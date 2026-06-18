@@ -94,7 +94,8 @@
   .warn-box.show { display: block; }
   input[type="date"]::-webkit-calendar-picker-indicator,
   input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
-  @media (max-width: 400px) { .form-body { padding: 18px; } .row { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .form-body { padding: 16px; } .row { grid-template-columns: 1fr; } }
+  input[type="date"], input[type="time"] { min-width: 0; width: 100%; }
 </style>
 </head>
 <body>
@@ -132,7 +133,7 @@
 
     <!-- Pickup -->
     <div class="field">
-      <label for="pickupInput">From</label>
+      <label for="pickupInput">Pickup location</label>
       <div class="input-wrap">
         <input type="text" id="pickupInput" placeholder="Start typing a location..." autocomplete="off">
         <div class="suggestions" id="pickupSuggestions"></div>
@@ -145,7 +146,7 @@
 
     <!-- Dropoff -->
     <div class="field">
-      <label for="dropoffInput">To</label>
+      <label for="dropoffInput">Dropoff location</label>
       <div class="input-wrap">
         <input type="text" id="dropoffInput" placeholder="Start typing a location..." autocomplete="off">
         <div class="suggestions" id="dropoffSuggestions"></div>
