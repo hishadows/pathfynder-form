@@ -385,7 +385,7 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
       time:               timeVal + ':00+00',
       source_geo:         wkt(geoCache.pickup.lat,  geoCache.pickup.lng),
       destination_geo:    wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
-      platform:           'telegram',
+      platform:           'Telegram_form',
       status:             'pending'
     };
   } else {
@@ -405,7 +405,7 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
       available_seats:    selectedSeat,
       source_geo:         wkt(geoCache.pickup.lat,  geoCache.pickup.lng),
       destination_geo:    wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
-      platform:           'telegram',
+      platform:           'Telegram_form',
       is_active:          true
     };
   }
