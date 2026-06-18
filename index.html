@@ -368,28 +368,45 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
   setLoading(true);
 
   var table, payload;
+  var table, payload;
   if (role === 'passenger') {
     table = 'passenger_requests';
     payload = {
-      telegram_chat_id: chatId || null, passenger_name: userName || null,
-      pickup_lat: geoCache.pickup.lat, pickup_lng: geoCache.pickup.lng, pickup_label: geoCache.pickup.label,
-      dropoff_lat: geoCache.dropoff.lat, dropoff_lng: geoCache.dropoff.lng, dropoff_label: geoCache.dropoff.label,
-      requested_datetime: dtISO, date: dateVal, time: timeVal,
-      source_geo: wkt(geoCache.pickup.lat, geoCache.pickup.lng),
-      destination_geo: wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
-      platform: 'telegram', status: 'pending'
+      telegram_chat_id:   chatId || null,
+      passenger_name:     userName || null,
+      pickup_lat:         geoCache.pickup.lat,
+      pickup_lng:         geoCache.pickup.lng,
+      pickup_label:       geoCache.pickup.label,
+      dropoff_lat:        geoCache.dropoff.lat,
+      dropoff_lng:        geoCache.dropoff.lng,
+      dropoff_label:      geoCache.dropoff.label,
+      requested_datetime: dtISO,
+      date:               dateVal,
+      time:               timeVal + ':00+00',
+      source_geo:         wkt(geoCache.pickup.lat,  geoCache.pickup.lng),
+      destination_geo:    wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
+      platform:           'telegram',
+      status:             'pending'
     };
   } else {
     table = 'driver_routines';
     payload = {
-      telegram_chat_id: chatId || null, driver_name: userName || null,
-      pickup_lat: geoCache.pickup.lat, pickup_lng: geoCache.pickup.lng, pickup_label: geoCache.pickup.label,
-      dropoff_lat: geoCache.dropoff.lat, dropoff_lng: geoCache.dropoff.lng, dropoff_label: geoCache.dropoff.label,
-      departure_time: timeVal, departure_datetime: dtISO, dates: dateVal,
-      available_seats: selectedSeat,
-      source_geo: wkt(geoCache.pickup.lat, geoCache.pickup.lng),
-      destination_geo: wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
-      platform: 'telegram', is_active: true
+      telegram_chat_id:   chatId || null,
+      driver_name:        userName || null,
+      pickup_lat:         geoCache.pickup.lat,
+      pickup_lng:         geoCache.pickup.lng,
+      pickup_label:       geoCache.pickup.label,
+      dropoff_lat:        geoCache.dropoff.lat,
+      dropoff_lng:        geoCache.dropoff.lng,
+      dropoff_label:      geoCache.dropoff.label,
+      departure_time:     timeVal + ':00',
+      departure_datetime: dtISO,
+      dates:              dateVal,
+      available_seats:    selectedSeat,
+      source_geo:         wkt(geoCache.pickup.lat,  geoCache.pickup.lng),
+      destination_geo:    wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
+      platform:           'telegram',
+      is_active:          true
     };
   }
 
@@ -407,7 +424,7 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
     document.getElementById('successScreen').classList.add('show');
     if (role === 'driver') {
       document.getElementById('successTitle').textContent = 'Route registered!';
-      document.getElementById('successSub').textContent = "Your route is live. We'll message you on Telegram when a passenger matches.";
+      document.getElementById('successSub').textContent = "Your route is live. We'll message you if there's match";
     }
   })
   .catch(function(err) { showError('Something went wrong: ' + err.message); })
