@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pathfynder — Request a Ride</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --border: #2a3348;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --accent-hover: #6ba3ff;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #e8edf5;
+    --text-dim: #8a95a8;
+    --text-muted: #4e5a6e;
+    --radius: 12px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo {
+    width: 38px; height: 38px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo svg { width: 20px; height: 20px; }
+  .brand { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .brand span { color: var(--accent); }
+
+  /* User pill */
+  .user-pill {
+    margin-left: auto;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px 5px 8px;
+    display: flex; align-items: center; gap: 7px;
+    font-size: 13px; color: var(--text-dim);
+  }
+  .user-avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: var(--accent);
+  }
+
+  /* Card */
+  .card {
+    width: 100%; max-width: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* Role toggle */
+  .role-toggle {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+  .role-btn {
+    padding: 16px;
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-body); font-size: 14px; font-weight: 500;
+    color: var(--text-dim);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    transition: all 0.18s;
+    position: relative;
+  }
+  .role-btn .role-icon { font-size: 22px; }
+  .role-btn.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .role-btn.active::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+    background: var(--accent);
+  }
+  .role-btn:not(.active):hover { background: var(--surface2); color: var(--text); }
+
+  /* Form body */
+  .form-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* Section label */
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.8px;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: -8px;
+  }
+
+  /* Field */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 500; color: var(--text-dim); }
+
+  .input-wrap { position: relative; }
+  .input-wrap input,
+  .input-wrap select {
+    width: 100%; padding: 11px 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text);
+    font-family: var(--font-body); font-size: 14px;
+    outline: none; transition: border-color 0.15s;
+    appearance: none;
+  }
+  .input-wrap input:focus,
+  .input-wrap select:focus { border-color: var(--accent); }
+  .input-wrap input::placeholder { color: var(--text-muted); }
+
+  .input-wrap.has-suffix input { padding-right: 42px; }
+  .input-suffix {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    font-size: 13px; color: var(--text-muted); pointer-events: none;
+  }
+
+  /* Geocode result */
+  .geo-result {
+    display: none; align-items: center; gap: 7px;
+    padding: 8px 12px; border-radius: 8px;
+    font-size: 12px; color: var(--text-dim);
+    background: var(--accent-dim); border: 1px solid rgba(79,142,247,0.2);
+  }
+  .geo-result.show { display: flex; }
+  .geo-result.error { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: var(--red); }
+  .geo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .geo-result.error .geo-dot { background: var(--red); }
+
+  /* Row for date+time */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Seats selector */
+  .seats-row { display: flex; gap: 8px; }
+  .seat-btn {
+    flex: 1; padding: 9px 4px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-dim); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .seat-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .seat-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%; padding: 14px;
+    background: var(--accent); border: none; border-radius: var(--radius);
+    color: #fff; font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 4px;
+  }
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none;
+  }
+  .submit-btn.loading .spinner { display: block; }
+  .submit-btn.loading .btn-text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error banner */
+  .error-banner {
+    display: none; padding: 10px 14px; border-radius: 8px;
+    background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+    color: var(--red); font-size: 13px; line-height: 1.5;
+  }
+  .error-banner.show { display: block; }
+
+  /* Success screen */
+  .success-screen {
+    display: none; flex-direction: column; align-items: center;
+    gap: 16px; padding: 40px 24px; text-align: center;
+  }
+  .success-screen.show { display: flex; }
+  .success-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(34,197,94,0.12); border: 2px solid rgba(34,197,94,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+  .success-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+  .success-sub { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 300px; }
+
+  /* No params warning */
+  .warn-box {
+    width: 100%; max-width: 480px;
+    background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+    border-radius: var(--radius); padding: 14px 16px;
+    font-size: 13px; color: #f87171; line-height: 1.6;
+    margin-bottom: 16px; display: none;
+  }
+  .warn-box.show { display: block; }
+
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.5);
+  }
+
+  @media (max-width: 400px) {
+    .form-body { padding: 18px; }
+    .row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+  </div>
+  <div class="brand">Path<span>fynder</span></div>
+  <div class="user-pill" id="userPill" style="display:none">
+    <div class="user-avatar" id="userInitial">?</div>
+    <span id="userName">—</span>
+  </div>
+</div>
+
+<div class="warn-box" id="warnBox">
+  ⚠️ This form should be opened from the Pathfynder bot on Telegram. Your identity could not be detected from the link.
+</div>
+
+<div class="card">
+  <!-- Role toggle -->
+  <div class="role-toggle">
+    <button class="role-btn active" id="btnPassenger" onclick="setRole('passenger')">
+      <span class="role-icon">🙋</span>
+      I need a ride
+    </button>
+    <button class="role-btn" id="btnDriver" onclick="setRole('driver')">
+      <span class="role-icon">🚗</span>
+      I'm offering a ride
+    </button>
+  </div>
+
+  <!-- Form -->
+  <form class="form-body" id="mainForm" onsubmit="handleSubmit(event)">
+
+    <div class="section-label">Route</div>
+
+    <!-- Pickup -->
+    <div class="field">
+      <label>Pickup location</label>
+      <div class="input-wrap">
+        <input type="text" id="pickupInput" placeholder="e.g. Gulshan-e-Iqbal, Karachi"
+          autocomplete="off" oninput="scheduleGeocode('pickup')" required>
+      </div>
+      <div class="geo-result" id="pickupResult">
+        <div class="geo-dot"></div>
+        <span id="pickupResultText"></span>
+      </div>
+    </div>
+
+    <!-- Dropoff -->
+    <div class="field">
+      <label>Dropoff location</label>
+      <div class="input-wrap">
+        <input type="text" id="dropoffInput" placeholder="e.g. DHA Phase 6, Karachi"
+          autocomplete="off" oninput="scheduleGeocode('dropoff')" required>
+      </div>
+      <div class="geo-result" id="dropoffResult">
+        <div class="geo-dot"></div>
+        <span id="dropoffResultText"></span>
+      </div>
+    </div>
+
+    <div class="section-label">Schedule</div>
+
+    <!-- Date + Time -->
+    <div class="row">
+      <div class="field">
+        <label id="dateLabel">Date</label>
+        <div class="input-wrap">
+          <input type="date" id="dateInput" required>
+        </div>
+      </div>
+      <div class="field">
+        <label id="timeLabel">Time</label>
+        <div class="input-wrap">
+          <input type="time" id="timeInput" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seats (driver only) -->
+    <div class="field" id="seatsField" style="display:none">
+      <label>Available seats</label>
+      <div class="seats-row" id="seatsRow">
+        <button type="button" class="seat-btn" onclick="setSeat(1)">1</button>
+        <button type="button" class="seat-btn active" onclick="setSeat(2)">2</button>
+        <button type="button" class="seat-btn" onclick="setSeat(3)">3</button>
+        <button type="button" class="seat-btn" onclick="setSeat(4)">4</button>
+        <button type="button" class="seat-btn" onclick="setSeat(5)">5</button>
+      </div>
+    </div>
+
+    <div class="error-banner" id="errorBanner"></div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">
+      <div class="spinner"></div>
+      <span class="btn-text">Submit request</span>
+    </button>
+
+  </form>
+
+  <!-- Success -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✓</div>
+    <div class="success-title" id="successTitle">Request received!</div>
+    <div class="success-sub" id="successSub">We'll notify you on Telegram as soon as we find a match.</div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://omussxfyrztjahbdrrpi.supabase.co/rest/v1/';   // ← replace
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';                      // ← replace
+// ───────────────────────────────────────────────────────────────────────────
+
+// Read URL params
+const params     = new URLSearchParams(location.search);
+const chatId     = params.get('chat_id') || '';
+const userName_  = params.get('name')    || '';
+
+let role         = 'passenger';
+let selectedSeat = 2;
+let geoCache     = { pickup: null, dropoff: null };
+let geoTimers    = {};
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today as min date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('dateInput').min = today;
+  document.getElementById('dateInput').value = today;
+
+  if (userName_) {
+    document.getElementById('userName').textContent = userName_;
+    document.getElementById('userInitial').textContent = userName_[0].toUpperCase();
+    document.getElementById('userPill').style.display = 'flex';
+  }
+
+  if (!chatId) {
+    document.getElementById('warnBox').classList.add('show');
+  }
+});
+
+// ── Role switch ────────────────────────────────────────────────────────────
+function setRole(r) {
+  role = r;
+  document.getElementById('btnPassenger').classList.toggle('active', r === 'passenger');
+  document.getElementById('btnDriver').classList.toggle('active', r === 'driver');
+  document.getElementById('seatsField').style.display = r === 'driver' ? '' : 'none';
+  document.getElementById('submitBtn').querySelector('.btn-text').textContent =
+    r === 'passenger' ? 'Submit request' : 'Register route';
+  document.getElementById('dateLabel').textContent = 'Date';
+  document.getElementById('timeLabel').textContent = r === 'driver' ? 'Departure time' : 'Time';
+}
+
+// ── Seat selector ──────────────────────────────────────────────────────────
+function setSeat(n) {
+  selectedSeat = n;
+  document.querySelectorAll('.seat-btn').forEach((b, i) => {
+    b.classList.toggle('active', i + 1 === n);
+  });
+}
+
+// ── Geocoding ─────────────────────────────────────────────────────────────
+function scheduleGeocode(which) {
+  clearTimeout(geoTimers[which]);
+  geoCache[which] = null;
+  hideGeoResult(which);
+  geoTimers[which] = setTimeout(() => geocode(which), 700);
+}
+
+async function geocode(which) {
+  const query = document.getElementById(which + 'Input').value.trim();
+  if (query.length < 3) return;
+
+  const resultEl  = document.getElementById(which + 'Result');
+  const resultTxt = document.getElementById(which + 'ResultText');
+  resultEl.className = 'geo-result show';
+  resultTxt.textContent = 'Looking up…';
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'Pathfynder/1.0' } });
+    const data = await res.json();
+
+    if (!data.length) {
+      resultEl.className = 'geo-result show error';
+      resultTxt.textContent = 'No location found — try a more specific address';
+      return;
+    }
+
+    const place = data[0];
+    geoCache[which] = {
+      lat:   parseFloat(place.lat),
+      lng:   parseFloat(place.lon),
+      label: place.display_name.split(',').slice(0, 3).join(',').trim()
+    };
+
+    resultEl.className = 'geo-result show';
+    resultTxt.textContent = geoCache[which].label;
+  } catch {
+    resultEl.className = 'geo-result show error';
+    resultTxt.textContent = 'Geocoding failed — check your connection';
+  }
+}
+
+function hideGeoResult(which) {
+  document.getElementById(which + 'Result').className = 'geo-result';
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────
+async function handleSubmit(e) {
+  e.preventDefault();
+  hideError();
+
+  if (!geoCache.pickup || !geoCache.dropoff) {
+    showError('Please wait for both locations to be verified (blue text appears below each field).');
+    return;
+  }
+
+  const dateVal = document.getElementById('dateInput').value;
+  const timeVal = document.getElementById('timeInput').value;
+
+  if (!dateVal || !timeVal) {
+    showError('Please fill in date and time.');
+    return;
+  }
+
+  // Build datetime string with timezone offset
+  const dtLocal  = `${dateVal}T${timeVal}:00`;
+  const tzOffset = new Date().getTimezoneOffset();
+  const sign     = tzOffset <= 0 ? '+' : '-';
+  const abs      = Math.abs(tzOffset);
+  const hh       = String(Math.floor(abs / 60)).padStart(2, '0');
+  const mm       = String(abs % 60).padStart(2, '0');
+  const dtISO    = `${dtLocal}${sign}${hh}:${mm}`;
+
+  const wkt = (lat, lng) => `POINT(${lng} ${lat})`;
+
+  setLoading(true);
+
+  try {
+    let payload, table;
+
+    if (role === 'passenger') {
+      table   = 'passenger_requests';
+      payload = {
+        telegram_chat_id:   chatId || null,
+        passenger_name:     userName_ || null,
+        pickup_lat:         geoCache.pickup.lat,
+        pickup_lng:         geoCache.pickup.lng,
+        pickup_label:       geoCache.pickup.label,
+        dropoff_lat:        geoCache.dropoff.lat,
+        dropoff_lng:        geoCache.dropoff.lng,
+        dropoff_label:      geoCache.dropoff.label,
+        requested_datetime: dtISO,
+        date:               dateVal,
+        time:               timeVal,
+        source_geo:         wkt(geoCache.pickup.lat,  geoCache.pickup.lng),
+        destination_geo:    wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
+        platform:           'telegram',
+        status:             'pending'
+      };
+    } else {
+      table   = 'driver_routines';
+      payload = {
+        telegram_chat_id:   chatId || null,
+        driver_name:        userName_ || null,
+        pickup_lat:         geoCache.pickup.lat,
+        pickup_lng:         geoCache.pickup.lng,
+        pickup_label:       geoCache.pickup.label,
+        dropoff_lat:        geoCache.dropoff.lat,
+        dropoff_lng:        geoCache.dropoff.lng,
+        dropoff_label:      geoCache.dropoff.label,
+        departure_time:     timeVal,
+        departure_datetime: dtISO,
+        dates:              dateVal,
+        available_seats:    selectedSeat,
+        source_geo:         wkt(geoCache.pickup.lat,  geoCache.pickup.lng),
+        destination_geo:    wkt(geoCache.dropoff.lat, geoCache.dropoff.lng),
+        platform:           'telegram',
+        is_active:          true
+      };
+    }
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'apikey':        SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer':        'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.message || errData.details || `HTTP ${res.status}`);
+    }
+
+    // Success
+    document.getElementById('mainForm').style.display = 'none';
+    const ss = document.getElementById('successScreen');
+    ss.classList.add('show');
+
+    if (role === 'driver') {
+      document.getElementById('successTitle').textContent = 'Route registered!';
+      document.getElementById('successSub').textContent =
+        'Your route is live. We'll message you on Telegram when a passenger matches.';
+    }
+
+  } catch (err) {
+    showError('Something went wrong: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('errorBanner').classList.remove('show');
+}
+</script>
+</body>
+</html>
