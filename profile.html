@@ -235,7 +235,7 @@
 </div>
 
 <script>
-var SUPABASE_URL = 'https://omussxfyrztjahbdrrpi.supabase.co';
+var SUPABASE_URL = 'https://omussxfyrztjahbdrrpi.supabase.co';   // supabase URL and Public Key
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';
 
 var params   = new URLSearchParams(location.search);
@@ -384,7 +384,7 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
 
   setLoading(true);
 
-  fetch(SUPABASE_URL + '/rest/v1/telegram_users?on_conflict=telegram_chat_id', {
+  fetch(SUPABASE_URL + '/rest/v1/telegram_users?on_conflict=telegram_chat_id', {  
     method: 'POST',
     headers: {
       'Content-Type':  'application/json',
@@ -403,7 +403,7 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
     document.getElementById('formWrapper').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
     // Fire n8n webhook (fire-and-forget, don't block redirect on it)
-    fetch('https://pathy.dpdns.org/webhook-test/telegram-profile-save', {
+    fetch('https://pathy.dpdns.org/webhook-test/telegram-profile-save', {  // webhook URL CALL : POST
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
