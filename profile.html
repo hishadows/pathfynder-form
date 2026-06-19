@@ -371,7 +371,7 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
 
   var tgVal = tgInput.value.trim().replace(/^@/, '');
   var waRaw = waInput.value.trim();
-  var waVal = waRaw ? ('+' + waRaw.replace(/\s/g, '')) : null;
+  var waVal = waRaw ? ( waRaw.replace(/\s/g, '')) : null;
 
   var payload = {
     telegram_chat_id:   chatId   || null,
