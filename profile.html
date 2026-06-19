@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pathfynder — Your Profile</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e1117; --surface: #161b27; --surface2: #1e2535; --border: #2a3348;
+    --accent: #4f8ef7; --accent-dim: rgba(79,142,247,0.12); --accent-hover: #6ba3ff;
+    --green: #22c55e; --green-dim: rgba(34,197,94,0.1); --green-border: rgba(34,197,94,0.25);
+    --red: #ef4444; --yellow: #f59e0b;
+    --text: #e8edf5; --text-dim: #8a95a8; --text-muted: #4e5a6e;
+    --radius: 12px; --font-display: 'Space Grotesk', sans-serif; --font-body: 'Inter', sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px 48px; }
+
+  /* Header */
+  .header { width: 100%; max-width: 480px; margin-bottom: 28px; display: flex; align-items: center; gap: 12px; }
+  .logo { width: 38px; height: 38px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo svg { width: 20px; height: 20px; }
+  .brand { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .brand span { color: var(--accent); }
+  .user-pill { margin-left: auto; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 8px; display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-dim); }
+  .user-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent); }
+
+  /* Card */
+  .card { width: 100%; max-width: 480px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+
+  /* Card header */
+  .card-header { padding: 24px 24px 0; }
+  .card-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .card-sub { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  /* Info banner */
+  .info-banner {
+    margin: 20px 24px 0;
+    padding: 12px 14px; border-radius: 10px;
+    background: var(--accent-dim); border: 1px solid rgba(79,142,247,0.2);
+    font-size: 13px; color: var(--text-dim); line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .info-banner .info-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Form */
+  .form-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; color: var(--text-muted); text-transform: uppercase; margin-bottom: -10px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-top { display: flex; align-items: center; justify-content: space-between; }
+  .field label { font-size: 13px; font-weight: 500; color: var(--text-dim); }
+  .required-badge { font-size: 10px; font-weight: 600; color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(79,142,247,0.25); padding: 2px 7px; border-radius: 20px; letter-spacing: 0.3px; }
+  .optional-badge { font-size: 10px; font-weight: 600; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px; }
+
+  .input-wrap { position: relative; }
+  .input-prefix {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; color: var(--text-muted); pointer-events: none; user-select: none;
+  }
+  .input-wrap input {
+    width: 100%; padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-family: var(--font-body); font-size: 14px;
+    outline: none; transition: border-color 0.15s;
+  }
+  .input-wrap.has-prefix input { padding-left: 28px; }
+  .input-wrap input:focus { border-color: var(--accent); }
+  .input-wrap input::placeholder { color: var(--text-muted); }
+  .input-wrap input.valid { border-color: var(--green); }
+  .input-wrap input.invalid { border-color: var(--red); }
+
+  .field-hint { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .field-hint a { color: var(--accent); text-decoration: none; }
+  .field-hint a:hover { text-decoration: underline; }
+
+  /* Help box */
+  .help-box {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .help-title { font-size: 12px; font-weight: 600; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+  .help-step { display: flex; gap: 10px; align-items: flex-start; }
+  .help-num { width: 18px; height: 18px; border-radius: 50%; background: var(--accent-dim); border: 1px solid rgba(79,142,247,0.3); color: var(--accent); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .help-text { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .help-text b { color: var(--text-dim); font-weight: 500; }
+
+  /* Validation msg */
+  .val-msg { font-size: 12px; display: none; }
+  .val-msg.show { display: block; }
+  .val-msg.error { color: var(--red); }
+  .val-msg.success { color: var(--green); }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 0 -24px; }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: var(--radius);
+    color: #fff; font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;
+  }
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  .submit-btn.loading .spinner { display: block; }
+  .submit-btn.loading .btn-text { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error banner */
+  .error-banner { display: none; padding: 10px 14px; border-radius: 8px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: var(--red); font-size: 13px; line-height: 1.5; }
+  .error-banner.show { display: block; }
+
+  /* Success screen */
+  .success-screen { display: none; flex-direction: column; align-items: center; gap: 16px; padding: 40px 24px; text-align: center; }
+  .success-screen.show { display: flex; }
+  .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green-dim); border: 2px solid var(--green-border); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .success-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+  .success-sub { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 300px; }
+  .tg-btn {
+    margin-top: 8px; padding: 13px 28px; background: #229ED9; border: none; border-radius: var(--radius);
+    color: #fff; font-family: var(--font-body); font-size: 15px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 8px; text-decoration: none;
+  }
+  .tg-btn:hover { background: #1a8bbf; }
+
+  /* Warn box */
+  .warn-box { width: 100%; max-width: 480px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: #f87171; line-height: 1.6; margin-bottom: 16px; display: none; }
+  .warn-box.show { display: block; }
+
+  /* Loading overlay */
+  .loading-overlay { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 48px 24px; }
+  .big-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .loading-overlay p { font-size: 14px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+  </div>
+  <div class="brand">Path<span>fynder</span></div>
+  <div class="user-pill" id="userPill" style="display:none">
+    <div class="user-avatar" id="userInitial">?</div>
+    <span id="userNameDisplay">-</span>
+  </div>
+</div>
+
+<div class="warn-box" id="warnBox">
+  ⚠️ This page should be opened from the Pathfynder bot on Telegram. Your identity could not be detected.
+</div>
+
+<div class="card" id="mainCard">
+
+  <!-- Loading state while fetching existing profile -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="big-spinner"></div>
+    <p>Loading your profile...</p>
+  </div>
+
+  <!-- Form (hidden until load check done) -->
+  <div id="formWrapper" style="display:none">
+    <div class="card-header">
+      <div class="card-title" id="cardTitle">Set Up Your Profile</div>
+
+    </div>
+
+    <div class="info-banner">
+      <span class="info-icon">💡</span>
+      <span>Helps your matched driver or passenger contact you directly to discuss ride details.</span>
+    </div>
+
+    <form class="form-body" id="profileForm">
+
+      <div class="section-label">Telegram</div>
+
+      <!-- Telegram Username -->
+      <div class="field">
+        <div class="field-top">
+          <label for="tgUsername">Telegram Username</label>
+          <span class="required-badge">REQUIRED</span>
+        </div>
+        <div class="input-wrap has-prefix">
+          <span class="input-prefix">@</span>
+          <input type="text" id="tgUsername" placeholder="yourusername" autocomplete="off" autocapitalize="none" spellcheck="false">
+        </div>
+        <div class="val-msg" id="tgUsernameMsg"></div>
+        <div class="field-hint">Don't have one? Telegram → Settings → Username</div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">WhatsApp</div>
+
+      <!-- WhatsApp number -->
+      <div class="field">
+        <div class="field-top">
+          <label for="waNumber">WhatsApp Number</label>
+          <span class="optional-badge">OPTIONAL</span>
+        </div>
+        <div class="input-wrap has-prefix">
+          <span class="input-prefix">+</span>
+          <input type="tel" id="waNumber" placeholder="1 416 123 4567 or 91 98765 43210" autocomplete="tel" style="padding-left:24px">
+        </div>
+        <div class="val-msg" id="waNumberMsg"></div>
+        <div class="field-hint">Enter your country code + number. e.g. Canada: 1 · India: 91</div>
+      </div>
+
+      <div class="error-banner" id="errorBanner"></div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <div class="spinner"></div>
+        <span class="btn-text">Save Profile</span>
+      </button>
+
+    </form>
+  </div>
+
+  <!-- Success screen -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Profile saved!</div>
+    <div class="success-sub">You're all set. When we find you a match, they'll be able to contact you directly.</div>
+    <a class="tg-btn" href="https://t.me/PathfynderBot">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.481c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.875.74z"/></svg>
+      Back to Pathfynder Bot
+    </a>
+  </div>
+
+</div>
+
+<script>
+var SUPABASE_URL = 'https://omussxfyrztjahbdrrpi.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';
+
+var params   = new URLSearchParams(location.search);
+var chatId   = params.get('chat_id')  || '';
+var userName = params.get('name')     || '';
+var userId   = params.get('user_id')  || '';
+
+// Show user pill
+if (userName) {
+  document.getElementById('userNameDisplay').textContent    = userName;
+  document.getElementById('userInitial').textContent        = userName[0].toUpperCase();
+  document.getElementById('userPill').style.display         = 'flex';
+}
+if (!chatId) {
+  document.getElementById('warnBox').classList.add('show');
+}
+
+// ── Load existing profile ──────────────────────────────────────────────────
+function loadProfile() {
+  if (!chatId) {
+    showForm();
+    return;
+  }
+  fetch(SUPABASE_URL + '/rest/v1/telegram_users?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&limit=1', {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    if (data && data.length > 0) {
+      var row = data[0];
+      if (row.telegram_username) {
+        document.getElementById('tgUsername').value = row.telegram_username.replace(/^@/, '');
+      }
+      if (row.whatsapp_number) {
+        document.getElementById('waNumber').value = row.whatsapp_number;
+      }
+      document.getElementById('cardTitle').textContent = 'Update Your Profile';
+      document.getElementById('submitBtn').querySelector('.btn-text').textContent = 'Update Profile';
+    }
+    showForm();
+  })
+  .catch(function() {
+    showForm();
+  });
+}
+
+function showForm() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+  document.getElementById('formWrapper').style.display    = 'block';
+}
+
+loadProfile();
+
+// ── Validation ─────────────────────────────────────────────────────────────
+var tgInput = document.getElementById('tgUsername');
+var waInput = document.getElementById('waNumber');
+
+tgInput.addEventListener('input', function() { validateTg(false); });
+tgInput.addEventListener('blur',  function() { validateTg(true); });
+waInput.addEventListener('input', function() { validateWa(false); });
+waInput.addEventListener('blur',  function() { validateWa(true); });
+
+function validateTg(showMsg) {
+  var val = tgInput.value.trim().replace(/^@/, '');
+  var msg = document.getElementById('tgUsernameMsg');
+  if (!val) {
+    tgInput.className = '';
+    msg.className = 'val-msg';
+    return false;
+  }
+  // Telegram usernames: 5-32 chars, alphanumeric + underscore
+  var valid = /^[a-zA-Z0-9_]{5,32}$/.test(val);
+  if (valid) {
+    tgInput.className = 'valid';
+    if (showMsg) { msg.className = 'val-msg success'; msg.textContent = '@' + val + ' looks good'; }
+    else { msg.className = 'val-msg'; }
+    return true;
+  } else {
+    tgInput.className = val.length > 0 ? 'invalid' : '';
+    if (showMsg && val.length > 0) {
+      msg.className = 'val-msg error';
+      if (val.length < 5) msg.textContent = 'Username must be at least 5 characters';
+      else msg.textContent = 'Only letters, numbers and underscores allowed';
+    } else { msg.className = 'val-msg'; }
+    return false;
+  }
+}
+
+function validateWa(showMsg) {
+  var val = waInput.value.trim();
+  var msg = document.getElementById('waNumberMsg');
+  if (!val) {
+    waInput.className = '';
+    msg.className = 'val-msg';
+    return true; // optional field, empty is fine
+  }
+  // Strip spaces and dashes for validation
+  var stripped = ('+' + val).replace(/[\s\-\(\)]/g, '');
+  // Must start with + and have 7-15 digits after
+  var valid = /^\+[1-9]\d{6,14}$/.test(stripped);
+  if (valid) {
+    waInput.className = 'valid';
+    if (showMsg) { msg.className = 'val-msg success'; msg.textContent = 'Number looks good'; }
+    else { msg.className = 'val-msg'; }
+    return true;
+  } else {
+    waInput.className = 'invalid';
+    if (showMsg) {
+      msg.className = 'val-msg error';
+      if (!stripped.startsWith('+')) msg.textContent = 'Include your country code, e.g. +92 300 1234567';
+      else msg.textContent = 'Enter a valid international phone number';
+    } else { msg.className = 'val-msg'; }
+    return false;
+  }
+}
+
+// ── Submit ─────────────────────────────────────────────────────────────────
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  hideError();
+
+  var tgOk = validateTg(true);
+  var waOk = validateWa(true);
+
+  if (!tgOk) {
+    showError('Please enter a valid Telegram username — this is required so your match can contact you.');
+    return;
+  }
+  if (!waOk) {
+    showError('Please enter a valid WhatsApp number with your country code, or leave it empty.');
+    return;
+  }
+
+  var tgVal = tgInput.value.trim().replace(/^@/, '');
+  var waRaw = waInput.value.trim();
+  var waVal = waRaw ? ('+' + waRaw.replace(/\s/g, '')) : null;
+
+  var payload = {
+    telegram_chat_id:   chatId   || null,
+    telegram_user_id:   userId   || null,
+    name:               userName || null,
+    telegram_username:  tgVal,
+    whatsapp_number:    waVal,
+    updated_at:         new Date().toISOString()
+  };
+
+  setLoading(true);
+
+  fetch(SUPABASE_URL + '/rest/v1/telegram_users', {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'apikey':        SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer':        'resolution=merge-duplicates,return=minimal'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) {
+      return res.json().then(function(err) {
+        throw new Error(err.message || err.details || 'HTTP ' + res.status);
+      });
+    }
+    document.getElementById('formWrapper').style.display = 'none';
+    document.getElementById('successScreen').classList.add('show');
+    // Fire n8n webhook (fire-and-forget, don't block redirect on it)
+    fetch('https://pathy.dpdns.org/webhook-test/telegram-profile-save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(function() {});
+    // Redirect to bot after 2.5 seconds
+    setTimeout(function() {
+      window.location.href = 'https://t.me/PathfynderBot';
+    }, 2500);
+  })
+  .catch(function(err) {
+    showError('Something went wrong: ' + err.message);
+  })
+  .finally(function() {
+    setLoading(false);
+  });
+});
+
+function setLoading(on) {
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+}
+function showError(msg) {
+  var el = document.getElementById('errorBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function hideError() {
+  document.getElementById('errorBanner').classList.remove('show');
+}
+</script>
+</body>
+</html>
