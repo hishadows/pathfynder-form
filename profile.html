@@ -384,7 +384,7 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
 
   setLoading(true);
 
-  fetch(SUPABASE_URL + '/rest/v1/telegram_users', {
+  fetch(SUPABASE_URL + '/rest/v1/telegram_users?on_conflict=telegram_chat_id', {
     method: 'POST',
     headers: {
       'Content-Type':  'application/json',
@@ -408,10 +408,10 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).catch(function() {});
-    // Redirect to bot after 2.5 seconds
+    // Redirect to bot after 1 seconds
     setTimeout(function() {
       window.location.href = 'https://t.me/PathfynderBot';
-    }, 2500);
+    }, 1000);
   })
   .catch(function(err) {
     showError('Something went wrong: ' + err.message);
