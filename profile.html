@@ -403,7 +403,7 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
     document.getElementById('formWrapper').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
     // Fire n8n webhook (fire-and-forget, don't block redirect on it)
-    fetch('https://pathy.dpdns.org/webhook/telegram-profile-save', {  // webhook URL CALL : POST
+    fetch('https://pathy.dpdns.org/webhook/telegram-profile-save', {                                                                            // N8N webhook URL CALL : POST
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
