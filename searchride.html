@@ -1191,6 +1191,7 @@ function renderCards(data) {
             '<div><div class="di-label">Time</div><div class="di-val">' + rideTime + '</div></div>',
             '<div><div class="di-label">Platform</div><div class="di-val">' + (r.platform || 'WhatsApp') + '</div></div>',
             '<div><div class="di-label">Status</div><div class="di-val">' + (r.status || 'pending') + '</div></div>',
+            '<div><div class="di-label">Extracted O1</div><div class="di-val">' + (r.extracted_date_o1 || '—') + '</div></div>',
           '</div>',
           (r.additional_conditions
             ? '<div class="detail-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>' + r.additional_conditions + '</span></div>'
