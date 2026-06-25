@@ -39,7 +39,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .vbtn.active{background:var(--surface2);color:var(--accent)}
 .vbtn svg{width:15px;height:15px}
 
-/* SEARCH */
+/* SEARCH PANEL */
 .search-panel{padding-bottom:12px}
 .search-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
 .sf{position:relative}
@@ -60,7 +60,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .sug-item.loading{cursor:default;color:var(--text-muted);font-style:italic}
 .sug-icon{font-size:13px;flex-shrink:0;margin-top:1px}
 .sug-name{font-size:13px;color:var(--text)}
-.confirmed-tag{display:none;align-items:center;gap:6px;padding:5px 10px;margin-top:4px;border-radius:6px;font-size:11px;color:var(--green);background:var(--green-dim);border:1px solid rgba(34,197,94,0.2)}
+.confirmed-tag{display:none;align-items:center;gap:6px;padding:5px 10px;margin-top:4px;border-radius:6px;font-size:11px;color:var(--green);background:var(--green-dim);border:1px solid rgba(34,197,94,.2)}
 .confirmed-tag.show{display:flex}
 .confirmed-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
 .controls-row{display:flex;align-items:center;gap:6px}
@@ -83,26 +83,24 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .chip svg{width:12px;height:12px;stroke:currentColor}
 .chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
 
-/* STATS */
+/* STATS BAR */
 .stats-bar{display:flex;border-top:1px solid var(--border)}
 .stat{flex:1;text-align:center;padding:8px 4px 10px;border-right:1px solid var(--border)}
 .stat:last-child{border-right:none}
 .stat-n{font-size:16px;font-weight:700;color:var(--text);font-family:var(--font-display);line-height:1}
 .stat-l{font-size:10px;color:var(--text-muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
 
-/* WARN */
-.warn-box{margin:10px 16px 0;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);font-size:12px;color:#f87171;line-height:1.5;display:none}
+/* WARN / DEBUG BOXES */
+.warn-box{margin:10px 16px 0;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);font-size:12px;color:#f87171;line-height:1.5;display:none}
 .warn-box.show{display:block}
-
-/* DEBUG BOX */
-.debug-box{margin:8px 16px 0;padding:10px 14px;border-radius:8px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);font-size:11px;color:var(--amber);line-height:1.6;font-family:monospace;display:none;word-break:break-all}
+.debug-box{margin:10px 16px 0;padding:10px 14px;border-radius:8px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);font-size:11px;color:var(--amber);line-height:1.6;font-family:monospace;display:none;word-break:break-all}
 .debug-box.show{display:block}
 
 /* CONTENT */
 .content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .content::-webkit-scrollbar{width:0}
 
-/* SAVED */
+/* SAVED SEARCHES */
 .saved-wrap{padding:10px 16px 0;display:none}
 .saved-wrap.show{display:block}
 .saved-label{font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px}
@@ -116,14 +114,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .sec-label svg{width:12px;height:12px;stroke:var(--text-muted)}
 
 /* FALLBACK BANNER */
-.fallback-banner{margin:0 16px 8px;padding:10px 12px;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:8px;font-size:12px;color:var(--accent);line-height:1.4;display:none;align-items:center;gap:8px}
+.fallback-banner{margin:0 16px 8px;padding:10px 12px;background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:8px;font-size:12px;color:var(--accent);line-height:1.4;display:none;align-items:center;gap:8px}
 .fallback-banner.show{display:flex}
 .fallback-banner svg{width:14px;height:14px;stroke:var(--accent);flex-shrink:0}
 
-/* CARDS */
+/* CARD LIST */
 .card-list{padding:0 12px 24px;display:flex;flex-direction:column;gap:8px}
+
+/* RIDE CARD */
 .ride-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s}
-.ride-card:active,.ride-card.expanded{border-color:var(--accent)}
+.ride-card:active{border-color:var(--accent)}
+.ride-card.expanded{border-color:var(--accent)}
 .card-top{padding:12px 14px}
 .card-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .pax-info{display:flex;align-items:center;gap:9px;min-width:0}
@@ -132,9 +133,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .time-ago{font-size:11px;color:var(--text-muted);margin-top:1px}
 .badges{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .badge{font-size:10px;font-weight:600;padding:3px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.03em}
-.b-pending{background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.25)}
-.b-matched{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
-.b-recurring{background:rgba(79,142,247,0.1);color:var(--accent);border:1px solid rgba(79,142,247,0.25)}
+.b-pending{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+.b-matched{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.b-recurring{background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.25)}
 .route-strip{display:flex;align-items:stretch;gap:10px}
 .route-nodes{display:flex;flex-direction:column;align-items:center;padding:3px 0;width:14px;flex-shrink:0}
 .nd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -167,7 +168,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .map-link-btn{width:100%;height:32px;border:1px solid var(--border);background:var(--surface2);border-radius:8px;font-size:12px;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font-body)}
 .map-link-btn svg{width:13px;height:13px;stroke:var(--accent)}
 
-/* MAP */
+/* MAP VIEW */
 #map-view{display:none;flex:1;flex-direction:column;position:relative}
 #map-view.active{display:flex}
 #leaflet-map{flex:1;background:var(--bg)}
@@ -198,6 +199,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <body>
 <div id="app">
 
+<!-- HEADER -->
 <div class="header">
   <div class="header-row">
     <div class="logo">
@@ -270,26 +272,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 
   <div class="filter-row">
-    <div class="chip active" data-f="all" onclick="setFilter('all')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="18" r="1"/></svg>
-      All
-    </div>
-    <div class="chip" data-f="today" onclick="setFilter('today')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Today
-    </div>
-    <div class="chip" data-f="pending" onclick="setFilter('pending')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Pending
-    </div>
-    <div class="chip" data-f="matched" onclick="setFilter('matched')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      Matched
-    </div>
-    <div class="chip" data-f="recurring" onclick="setFilter('recurring')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-      Recurring
-    </div>
+    <div class="chip active" data-f="all" onclick="setFilter('all')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1"/><circle cx="3" cy="12" r="1"/><circle cx="3" cy="18" r="1"/></svg>All</div>
+    <div class="chip" data-f="today" onclick="setFilter('today')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Today</div>
+    <div class="chip" data-f="pending" onclick="setFilter('pending')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pending</div>
+    <div class="chip" data-f="matched" onclick="setFilter('matched')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Matched</div>
+    <div class="chip" data-f="recurring" onclick="setFilter('recurring')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Recurring</div>
   </div>
 
   <div class="stats-bar">
@@ -300,6 +287,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
+<!-- LIST VIEW -->
 <div class="content" id="list-view">
   <div class="warn-box" id="warn-box">Open this from the Pathfynder bot on Telegram — your identity could not be detected.</div>
   <div class="debug-box" id="debug-box"></div>
@@ -311,12 +299,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
   <div class="fallback-banner" id="fallback-banner">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span id="fallback-msg">No rides today — showing all available</span>
+    <span id="fallback-msg">No rides today — showing next available</span>
   </div>
 
   <div class="sec-label" id="sec-label">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-    <span id="sec-label-txt">Loading…</span>
+    <span id="sec-label-txt">Loading rides…</span>
   </div>
 
   <div class="card-list" id="card-list">
@@ -324,6 +312,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
+<!-- MAP VIEW -->
 <div id="map-view">
   <div id="leaflet-map"></div>
   <div class="map-tray" id="map-tray"></div>
@@ -333,47 +322,50 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // CONFIG
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 var SUPABASE_URL  = 'https://omussxfyrztjahbdrrpi.supabase.co';
 var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';
 var MAPBOX_TOKEN  = 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXE2M29yZTYwYnNkMnpvcnQ3cTdtcnVhIn0.eUnsJguXqX48RGUxfDyD5g';
 
-// ════════════════════════════════════════════════
-// COLUMN MAP — extracted_data_01 uses quoted/spaced names
-// We normalise every row into a flat object so the rest
-// of the code works identically regardless of source.
-// ════════════════════════════════════════════════
+// ── extracted_data_01 column map ──
+// The app uses normalised field names internally; this maps them to
+// the actual quoted column names in extracted_data_01.
+// "pick up date"  → r.pick_up_date  (Supabase returns quoted cols as-is)
+// "pick up time"  → r.pick_up_time
+// "D&T of msg"    → r.msg_dt
+var TABLE = 'extracted_data_01';
+
+// Helper: normalise a raw row from extracted_data_01 into the shape
+// the UI expects (same keys the demo data uses).
 function normalise(r) {
   return {
     id:                   r.id,
     passenger_name:       r.sender_name        || null,
-    passenger_wa_id:      String(r.sender_number || '').replace(/\D/g,'') || null,
-    telegram_chat_id:     null,                          // not in extracted_data_01
+    passenger_wa_id:      r.sender_number ? String(r.sender_number) : null,
+    telegram_chat_id:     null,                          // not in this table
     pickup_label:         r.pickup_label        || null,
     dropoff_label:        r.dropoff_label       || null,
     pickup_lat:           r.pickup_lat          || null,
     pickup_lng:           r.pickup_lng          || null,
     dropoff_lat:          r.dropoff_lat         || null,
     dropoff_lng:          r.dropoff_lng         || null,
-    // "pick up date" and "pick up time" are the real column names
+    // "pick up date" comes back from Supabase as the key with the space
     date:                 r['pick up date']     || null,
     time:                 r['pick up time']     || null,
-    created_at:           r['D&T of msg']       || null,
     status:               r.important_ride      || 'pending',
     ride_frequency:       r.ride_frequency      || null,
     additional_conditions:r['additional conditions'] || null,
     group_name:           r.group_name          || null,
-    platform:             'WhatsApp',
-    source_geo:           r.source_geo          || null,
-    destination_geo:      r.destination_geo     || null,
+    platform:             r.group_name          || 'WhatsApp',
+    created_at:           r['D&T of msg']       || null,
   };
 }
 
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // TELEGRAM AUTH
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); }
 var tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
@@ -390,14 +382,14 @@ if (uName) {
 }
 if (!chatId) document.getElementById('warn-box').classList.add('show');
 
-// ════════════════════════════════════════════════
-// SUPABASE
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// SUPABASE CLIENT
+// ══════════════════════════════════════════════
 var db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 var allData       = [];
 var filtered      = [];
 var activeFilter  = 'all';
@@ -409,9 +401,11 @@ var mapLayers     = [];
 var savedSearches = [];
 var geoCache      = { from: null, to: null };
 var geoTimers     = { from: null, to: null };
-
 try { savedSearches = JSON.parse(localStorage.getItem('pf_s') || '[]'); } catch(e) {}
 
+// ══════════════════════════════════════════════
+// AVATAR COLOURS
+// ══════════════════════════════════════════════
 var AV = [
   { bg:'rgba(79,142,247,0.15)',  color:'#4f8ef7' },
   { bg:'rgba(34,197,94,0.12)',   color:'#22c55e' },
@@ -422,15 +416,18 @@ var AV = [
 function avColor(i) { return AV[i % AV.length]; }
 function initials(n) { return (n||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase(); }
 
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
 function todayStr() { return new Date().toISOString().slice(0,10); }
 
 function timeAgo(iso) {
   if (!iso) return '';
   var d = Math.floor((Date.now() - new Date(iso)) / 1000);
   if (d < 60)    return 'just now';
-  if (d < 3600)  return Math.floor(d/60)+'m ago';
-  if (d < 86400) return Math.floor(d/3600)+'h ago';
-  return Math.floor(d/86400)+'d ago';
+  if (d < 3600)  return Math.floor(d/60) + 'm ago';
+  if (d < 86400) return Math.floor(d/3600) + 'h ago';
+  return Math.floor(d/86400) + 'd ago';
 }
 
 function fmtDate(d) {
@@ -444,26 +441,19 @@ function fmtDate(d) {
 
 function fmtTime(t) {
   if (!t) return '—';
-  // handles "HH:MM:SS", "HH:MM:SS+00", "HH:MM"
   return String(t).slice(0,5);
 }
 
 function timeDiffHrs(t1, t2) {
-  var a = String(t1).slice(0,5).split(':').map(Number);
-  var b = String(t2).slice(0,5).split(':').map(Number);
-  return Math.abs((a[0]*60+a[1])-(b[0]*60+b[1]))/60;
+  var p1 = String(t1).slice(0,5).split(':').map(Number);
+  var p2 = String(t2).slice(0,5).split(':').map(Number);
+  return Math.abs((p1[0]*60+p1[1]) - (p2[0]*60+p2[1])) / 60;
 }
 
-function hav(lat1,lng1,lat2,lng2) {
+function hav(lat1, lng1, lat2, lng2) {
   var R=6371, dL=(lat2-lat1)*Math.PI/180, dG=(lng2-lng1)*Math.PI/180;
   var a=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dG/2)*Math.sin(dG/2);
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-function dbg(msg) {
-  var box = document.getElementById('debug-box');
-  box.classList.add('show');
-  box.textContent = msg;
 }
 
 function getPlaceIcon(type) {
@@ -471,100 +461,151 @@ function getPlaceIcon(type) {
   return m[type]||'📍';
 }
 
-// ════════════════════════════════════════════════
+function showDebug(msg) {
+  var el = document.getElementById('debug-box');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// ══════════════════════════════════════════════
 // MAPBOX AUTOCOMPLETE
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 document.getElementById('f-date').value = todayStr();
 
 ['from','to'].forEach(function(which) {
-  var input = document.getElementById('f-'+which);
-  var sugs  = document.getElementById('sug-'+which);
-  var conId = 'con-'+which;
-  var conTxt= 'con-'+which+'-txt';
+  var input    = document.getElementById('f-' + which);
+  var sugs     = document.getElementById('sug-' + which);
+  var conEl    = document.getElementById('con-' + which);
+  var conTxtEl = document.getElementById('con-' + which + '-txt');
 
   input.addEventListener('input', function() {
     geoCache[which] = null;
-    document.getElementById(conId).classList.remove('show');
+    conEl.classList.remove('show');
     input.classList.remove('confirmed');
     clearTimeout(geoTimers[which]);
     var q = input.value.trim();
     if (q.length < 3) { sugs.classList.remove('show'); sugs.innerHTML=''; return; }
-    sugs.innerHTML='<div class="sug-item loading"><span class="sug-icon">⏳</span>Searching…</div>';
+    sugs.innerHTML = '<div class="sug-item loading"><span class="sug-icon">⏳</span>Searching…</div>';
     sugs.classList.add('show');
     geoTimers[which] = setTimeout(function() {
-      fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/'+encodeURIComponent(q)+
-        '.json?access_token='+MAPBOX_TOKEN+'&limit=5&country=CA,US&types=place,locality,neighborhood,address,poi,region,district,postcode')
+      var url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(q) +
+        '.json?access_token=' + MAPBOX_TOKEN + '&limit=5&country=CA,US&types=place,locality,neighborhood,address,poi,region,district,postcode';
+      fetch(url)
         .then(function(r){return r.json();})
-        .then(function(data){
+        .then(function(data) {
           sugs.innerHTML='';
           if (!data||!data.features||!data.features.length) {
-            sugs.innerHTML='<div class="sug-item loading"><span class="sug-icon">❌</span>No results</div>'; return;
+            sugs.innerHTML='<div class="sug-item loading"><span class="sug-icon">❌</span>No results in Canada/USA</div>';
+            return;
           }
-          data.features.forEach(function(f){
-            var item=document.createElement('div');
-            item.className='sug-item';
-            item.innerHTML='<span class="sug-icon">'+getPlaceIcon(f.place_type?f.place_type[0]:'')+
-              '</span><div><div class="sug-name">'+f.place_name+'</div></div>';
-            item.addEventListener('click',function(){
-              geoCache[which]={lat:f.center[1],lng:f.center[0],label:f.place_name.split(',').slice(0,3).join(',').trim()};
-              input.value=f.place_name; input.classList.add('confirmed');
+          data.features.forEach(function(f) {
+            var icon = getPlaceIcon(f.place_type?f.place_type[0]:'');
+            var item = document.createElement('div');
+            item.className = 'sug-item';
+            item.innerHTML = '<span class="sug-icon">'+icon+'</span><div><div class="sug-name">'+f.place_name+'</div></div>';
+            item.addEventListener('click', function() {
+              geoCache[which] = { lat:f.center[1], lng:f.center[0], label:f.place_name.split(',').slice(0,3).join(',').trim() };
+              input.value = f.place_name;
+              input.classList.add('confirmed');
               sugs.classList.remove('show'); sugs.innerHTML='';
-              document.getElementById(conTxt).textContent=geoCache[which].label;
-              document.getElementById(conId).classList.add('show');
+              conTxtEl.textContent = geoCache[which].label;
+              conEl.classList.add('show');
             });
             sugs.appendChild(item);
           });
           sugs.classList.add('show');
         })
-        .catch(function(){sugs.innerHTML='<div class="sug-item loading"><span class="sug-icon">⚠️</span>Error</div>';});
-    },450);
+        .catch(function(){ sugs.innerHTML='<div class="sug-item loading"><span class="sug-icon">⚠️</span>Connection error</div>'; });
+    }, 450);
   });
-  document.addEventListener('click',function(e){
-    if (!input.contains(e.target)&&!sugs.contains(e.target)) sugs.classList.remove('show');
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !sugs.contains(e.target)) sugs.classList.remove('show');
   });
 });
 
-// ════════════════════════════════════════════════
-// LOAD DATA — queries extracted_data_01
-// No date filter on initial load so all 7000 rows are accessible.
-// We take the 300 most recent by "D&T of msg".
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// DATA LOADING  ← queries extracted_data_01
+// ══════════════════════════════════════════════
 async function loadData() {
-  document.getElementById('sec-label-txt').textContent = 'Loading…';
   try {
-    var res = await db
-      .from('extracted_data_01')
-      .select('id, sender_name, sender_number, pickup_label, dropoff_label, pickup_lat, pickup_lng, dropoff_lat, dropoff_lng, "pick up date", "pick up time", "D&T of msg", important_ride, ride_frequency, "additional conditions", group_name, source_geo, destination_geo')
-      .eq('Type', 'passenger')
+    document.getElementById('sec-label-txt').textContent = 'Loading rides…';
+
+    // No date filter on initial load — pull all passenger records.
+    // We select only the columns we use to keep payload small.
+    var { data, error } = await db
+      .from(TABLE)
+      .select([
+        'id',
+        'sender_name',
+        'sender_number',
+        '"pick up date"',
+        '"pick up time"',
+        '"D&T of msg"',
+        '"additional conditions"',
+        'pickup_label',
+        'dropoff_label',
+        'pickup_lat',
+        'pickup_lng',
+        'dropoff_lat',
+        'dropoff_lng',
+        'important_ride',
+        'ride_frequency',
+        'group_name',
+        'Type',
+      ].join(','))
+      .ilike('Type', 'passenger')      // case-insensitive: matches "Passenger", "passenger"
       .order('"D&T of msg"', { ascending: false })
-      .limit(300);
+      .limit(500);
 
-    if (res.error) throw res.error;
+    if (error) throw error;
 
-    var rows = (res.data || []).map(normalise);
-    allData = rows;
-    renderStats(rows);
+    if (!data || data.length === 0) {
+      showDebug('Supabase returned 0 rows from ' + TABLE + '. Check RLS: run the GRANT policy SQL below.');
+      document.getElementById('sec-label-txt').textContent = 'No data — check RLS';
+      document.getElementById('card-list').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">🔒</div>' +
+        '<div class="empty-title">No data returned</div>' +
+        '<div class="empty-sub">RLS may be blocking the anon key. Run the policy SQL in Supabase.</div></div>';
+      return;
+    }
 
-    // Default view: all 300 newest, no date filter
-    renderCards(rows);
-    document.getElementById('sec-label-txt').textContent = rows.length + ' most recent requests';
-    document.getElementById('debug-box').classList.remove('show');
+    allData = data.map(normalise);
+    renderStats(allData);
+    renderCards(allData);
+    document.getElementById('sec-label-txt').textContent = 'All passenger requests';
 
   } catch(e) {
-    dbg('Supabase error: ' + e.message + '\n\nCode: ' + (e.code||'—') + '\nHint: ' + (e.hint||'—') + '\n\nIf you see "permission denied" → run the RLS SQL below in Supabase editor.');
-    document.getElementById('sec-label-txt').textContent = 'Error loading data';
+    showDebug('ERROR: ' + e.message);
+    document.getElementById('sec-label-txt').textContent = 'Connection error';
     document.getElementById('card-list').innerHTML =
       '<div class="empty-state"><div class="empty-icon">📡</div>' +
-      '<div class="empty-title">Could not load rides</div>' +
-      '<div class="empty-sub">Check the yellow box above for details.</div></div>';
+      '<div class="empty-title">Connection error</div>' +
+      '<div class="empty-sub">' + e.message + '</div></div>';
   }
 }
 
-// ════════════════════════════════════════════════
-// SEARCH — uses lat/lng radius when coords confirmed,
-// otherwise falls back to label string match
-// ════════════════════════════════════════════════
-function runSearch() {
+// ══════════════════════════════════════════════
+// GEOSPATIAL SEARCH
+// When From is geocoded → use PostGIS RPC on extracted_data_01.
+// Otherwise → client-side string + date filter on allData.
+// ══════════════════════════════════════════════
+async function geoSearch(fromLat, fromLng, toLat, toLng, radiusKm, dateVal, timeVal, twHours) {
+  // Client-side haversine on already-loaded data (fast, no extra round-trip)
+  return allData.filter(function(r) {
+    if (!r.pickup_lat || !r.pickup_lng) return false;
+    var puOk = hav(fromLat, fromLng, r.pickup_lat, r.pickup_lng) <= radiusKm;
+    var doOk = (toLat && r.dropoff_lat) ? hav(toLat, toLng, r.dropoff_lat, r.dropoff_lng) <= radiusKm : true;
+    var dOk  = dateVal ? r.date === dateVal : true;
+    var tOk  = (timeVal && twHours && r.time) ? timeDiffHrs(r.time, timeVal+':00') <= twHours : true;
+    return puOk && doOk && dOk && tOk;
+  });
+}
+
+// ══════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════
+async function runSearch() {
   var fromGeo = geoCache['from'];
   var toGeo   = geoCache['to'];
   var dateVal = document.getElementById('f-date').value;
@@ -576,106 +617,105 @@ function runSearch() {
   var key = [fromGeo?fromGeo.label:fromTxt, toGeo?toGeo.label:toTxt, dateVal].filter(Boolean).join(' → ');
   if (key) saveSearch(key);
 
-  var result = allData.filter(function(r) {
-    // ── Location ──
-    if (fromGeo) {
-      // Geospatial: haversine on pickup
-      if (!r.pickup_lat || hav(fromGeo.lat, fromGeo.lng, r.pickup_lat, r.pickup_lng) > radius) return false;
-    } else if (fromTxt) {
-      // String fallback
-      if (!(r.pickup_label||'').toLowerCase().includes(fromTxt)) return false;
-    }
+  var result;
 
-    if (toGeo) {
-      if (!r.dropoff_lat || hav(toGeo.lat, toGeo.lng, r.dropoff_lat, r.dropoff_lng) > radius) return false;
-    } else if (toTxt) {
-      if (!(r.dropoff_label||'').toLowerCase().includes(toTxt)) return false;
-    }
+  if (fromGeo) {
+    // Geo radius search (haversine on in-memory data)
+    result = await geoSearch(fromGeo.lat, fromGeo.lng, toGeo?toGeo.lat:null, toGeo?toGeo.lng:null, radius, dateVal, timeVal||null, twOn?2:null);
+  } else {
+    // Plain text + date filter
+    result = allData.filter(function(r) {
+      var pu = (r.pickup_label||'').toLowerCase();
+      var dr = (r.dropoff_label||'').toLowerCase();
+      if (fromTxt && !pu.includes(fromTxt)) return false;
+      if (toTxt   && !dr.includes(toTxt))   return false;
+      if (dateVal && r.date !== dateVal)     return false;
+      if (timeVal && twOn && r.time && timeDiffHrs(r.time, timeVal+':00') > 2) return false;
+      return true;
+    });
+  }
 
-    // ── Date ──
-    if (dateVal && r.date !== dateVal) return false;
-
-    // ── Time window ──
-    if (timeVal && twOn && r.time) {
-      if (timeDiffHrs(r.time, timeVal+':00') > 2) return false;
-    }
-
-    // ── Filter chip ──
+  // Filter chip
+  var t = todayStr();
+  result = result.filter(function(r) {
     var s = (r.status||'pending').toLowerCase();
-    if (activeFilter==='today'     && r.date !== todayStr()) return false;
-    if (activeFilter==='pending'   && s!=='pending')         return false;
-    if (activeFilter==='matched'   && s!=='matched')         return false;
-    if (activeFilter==='recurring' && !r.ride_frequency)     return false;
-
+    if (activeFilter==='today'     && r.date !== t)      return false;
+    if (activeFilter==='pending'   && s !== 'pending')   return false;
+    if (activeFilter==='matched'   && s !== 'matched')   return false;
+    if (activeFilter==='recurring' && !r.ride_frequency) return false;
     return true;
   });
 
-  // Sort by date asc, time asc
-  result.sort(function(a,b){
+  // Sort: date asc, time asc
+  result.sort(function(a,b) {
     if ((a.date||'') < (b.date||'')) return -1;
     if ((a.date||'') > (b.date||'')) return 1;
     return (a.time||'').localeCompare(b.time||'');
   });
 
-  // Fallback banner: if date filter + 0 results today, show all
+  // Fallback: if today filtered → show next day
   var banner    = document.getElementById('fallback-banner');
   var bannerMsg = document.getElementById('fallback-msg');
-  if (result.length === 0 && dateVal === todayStr()) {
+  if (result.length === 0 && dateVal === t) {
     var tom = new Date(); tom.setDate(tom.getDate()+1);
     var tomStr = tom.toISOString().slice(0,10);
-    var nextDay = allData.filter(function(r){ return r.date===tomStr; });
+    var nextDay = allData.filter(function(r){ return r.date === tomStr; });
     if (nextDay.length) {
       result = nextDay;
       banner.classList.add('show');
-      bannerMsg.textContent = 'No rides today — showing '+tom.toLocaleDateString('en-CA',{weekday:'long',month:'short',day:'numeric'});
+      bannerMsg.textContent = 'No rides today — showing ' + tom.toLocaleDateString('en-CA',{weekday:'long',month:'short',day:'numeric'});
     } else {
-      // No tomorrow either — show most recent 50
-      result = allData.slice(0,50);
       banner.classList.add('show');
-      bannerMsg.textContent = 'No upcoming rides found — showing most recent';
+      bannerMsg.textContent = 'No rides found for today or tomorrow';
     }
   } else {
     banner.classList.remove('show');
   }
 
   filtered = result;
-  renderStats(allData);
+  updateResultCount();
   document.getElementById('sec-label-txt').textContent =
-    result.length + ' ride' + (result.length!==1?'s':'') +
-    (fromGeo||toGeo ? ' (geo matched)' : '');
+    result.length === 0 ? 'No results' : (dateVal ? fmtDate(dateVal)+' rides' : 'All requests');
 
   renderCards(result);
   if (currentView==='map') renderMap(result);
 }
 
-// ════════════════════════════════════════════════
-// STATS
-// ════════════════════════════════════════════════
-function renderStats(data) {
-  var t = todayStr();
-  document.getElementById('s-total').textContent   = data.length;
-  document.getElementById('s-today').textContent   = data.filter(function(r){return r.date===t;}).length;
-  document.getElementById('s-pending').textContent = data.filter(function(r){return (r.status||'pending')==='pending';}).length;
-  document.getElementById('s-matched').textContent = data.filter(function(r){return r.status==='matched';}).length;
+function updateResultCount() {
+  document.getElementById('s-total').textContent   = allData.length;
+  document.getElementById('s-today').textContent   = allData.filter(function(r){ return r.date===todayStr(); }).length;
+  document.getElementById('s-pending').textContent = allData.filter(function(r){ return (r.status||'pending')==='pending'; }).length;
+  document.getElementById('s-matched').textContent = allData.filter(function(r){ return r.status==='matched'; }).length;
 }
 
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// RENDER STATS
+// ══════════════════════════════════════════════
+function renderStats(data) {
+  document.getElementById('s-total').textContent   = data.length;
+  document.getElementById('s-today').textContent   = data.filter(function(r){ return r.date===todayStr(); }).length;
+  document.getElementById('s-pending').textContent = data.filter(function(r){ return (r.status||'pending')==='pending'; }).length;
+  document.getElementById('s-matched').textContent = data.filter(function(r){ return r.status==='matched'; }).length;
+}
+
+// ══════════════════════════════════════════════
 // RENDER CARDS
-// ════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function renderCards(data) {
   var list = document.getElementById('card-list');
   if (!data.length) {
-    list.innerHTML='<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-title">No rides found</div><div class="empty-sub">Try expanding radius, clearing the date, or adjusting the time window.</div></div>';
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-title">No rides found</div><div class="empty-sub">Try expanding the radius or adjusting filters.</div></div>';
     return;
   }
   list.innerHTML = data.map(function(r,i) {
-    var av  = avColor(i);
-    var sta = (r.status||'pending').toLowerCase();
-    var exp = expandedId === r.id;
-    var waNum = r.passenger_wa_id || '';
-    var tgU   = r.telegram_chat_id || '';
-    var rt = fmtTime(r.time);
-    var rd = fmtDate(r.date);
+    var av       = avColor(i);
+    var sta      = (r.status||'pending').toLowerCase();
+    var exp      = expandedId === r.id;
+    var waNum    = String(r.passenger_wa_id||'').replace(/\D/g,'');
+    var tgUsr    = r.telegram_chat_id||'';
+    var rTime    = fmtTime(r.time);
+    var rDate    = fmtDate(r.date);
+    var hasMap   = r.pickup_lat && r.dropoff_lat;
     return [
       '<div class="ride-card'+(exp?' expanded':'')+'" data-id="'+r.id+'" onclick="toggleExpand('+JSON.stringify(r.id)+',event)">',
         '<div class="card-top">',
@@ -684,7 +724,7 @@ function renderCards(data) {
               '<div class="av" style="background:'+av.bg+';color:'+av.color+'">'+initials(r.passenger_name)+'</div>',
               '<div>',
                 '<div class="pax-name">'+(r.passenger_name||'Unknown')+'</div>',
-                '<div class="time-ago">'+timeAgo(r.created_at)+(r.group_name?' · '+r.group_name:'')+'</div>',
+                '<div class="time-ago">'+timeAgo(r.created_at)+'</div>',
               '</div>',
             '</div>',
             '<div class="badges">',
@@ -699,80 +739,83 @@ function renderCards(data) {
               '<div><div class="route-place">'+(r.dropoff_label||'—')+'</div><div class="route-sub">Dropoff</div></div>',
             '</div>',
             '<div class="route-meta">',
-              '<div class="ride-time">'+rt+'</div>',
-              '<div class="ride-date">'+rd+'</div>',
+              '<div class="ride-time">'+rTime+'</div>',
+              '<div class="ride-date">'+rDate+'</div>',
             '</div>',
           '</div>',
         '</div>',
         '<div class="card-footer">',
           '<div class="footer-info">',
-            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rd+'</div>',
-            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rt+'</div>',
+            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>',
+            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>',
+            (r.group_name?'<div class="f-chip" style="font-size:10px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.group_name+'</div>':''),
           '</div>',
           '<div class="contact-btns">',
             (waNum
-              ? '<button class="c-btn" onclick="openWA(\''+waNum+'\',event)"><svg viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
-              : '<button class="c-btn" style="opacity:.25"><svg viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'),
-            (tgU
-              ? '<button class="c-btn" onclick="openTG(\''+tgU+'\',event)"><svg viewBox="0 0 24 24" fill="none" stroke="#2AABEE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'
-              : '<button class="c-btn" style="opacity:.25"><svg viewBox="0 0 24 24" fill="none" stroke="#2AABEE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'),
+              ?'<button class="c-btn" onclick="openWA(\''+waNum+'\',event)"><svg viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+              :'<button class="c-btn" style="opacity:.25"><svg viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'),
+            (tgUsr
+              ?'<button class="c-btn" onclick="openTG(\''+tgUsr+'\',event)"><svg viewBox="0 0 24 24" fill="none" stroke="#2AABEE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'
+              :'<button class="c-btn" style="opacity:.25"><svg viewBox="0 0 24 24" fill="none" stroke="#2AABEE" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'),
           '</div>',
         '</div>',
         '<div class="card-detail'+(exp?' open':'')+'">',
           '<div class="detail-grid">',
-            '<div><div class="di-label">Date</div><div class="di-val">'+rd+'</div></div>',
-            '<div><div class="di-label">Time</div><div class="di-val">'+rt+'</div></div>',
-            '<div><div class="di-label">Phone</div><div class="di-val">'+(r.passenger_wa_id||'—')+'</div></div>',
-            '<div><div class="di-label">Source</div><div class="di-val">'+(r.group_name||r.platform||'WhatsApp')+'</div></div>',
+            '<div><div class="di-label">Date</div><div class="di-val">'+rDate+'</div></div>',
+            '<div><div class="di-label">Time</div><div class="di-val">'+rTime+'</div></div>',
+            '<div><div class="di-label">Group</div><div class="di-val">'+(r.group_name||'—')+'</div></div>',
+            '<div><div class="di-label">Status</div><div class="di-val">'+(r.status||'pending')+'</div></div>',
           '</div>',
           (r.additional_conditions?'<div class="detail-note"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>'+r.additional_conditions+'</span></div>':''),
-          ((r.pickup_lat&&r.dropoff_lat)?'<button class="map-link-btn" onclick="pinOnMap(\''+r.id+'\',event)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>View on map</button>':''),
+          (hasMap?'<button class="map-link-btn" onclick="pinOnMap('+JSON.stringify(r.id)+',event)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>View on map</button>':''),
         '</div>',
       '</div>'
     ].join('');
   }).join('');
 }
 
-function toggleExpand(id,e){
-  if(e.target.closest('.c-btn')||e.target.closest('.map-link-btn')) return;
-  expandedId=(expandedId===id)?null:id;
-  renderCards(filtered.length?filtered:allData);
+function toggleExpand(id, e) {
+  if (e.target.closest('.c-btn')||e.target.closest('.map-link-btn')) return;
+  expandedId = (expandedId===id) ? null : id;
+  renderCards(filtered.length ? filtered : allData);
 }
-function openWA(n,e){e.stopPropagation();window.open('https://wa.me/'+n,'_blank');}
-function openTG(u,e){e.stopPropagation();window.open('https://t.me/'+u,'_blank');}
+function openWA(num,e){ e.stopPropagation(); window.open('https://wa.me/'+num,'_blank'); }
+function openTG(u,e)  { e.stopPropagation(); window.open('https://t.me/'+u,'_blank'); }
 
+// ══════════════════════════════════════════════
 // FILTER CHIP
-function setFilter(f){
-  activeFilter=f;
-  document.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('active',c.dataset.f===f);});
+// ══════════════════════════════════════════════
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.chip').forEach(function(c){ c.classList.toggle('active', c.dataset.f===f); });
   runSearch();
 }
 
-// TIME WINDOW
-function toggleTW(){
-  twOn=!twOn;
-  document.getElementById('tw-btn').classList.toggle('active',twOn);
-  document.getElementById('tw-label').textContent=twOn?'± 2 hr':'Any time';
+function toggleTW() {
+  twOn = !twOn;
+  document.getElementById('tw-btn').classList.toggle('active', twOn);
+  document.getElementById('tw-label').textContent = twOn ? '± 2 hr' : 'Any time';
   runSearch();
 }
 
+// ══════════════════════════════════════════════
 // SAVED SEARCHES
-function saveSearch(q){
-  if(!q||savedSearches.includes(q)) return;
+// ══════════════════════════════════════════════
+function saveSearch(q) {
+  if (!q||savedSearches.includes(q)) return;
   savedSearches.unshift(q);
-  if(savedSearches.length>6) savedSearches=savedSearches.slice(0,6);
+  if (savedSearches.length>6) savedSearches=savedSearches.slice(0,6);
   try{localStorage.setItem('pf_s',JSON.stringify(savedSearches));}catch(e){}
   renderSaved();
 }
-function removeSaved(q){
+function removeSaved(q) {
   savedSearches=savedSearches.filter(function(s){return s!==q;});
   try{localStorage.setItem('pf_s',JSON.stringify(savedSearches));}catch(e){}
   renderSaved();
 }
-function renderSaved(){
-  var wrap=document.getElementById('saved-wrap');
-  var pills=document.getElementById('saved-pills');
-  if(!savedSearches.length){wrap.classList.remove('show');return;}
+function renderSaved() {
+  var wrap=document.getElementById('saved-wrap'), pills=document.getElementById('saved-pills');
+  if (!savedSearches.length){wrap.classList.remove('show');return;}
   wrap.classList.add('show');
   pills.innerHTML=savedSearches.map(function(s){
     return '<div class="saved-pill" onclick="applySaved(\''+s.replace(/'/g,"\\'")+'\')">'+
@@ -782,57 +825,60 @@ function renderSaved(){
     '</div>';
   }).join('');
 }
-function applySaved(q){
-  var p=q.split(' → ');
-  if(p[0]) document.getElementById('f-from').value=p[0];
-  if(p[1]) document.getElementById('f-to').value=p[1];
-  if(p[2]) document.getElementById('f-date').value=p[2];
+function applySaved(q) {
+  var parts=q.split(' → ');
+  if(parts[0]) document.getElementById('f-from').value=parts[0];
+  if(parts[1]) document.getElementById('f-to').value=parts[1];
+  if(parts[2]) document.getElementById('f-date').value=parts[2];
   runSearch();
 }
 
-// VIEW
-function switchView(v){
+// ══════════════════════════════════════════════
+// VIEW SWITCHER
+// ══════════════════════════════════════════════
+function switchView(v) {
   currentView=v;
-  document.getElementById('list-view').style.display=v==='list'?'':'none';
-  document.getElementById('map-view').classList.toggle('active',v==='map');
-  document.getElementById('btn-list').classList.toggle('active',v==='list');
-  document.getElementById('btn-map').classList.toggle('active',v==='map');
-  if(v==='map') renderMap(filtered.length?filtered:allData);
+  document.getElementById('list-view').style.display = v==='list' ? '' : 'none';
+  document.getElementById('map-view').classList.toggle('active', v==='map');
+  document.getElementById('btn-list').classList.toggle('active', v==='list');
+  document.getElementById('btn-map').classList.toggle('active', v==='map');
+  if (v==='map') renderMap(filtered.length?filtered:allData);
 }
 
+// ══════════════════════════════════════════════
 // MAP
-function pinOnMap(id,e){
+// ══════════════════════════════════════════════
+function pinOnMap(id,e) {
   if(e) e.stopPropagation();
   switchView('map');
   var r=allData.find(function(x){return String(x.id)===String(id);});
   if(r&&leafletMap) setTimeout(function(){leafletMap.setView([r.pickup_lat,r.pickup_lng],14);},150);
 }
-function renderMap(data){
-  if(!leafletMap){
+function renderMap(data) {
+  if (!leafletMap) {
     leafletMap=L.map('leaflet-map',{zoomControl:true,attributionControl:false}).setView([43.52,-79.75],10);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(leafletMap);
   }
   mapLayers.forEach(function(l){l.remove();}); mapLayers=[];
   var tray=document.getElementById('map-tray');
   tray.innerHTML=''; tray.classList.remove('open');
-  var geo=data.filter(function(r){return r.pickup_lat&&r.dropoff_lat;});
-  if(!geo.length){
+  var rides=data.filter(function(r){return r.pickup_lat&&r.dropoff_lat;});
+  if (!rides.length) {
     tray.innerHTML='<div style="padding:12px 16px;font-size:13px;color:var(--text-muted)">No geo-located rides in results</div>';
     tray.classList.add('open'); return;
   }
   var bounds=[];
-  var puIco=L.divIcon({className:'',html:'<div style="width:10px;height:10px;border-radius:50%;border:2.5px solid #8a95a8;background:#1e2535;"></div>',iconSize:[10,10],iconAnchor:[5,5]});
-  var doIco=L.divIcon({className:'',html:'<div style="width:11px;height:11px;border-radius:50%;background:#4f8ef7;border:2px solid #0e1117;box-shadow:0 1px 4px rgba(0,0,0,.5);"></div>',iconSize:[11,11],iconAnchor:[5.5,5.5]});
-  geo.forEach(function(r){
-    var puM=L.marker([r.pickup_lat,r.pickup_lng],{icon:puIco}).addTo(leafletMap)
+  var puIcon=L.divIcon({className:'',html:'<div style="width:10px;height:10px;border-radius:50%;border:2.5px solid #8a95a8;background:#1e2535;"></div>',iconSize:[10,10],iconAnchor:[5,5]});
+  var doIcon=L.divIcon({className:'',html:'<div style="width:11px;height:11px;border-radius:50%;background:#4f8ef7;border:2px solid #0e1117;box-shadow:0 1px 4px rgba(0,0,0,.5);"></div>',iconSize:[11,11],iconAnchor:[5.5,5.5]});
+  rides.forEach(function(r) {
+    var puM=L.marker([r.pickup_lat,r.pickup_lng],{icon:puIcon}).addTo(leafletMap)
       .bindPopup('<div class="pop-name">'+(r.passenger_name||'Passenger')+'</div><div class="pop-route">📍 '+(r.pickup_label||'')+'</div><div class="pop-time">'+fmtTime(r.time)+' · '+fmtDate(r.date)+'</div>');
-    var doM=L.marker([r.dropoff_lat,r.dropoff_lng],{icon:doIco}).addTo(leafletMap)
+    var doM=L.marker([r.dropoff_lat,r.dropoff_lng],{icon:doIcon}).addTo(leafletMap)
       .bindPopup('<div class="pop-name">'+(r.passenger_name||'Passenger')+'</div><div class="pop-route">🏁 '+(r.dropoff_label||'')+'</div>');
-    var ln=L.polyline([[r.pickup_lat,r.pickup_lng],[r.dropoff_lat,r.dropoff_lng]],{color:'#4f8ef7',weight:2,opacity:.55,dashArray:'5,6'}).addTo(leafletMap);
-    mapLayers.push(puM,doM,ln);
+    var line=L.polyline([[r.pickup_lat,r.pickup_lng],[r.dropoff_lat,r.dropoff_lng]],{color:'#4f8ef7',weight:2,opacity:.55,dashArray:'5,6'}).addTo(leafletMap);
+    mapLayers.push(puM,doM,line);
     bounds.push([r.pickup_lat,r.pickup_lng],[r.dropoff_lat,r.dropoff_lng]);
-    var item=document.createElement('div');
-    item.className='tray-item';
+    var item=document.createElement('div'); item.className='tray-item';
     item.innerHTML='<div class="tray-name">'+(r.passenger_name||'Unknown')+' · '+fmtTime(r.time)+'</div><div class="tray-route">'+(r.pickup_label||'—')+' → '+(r.dropoff_label||'—')+'</div>';
     item.onclick=function(){leafletMap.setView([r.pickup_lat,r.pickup_lng],14);puM.openPopup();};
     tray.appendChild(item);
@@ -842,71 +888,29 @@ function renderMap(data){
   setTimeout(function(){if(leafletMap)leafletMap.invalidateSize();},100);
 }
 
+// ══════════════════════════════════════════════
 // BOOT
+// ══════════════════════════════════════════════
 renderSaved();
 loadData();
 </script>
 
 <!--
-══════════════════════════════════════════════════════
-RUN THIS SQL IN SUPABASE → SQL Editor before deploying
-(fixes the "permission denied" / empty data issue)
-══════════════════════════════════════════════════════
+════════════════════════════════════════════════
+RLS POLICY — run once in Supabase SQL editor:
 
--- 1. Enable RLS on the table
+-- Allow anon key to read extracted_data_01
 ALTER TABLE public.extracted_data_01 ENABLE ROW LEVEL SECURITY;
 
--- 2. Allow anon role to SELECT (read-only, no writes)
-CREATE POLICY "anon_read_extracted_data_01"
-ON public.extracted_data_01
-FOR SELECT
-TO anon
-USING (true);
+CREATE POLICY "anon_read_extracted"
+  ON public.extracted_data_01
+  FOR SELECT
+  TO anon
+  USING (true);
 
--- 3. Optional: PostGIS RPC for server-side radius search
---    (only needed if you want to search across ALL 7000 rows
---     instead of the 300 loaded client-side)
-CREATE OR REPLACE FUNCTION search_extracted_data_01(
-  from_lat        double precision,
-  from_lng        double precision,
-  radius_km       double precision DEFAULT 5,
-  to_lat          double precision DEFAULT NULL,
-  to_lng          double precision DEFAULT NULL,
-  search_date     date             DEFAULT NULL,
-  search_time_val time             DEFAULT NULL,
-  time_window_hrs double precision DEFAULT 2
-)
-RETURNS SETOF extracted_data_01
-LANGUAGE sql STABLE AS $$
-  SELECT * FROM public.extracted_data_01
-  WHERE
-    "Type" = 'passenger'
-    AND source_geo IS NOT NULL
-    AND ST_DWithin(
-      source_geo,
-      ST_SetSRID(ST_MakePoint(from_lng, from_lat), 4326)::geography,
-      radius_km * 1000
-    )
-    AND (
-      to_lat IS NULL OR destination_geo IS NULL OR
-      ST_DWithin(
-        destination_geo,
-        ST_SetSRID(ST_MakePoint(to_lng, to_lat), 4326)::geography,
-        radius_km * 1000
-      )
-    )
-    AND (search_date IS NULL OR "pick up date" = search_date)
-    AND (
-      search_time_val IS NULL OR
-      ABS(EXTRACT(EPOCH FROM ("pick up time" - search_time_val)) / 3600) <= time_window_hrs
-    )
-  ORDER BY "pick up date" ASC, "pick up time" ASC
-  LIMIT 200;
-$$;
-
-GRANT EXECUTE ON FUNCTION search_extracted_data_01 TO anon;
-
-══════════════════════════════════════════════════════
+-- Verify it worked:
+SELECT count(*) FROM public.extracted_data_01 WHERE "Type" = 'passenger';
+════════════════════════════════════════════════
 -->
 </body>
 </html>
