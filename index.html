@@ -241,29 +241,19 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .suggestions.show { display: block; }
 
 .suggestion-item {
-  padding: 11px 14px;
-  font-size: 13px;
-  color: var(--text-dim);
-  cursor: pointer;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  border-bottom: 1px solid var(--border);
-  line-height: 1.4;
-}
-
-.suggestion-item:last-child { border-bottom: none; }
-.suggestion-item:hover { background: var(--accent-dim); color: var(--text); }
-
-.suggestion-item.loading-item {
-  cursor: default;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
-.suggestion-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-.suggestion-name { font-weight: 500; color: var(--text); }
-.suggestion-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+      padding: 11px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover { background: var(--surface2); }
+    .suggestion-item.loading-item {
+      cursor: default; font-size: 12px;
+      color: var(--text-muted); font-style: italic; padding: 12px 14px;
+    }
+    .sug-main { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sug-ctx  { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .confirmed-tag {
   display: none;
@@ -633,7 +623,7 @@ function setupLocationField(which) {
       return;
     }
 
-    suggestions.innerHTML = '<div class="suggestion-item loading-item"><span class="suggestion-icon">⏳</span>Searching...</div>';
+    suggestions.innerHTML = '<div class="suggestion-item loading-item"></span>Searching...</div>';
     suggestions.classList.add('show');
 
     geoTimers[which] = setTimeout(function() {
@@ -649,221 +639,68 @@ function setupLocationField(which) {
 }
 
 function fetchSuggestions(which, query) {
-  var suggestions = document.getElementById(which + 'Suggestions');
-  var MAPBOX_TOKEN = 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXE2M29yZTYwYnNkMnpvcnQ3cTdtcnVhIn0.eUnsJguXqX48RGUxfDyD5g';
-  var url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(query) + '.json?access_token=' + MAPBOX_TOKEN + '&limit=5&country=CA,US&types=place,locality,neighborhood,address,poi,region,district,postcode';
+  var suggestions = document.getElementById(which + "Suggestions");
+  var input       = document.getElementById(which + "Input");
+  var MBTK = "pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw";
+  if (!window._SB_SID) window._SB_SID = "pf-" + Date.now();
 
-  fetch(url)
-    .then(function(res) {
-      return res.json();
-    })
+  fetch("https://api.mapbox.com/search/searchbox/v1/suggest"
+    + "?q="             + encodeURIComponent(query)
+    + "&access_token="  + MBTK
+    + "&session_token=" + window._SB_SID
+    + "&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532")
+    .then(function(r) { return r.json(); })
     .then(function(data) {
-      suggestions.innerHTML = '';
-
-      if (!data || !data.features || !data.features.length) {
-        suggestions.innerHTML = '<div class="suggestion-item loading-item"><span class="suggestion-icon">❌</span>No results in Canada/USA — try a different name</div>';
+      suggestions.innerHTML = "";
+      var items = (data && data.suggestions) || [];
+      if (!items.length) {
+        suggestions.innerHTML = "<div class=\"suggestion-item loading-item\">No results found</div>";
         return;
       }
-
-      data.features.forEach(function(feature) {
-        var placeType = feature.place_type ? feature.place_type[0] : '';
-        var icon = getPlaceIcon(placeType);
-        var fullName = feature.place_name;
-
-        var item = document.createElement('div');
-        item.className = 'suggestion-item';
-
-        item.innerHTML =
-          '<span class="suggestion-icon">' + icon + '</span>' +
-          '<span class="suggestion-name" style="font-size:13px;font-weight:400;color:var(--text)">' + fullName + '</span>';
-
-        item.addEventListener('click', function() {
-          selectPlace(which, feature, fullName);
+      items.forEach(function(item) {
+        var name = item.name || "";
+        var ctx  = item.place_formatted || item.full_address || "";
+        if (ctx.toLowerCase().startsWith(name.toLowerCase() + ", ")) ctx = ctx.slice(name.length + 2);
+        var el = document.createElement("div");
+        el.className = "suggestion-item";
+        el.innerHTML = "<div class=\"sug-main\">" + name + "</div>"
+          + (ctx ? "<div class=\"sug-ctx\">" + ctx + "</div>" : "");
+        el.addEventListener("click", function() {
+          input.value = name + (ctx ? ", " + ctx : "");
+          suggestions.classList.remove("show");
+          suggestions.innerHTML = "";
+          retrieveAndSelect(which, item.mapbox_id, name, ctx, MBTK, window._SB_SID);
         });
-
-        suggestions.appendChild(item);
+        suggestions.appendChild(el);
       });
-
-      suggestions.classList.add('show');
+      suggestions.classList.add("show");
     })
     .catch(function() {
-      suggestions.innerHTML = '<div class="suggestion-item loading-item"><span class="suggestion-icon">⚠️</span>Connection error</div>';
+      suggestions.innerHTML = "<div class=\"suggestion-item loading-item\">Connection error</div>";
     });
 }
 
-function selectPlace(which, place, displayName) {
-  var input = document.getElementById(which + 'Input');
-  var suggestions = document.getElementById(which + 'Suggestions');
-  var confirmed = document.getElementById(which + 'Confirmed');
-  var confirmedTx = document.getElementById(which + 'ConfirmedText');
+function retrieveAndSelect(which, mapboxId, name, ctx, token, session) {
+  var input       = document.getElementById(which + "Input");
+  var confirmed   = document.getElementById(which + "Confirmed");
+  var confirmedTx = document.getElementById(which + "ConfirmedText");
 
-  geoCache[which] = {
-    lat: place.center[1],
-    lng: place.center[0],
-    label: place.place_name.split(',').slice(0, 3).join(',').trim()
-  };
-
-  input.value = displayName;
-  input.classList.add('confirmed');
-
-  suggestions.classList.remove('show');
-  suggestions.innerHTML = '';
-
-  confirmedTx.textContent = geoCache[which].label;
-  confirmed.classList.add('show');
+  fetch("https://api.mapbox.com/search/searchbox/v1/retrieve/" + mapboxId
+    + "?access_token=" + token + "&session_token=" + session)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var feat   = data.features && data.features[0];
+      var coords = feat && feat.geometry && feat.geometry.coordinates;
+      if (!coords) return;
+      geoCache[which] = { lat: coords[1], lng: coords[0], label: name + (ctx ? ", " + ctx : "") };
+      input.classList.add("confirmed");
+      confirmedTx.textContent = name;
+      confirmed.classList.add("show");
+    })
+    .catch(function() {});
 }
 
-function getPlaceIcon(type) {
-  var icons = {
-    // Mapbox types
-    place: '🏙️',
-    locality: '🏘️',
-    neighborhood: '🏘️',
-    district: '🏙️',
-    region: '🗺️',
-    postcode: '📮',
-    address: '🏠',
-    poi: '📍',
-    // Legacy / fallback types
-    city: '🏙️',
-    town: '🏘️',
-    village: '🏡',
-    suburb: '🏘️',
-    road: '🛣️',
-    street: '🛣️',
-    highway: '🛣️',
-    station: '🚉',
-    airport: '✈️',
-    bus_stop: '🚌',
-    hospital: '🏥',
-    school: '🏫',
-    university: '🎓',
-    restaurant: '🍽️',
-    hotel: '🏨',
-    park: '🌳',
-    residential: '🏠',
-    building: '🏢'
-  };
 
-  return icons[type] || '📍';
-}
-
-document.getElementById('mainForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  hideError();
-
-  if (!N8N_WEBHOOK_URL || N8N_WEBHOOK_URL.includes('YOUR-N8N-DOMAIN')) {
-    showError('Replace N8N_WEBHOOK_URL in the code first.');
-    return;
-  }
-
-  if (!geoCache.pickup || !geoCache.dropoff) {
-    showError('Please select both pickup and dropoff locations from the dropdown.');
-    return;
-  }
-
-  var dateVal = document.getElementById('dateInput').value;
-  var timeVal = document.getElementById('timeInput').value;
-
-  if (!dateVal || !timeVal) {
-    showError('Please fill in date and time.');
-    return;
-  }
-
-  var dtLocal = dateVal + 'T' + timeVal + ':00';
-
-  var tzOffset = new Date().getTimezoneOffset();
-  var sign = tzOffset <= 0 ? '+' : '-';
-  var absOff = Math.abs(tzOffset);
-  var hh = String(Math.floor(absOff / 60)).padStart(2, '0');
-  var mm = String(absOff % 60).padStart(2, '0');
-  var dtISO = dtLocal + sign + hh + ':' + mm;
-
-  setLoading(true);
-
-  var payload = {
-    role: role,
-    platform: 'Telegram_form',
-
-    telegram_chat_id: chatId || null,
-    telegram_user_id: chatId || null,
-    name: userName || null,
-
-    pickup_lat: geoCache.pickup.lat,
-    pickup_lng: geoCache.pickup.lng,
-    pickup_label: geoCache.pickup.label,
-
-    dropoff_lat: geoCache.dropoff.lat,
-    dropoff_lng: geoCache.dropoff.lng,
-    dropoff_label: geoCache.dropoff.label,
-
-    date: dateVal,
-    time: role === 'passenger' ? timeVal + ':00+00' : timeVal + ':00',
-
-    requested_datetime: dtISO,
-    departure_time: timeVal + ':00',
-    departure_datetime: dtISO,
-    dates: dateVal,
-
-    available_seats: selectedSeat,
-    status: 'pending',
-    is_active: true
-  };
-
-  fetch(N8N_WEBHOOK_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(function(res) {
-    if (!res.ok) {
-      throw new Error('n8n webhook returned HTTP ' + res.status);
-    }
-
-    if (tg && tg.HapticFeedback) {
-      tg.HapticFeedback.notificationOccurred('success');
-    }
-
-    document.getElementById('mainForm').style.display = 'none';
-    document.getElementById('successScreen').classList.add('show');
-
-    if (role === 'driver') {
-      document.getElementById('successTitle').textContent = 'Route registered!';
-      document.getElementById('successSub').textContent = "Your route is live. We'll message you if there's a match.";
-    } else {
-      document.getElementById('successTitle').textContent = 'Request received!';
-      document.getElementById('successSub').textContent = "Your request is saved. We'll message you if there's a matching driver.";
-    }
-  })
-  .catch(function(err) {
-    if (tg && tg.HapticFeedback) {
-      tg.HapticFeedback.notificationOccurred('error');
-    }
-
-    showError('Something went wrong: ' + err.message);
-  })
-  .finally(function() {
-    setLoading(false);
-  });
-});
-
-function setLoading(on) {
-  var btn = document.getElementById('submitBtn');
-  btn.disabled = on;
-  btn.classList.toggle('loading', on);
-}
-
-function showError(msg) {
-  var el = document.getElementById('errorBanner');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-
-function hideError() {
-  document.getElementById('errorBanner').classList.remove('show');
-}
 </script>
 
 </body>
