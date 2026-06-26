@@ -51,7 +51,8 @@ html, body {
   height: 100dvh;
   max-width: 640px;
   margin: 0 auto;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 /* ── HEADER ── */
@@ -59,6 +60,9 @@ html, body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
 }
 
 .header-top {
@@ -138,6 +142,7 @@ html, body {
   padding: 0 14px 10px;
   border-bottom: 1px solid var(--border);
   transition: all 0.25s ease;
+  overflow: visible;
 }
 
 .search-grid {
@@ -149,7 +154,7 @@ html, body {
 
 .sf { position: relative; }
 
-.sf-inner { position: relative; }
+.sf-inner { position: relative; overflow: visible; }
 
 .sf-icon {
   position: absolute;
@@ -203,8 +208,9 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
-  z-index: 9999;
+  z-index: 99999;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  pointer-events: auto;
 }
 .sug-box.show { display: block; }
 .sug-item {
@@ -379,7 +385,7 @@ html, body {
 .debug-box.show { display: block; }
 
 /* ── CONTENT AREA ── */
-.content { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+.content { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; min-height: 0; }
 .content::-webkit-scrollbar { display: none; }
 
 /* ── SAVED SEARCHES ── */
@@ -987,10 +993,10 @@ function placeIcon(type) { return PLACE_ICONS[type] || PLACE_ICONS['poi']; }
     sugBox.classList.add('show');
 
     geoTimers[which] = setTimeout(function() {
-      // Mapbox Geocoding v6 (current API — v5 mapbox.places is deprecated)
-      var url = 'https://api.mapbox.com/search/geocode/v6/forward'
-        + '?q=' + encodeURIComponent(q)
-        + '&access_token=' + MAPBOX_TOKEN
+      // Mapbox Geocoding v5 — proven working with this token
+      var url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/'
+        + encodeURIComponent(q)
+        + '.json?access_token=' + MAPBOX_TOKEN
         + '&limit=5'
         + '&country=CA,US'
         + '&types=country,region,postcode,district,place,locality,neighborhood,street,address,poi'
@@ -999,30 +1005,27 @@ function placeIcon(type) { return PLACE_ICONS[type] || PLACE_ICONS['poi']; }
 
       fetch(url).then(function(r){ return r.json(); }).then(function(data) {
         sugBox.innerHTML = '';
-        if (!data.features || !data.features.length) {
+        if (!data || !data.features || !data.features.length) {
           sugBox.innerHTML = '<div class="sug-loading">No results found</div>';
           return;
         }
         data.features.forEach(function(f) {
-          var props  = f.properties || {};
-          var coords = f.geometry && f.geometry.coordinates;
-          var type   = (props.feature_type) || 'place';
-          // v6 uses full_address, name, and place_formatted
-          var name        = props.name || props.full_address || '';
-          var fullAddress = props.full_address || props.place_formatted || name;
-          var sub         = props.place_formatted || fullAddress;
-          // strip leading name from sub if it repeats
-          if (sub.startsWith(name + ', ')) sub = sub.slice(name.length + 2);
+          var type        = f.place_type ? f.place_type[0] : 'place';
+          var name        = f.text || '';
+          var fullAddress = f.place_name || name;
+          // context = everything after the first segment
+          var sub = fullAddress.indexOf(', ') > -1
+            ? fullAddress.slice(fullAddress.indexOf(', ') + 2)
+            : '';
 
           var item = document.createElement('div');
           item.className = 'sug-item';
           item.innerHTML = placeIcon(type)
             + '<div><div class="sug-name">' + name + '</div>'
-            + '<div class="sug-sub">' + sub + '</div></div>';
+            + (sub ? '<div class="sug-sub">' + sub + '</div>' : '') + '</div>';
           item.addEventListener('mousedown', function(e) { e.preventDefault(); });
           item.addEventListener('click', function() {
-            if (!coords) return;
-            geoCache[which] = { lat: coords[1], lng: coords[0], label: name };
+            geoCache[which] = { lat: f.center[1], lng: f.center[0], label: name };
             input.value = fullAddress;
             input.classList.add('geo-confirmed');
             sugBox.classList.remove('show');
@@ -1033,7 +1036,7 @@ function placeIcon(type) { return PLACE_ICONS[type] || PLACE_ICONS['poi']; }
           sugBox.appendChild(item);
         });
       }).catch(function(err) {
-        sugBox.innerHTML = '<div class="sug-loading">Connection error — ' + err.message + '</div>';
+        sugBox.innerHTML = '<div class="sug-loading">Error: ' + err.message + '</div>';
       });
     }, 400);
   });
