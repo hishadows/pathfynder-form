@@ -179,56 +179,70 @@ html, body {
 }
 .sf input:focus { border-color: var(--accent); }
 .sf input::placeholder { color: var(--text-muted); }
-.sf input.geo-confirmed { border-color: var(--green); }
+.sf input.confirmed { border-color: var(--green); }
 .sf input[type="date"]::-webkit-calendar-picker-indicator,
 .sf input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; position: absolute; right: 0; top: 0; width: 100%; height: 100%; cursor: pointer; }
 
-.conf-tag {
+.confirmed-tag {
   display: none;
   align-items: center;
-  gap: 5px;
-  margin-top: 3px;
-  padding: 3px 8px;
-  background: var(--green-dim);
+  gap: 7px;
+  margin-top: 4px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #22c55e;
+  background: rgba(34,197,94,0.08);
   border: 1px solid rgba(34,197,94,0.2);
-  border-radius: 6px;
-  font-size: 10px;
-  color: var(--green);
 }
-.conf-tag.show { display: flex; }
-.conf-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.confirmed-tag.show { display: flex; }
+.confirmed-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
 
 /* suggestions dropdown */
-.sug-box {
+.suggestions {
   display: none;
   position: absolute;
   left: 0; right: 0;
-  top: calc(100% + 4px);
-  background: var(--surface2);
+  top: calc(100% + 6px);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
-  z-index: 99999;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  pointer-events: auto;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
 }
-.sug-box.show { display: block; }
-.sug-item {
-  padding: 9px 11px;
-  font-size: 12px;
+.suggestions.show { display: block; }
+.suggestion-item {
+  padding: 11px 14px;
   cursor: pointer;
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
   border-bottom: 1px solid var(--border);
   transition: background 0.1s;
 }
-.sug-item:last-child { border: none; }
-.sug-item:hover, .sug-item.highlighted { background: var(--accent-dim); }
-.sug-item svg { width: 13px; height: 13px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px; }
-.sug-name { font-size: 12px; color: var(--text); line-height: 1.3; }
-.sug-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
-.sug-loading { padding: 10px 11px; font-size: 12px; color: var(--text-muted); font-style: italic; }
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: var(--surface2); }
+.suggestion-item.loading-item {
+  cursor: default;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 12px 14px;
+}
+.sug-main {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sug-ctx {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* controls row */
 .ctrl-row {
@@ -619,18 +633,18 @@ html, body {
       <div class="sf" id="sf-from">
         <div class="sf-inner">
           <span class="sf-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg></span>
-          <input type="text" id="f-from" placeholder="From…" autocomplete="off" aria-label="Pickup location"/>
-          <div class="sug-box" id="sug-from"></div>
+          <input type="text" id="fromInput" placeholder="From…" autocomplete="off" aria-label="Pickup location"/>
+          <div class="suggestions" id="fromSuggestions"></div>
         </div>
-        <div class="conf-tag" id="con-from"><div class="conf-dot"></div><span id="con-from-txt"></span></div>
+        <div class="confirmed-tag" id="fromConfirmed"><div class="confirmed-dot"></div><span id="fromConfirmedText"></span></div>
       </div>
       <div class="sf" id="sf-to">
         <div class="sf-inner">
           <span class="sf-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg></span>
-          <input type="text" id="f-to" placeholder="To…" autocomplete="off" aria-label="Dropoff location"/>
-          <div class="sug-box" id="sug-to"></div>
+          <input type="text" id="toInput" placeholder="To…" autocomplete="off" aria-label="Dropoff location"/>
+          <div class="suggestions" id="toSuggestions"></div>
         </div>
-        <div class="conf-tag" id="con-to"><div class="conf-dot"></div><span id="con-to-txt"></span></div>
+        <div class="confirmed-tag" id="toConfirmed"><div class="confirmed-dot"></div><span id="toConfirmedText"></span></div>
       </div>
       <div class="sf">
         <div class="sf-inner">
@@ -948,8 +962,8 @@ function expandSearch() {
 }
 
 function updateCollapsedSummary() {
-  var from  = geoCache.from ? geoCache.from.label : document.getElementById('f-from').value.trim();
-  var to    = geoCache.to   ? geoCache.to.label   : document.getElementById('f-to').value.trim();
+  var from  = geoCache.from ? geoCache.from.label : document.getElementById('fromInput').value.trim();
+  var to    = geoCache.to   ? geoCache.to.label   : document.getElementById('toInput').value.trim();
   var date  = document.getElementById('f-date').value;
   var r     = document.getElementById('radius-slider').value;
   var parts = [];
@@ -961,90 +975,213 @@ function updateCollapsedSummary() {
 }
 
 // ════════════════════════════════════════════════
-// MAPBOX GEOCODING
+// MAPBOX GEOCODING — exact pattern from working index.html
 // ════════════════════════════════════════════════
-var PLACE_ICONS = {
-  place:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;stroke:var(--text-muted)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
-  locality:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;stroke:var(--text-muted)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
-  neighborhood:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;stroke:var(--text-muted)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
-  poi:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;stroke:var(--text-muted)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>',
-  address:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;stroke:var(--text-muted)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
-  district:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;stroke:var(--text-muted)"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>',
-  region:'<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;stroke:var(--text-muted)"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>',
-};
-function placeIcon(type) { return PLACE_ICONS[type] || PLACE_ICONS['poi']; }
+/* getPlaceIcon removed — no icons in suggestions */
 
-['from','to'].forEach(function(which) {
-  var input   = document.getElementById('f-' + which);
-  var sugBox  = document.getElementById('sug-' + which);
-  var conTag  = document.getElementById('con-' + which);
-  var conTxt  = document.getElementById('con-' + which + '-txt');
+function setupLocationField(which) {
+  var input       = document.getElementById(which + 'Input');
+  var suggestions = document.getElementById(which + 'Suggestions');
 
   input.addEventListener('input', function() {
     geoCache[which] = null;
-    conTag.classList.remove('show');
-    input.classList.remove('geo-confirmed');
+    document.getElementById(which + 'Confirmed').classList.remove('show');
+    input.classList.remove('confirmed');
     clearTimeout(geoTimers[which]);
 
-    var q = input.value.trim();
-    if (q.length < 2) { sugBox.classList.remove('show'); sugBox.innerHTML = ''; return; }
+    var query = input.value.trim();
+    if (query.length < 3) {
+      suggestions.classList.remove('show');
+      suggestions.innerHTML = '';
+      return;
+    }
 
-    sugBox.innerHTML = '<div class="sug-loading">Searching…</div>';
-    sugBox.classList.add('show');
+    suggestions.innerHTML = '<div class="suggestion-item loading-item">Searching...</div>';
+    suggestions.classList.add('show');
 
     geoTimers[which] = setTimeout(function() {
-      // Mapbox Geocoding v5 — proven working with this token
-      var url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/'
-        + encodeURIComponent(q)
-        + '.json?access_token=' + MAPBOX_TOKEN
-        + '&limit=5'
-        + '&country=CA,US'
-        + '&types=country,region,postcode,district,place,locality,neighborhood,street,address,poi'
-        + '&proximity=-79.3832,43.6532'
-        + '&language=en';
+      fetchSuggestions(which, query);
+    }, 500);
+  });
 
-      fetch(url).then(function(r){ return r.json(); }).then(function(data) {
-        sugBox.innerHTML = '';
-        if (!data || !data.features || !data.features.length) {
-          sugBox.innerHTML = '<div class="sug-loading">No results found</div>';
-          return;
-        }
-        data.features.forEach(function(f) {
-          var type        = f.place_type ? f.place_type[0] : 'place';
-          var name        = f.text || '';
-          var fullAddress = f.place_name || name;
-          // context = everything after the first segment
-          var sub = fullAddress.indexOf(', ') > -1
-            ? fullAddress.slice(fullAddress.indexOf(', ') + 2)
-            : '';
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+      suggestions.classList.remove('show');
+    }
+  });
+}
 
-          var item = document.createElement('div');
-          item.className = 'sug-item';
-          item.innerHTML = placeIcon(type)
-            + '<div><div class="sug-name">' + name + '</div>'
-            + (sub ? '<div class="sug-sub">' + sub + '</div>' : '') + '</div>';
-          item.addEventListener('mousedown', function(e) { e.preventDefault(); });
-          item.addEventListener('click', function() {
-            geoCache[which] = { lat: f.center[1], lng: f.center[0], label: name };
-            input.value = fullAddress;
-            input.classList.add('geo-confirmed');
-            sugBox.classList.remove('show');
-            sugBox.innerHTML = '';
-            conTxt.textContent = name;
-            conTag.classList.add('show');
-          });
-          sugBox.appendChild(item);
+function fetchSuggestions(which, query) {
+  var suggestions = document.getElementById(which + 'Suggestions');
+  suggestions.innerHTML = '<div class="suggestion-item loading-item">Searching...</div>';
+  suggestions.classList.add('show');
+
+  // Strategy: Search Box API first (understands intent like "pearson airport" → YYZ)
+  // Falls back to Geocoding v5 if Search Box returns nothing.
+  // Both locked to CA,US. Proximity strongly biases Ontario.
+  var SESSION = 'pf-' + Date.now();
+  var searchUrl = 'https://api.mapbox.com/search/searchbox/v1/suggest'
+    + '?q='             + encodeURIComponent(query)
+    + '&access_token='  + MAPBOX_TOKEN
+    + '&session_token=' + SESSION
+    + '&language=en'
+    + '&limit=6'
+    + '&country=CA,US'
+    + '&proximity=-79.3832,43.6532';
+
+  fetch(searchUrl)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var items = data && data.suggestions && data.suggestions.length ? data.suggestions : null;
+      if (items) {
+        renderSearchBox(which, items, SESSION, suggestions);
+      } else {
+        // fallback to geocoding v5
+        geocodeV5(which, query, suggestions);
+      }
+    })
+    .catch(function() {
+      geocodeV5(which, query, suggestions);
+    });
+}
+
+function renderSearchBox(which, items, session, suggestions) {
+  suggestions.innerHTML = '';
+  items.forEach(function(item) {
+    var name    = item.name || '';
+    var address = item.place_formatted || item.full_address || '';
+    // strip name from address if it repeats
+    if (address.toLowerCase().startsWith(name.toLowerCase() + ', ')) {
+      address = address.slice(name.length + 2);
+    }
+
+    var el = document.createElement('div');
+    el.className = 'suggestion-item';
+    el.innerHTML =
+      '<div class="sug-main">' + name + '</div>'
+      + (address ? '<div class="sug-ctx">' + address + '</div>' : '');
+
+    el.addEventListener('click', function() {
+      // retrieve full coords via retrieve endpoint
+      var retrieveUrl = 'https://api.mapbox.com/search/searchbox/v1/retrieve/' + item.mapbox_id
+        + '?access_token=' + MAPBOX_TOKEN
+        + '&session_token=' + session;
+
+      fetch(retrieveUrl)
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var feat   = d.features && d.features[0];
+          var coords = feat && feat.geometry && feat.geometry.coordinates; // [lng, lat]
+          if (!coords) return;
+          var displayName = name + (address ? ', ' + address : '');
+          selectPlaceCoords(which, coords[0], coords[1], name, displayName);
+        })
+        .catch(function() {
+          // if retrieve fails, try geocode as backup
+          geocodeV5(which, name, suggestions);
         });
-      }).catch(function(err) {
-        sugBox.innerHTML = '<div class="sug-loading">Error: ' + err.message + '</div>';
-      });
-    }, 400);
+    });
+    suggestions.appendChild(el);
   });
+  suggestions.classList.add('show');
+}
 
-  input.addEventListener('blur', function() {
-    setTimeout(function() { sugBox.classList.remove('show'); }, 150);
+function geocodeV5(which, query, suggestions) {
+  // Canada-first: try CA only, fall back to CA,US if nothing
+  var baseUrl = 'https://api.mapbox.com/geocoding/v5/mapbox.places/'
+    + encodeURIComponent(query) + '.json'
+    + '?access_token=' + MAPBOX_TOKEN
+    + '&limit=6'
+    + '&types=place,locality,neighborhood,district,region,postcode,address,poi'
+    + '&proximity=-79.3832,43.6532'
+    + '&language=en';
+
+  // First: Canada only
+  fetch(baseUrl + '&country=ca')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var features = data && data.features;
+      if (features && features.length) {
+        renderGeocodeResults(which, features, suggestions);
+      } else {
+        // No CA results — try CA + US
+        return fetch(baseUrl + '&country=ca,us')
+          .then(function(r) { return r.json(); })
+          .then(function(data2) {
+            renderGeocodeResults(which, data2.features || [], suggestions);
+          });
+      }
+    })
+    .catch(function() {
+      suggestions.innerHTML = '<div class="suggestion-item loading-item">Connection error</div>';
+    });
+}
+
+function renderGeocodeResults(which, features, suggestions) {
+  suggestions.innerHTML = '';
+  if (!features.length) {
+    suggestions.innerHTML = '<div class="suggestion-item loading-item">No results — try a different spelling</div>';
+    return;
+  }
+  features.forEach(function(f) {
+    var name     = f.text || '';
+    var fullName = f.place_name || name;
+    var parts    = fullName.split(', ');
+    var ctx      = parts.length > 1 ? parts.slice(1, 3).join(', ') : '';
+
+    var el = document.createElement('div');
+    el.className = 'suggestion-item';
+    el.innerHTML =
+      '<div class="sug-main">' + name + '</div>'
+      + (ctx ? '<div class="sug-ctx">' + ctx + '</div>' : '');
+
+    el.addEventListener('click', function() {
+      selectPlaceCoords(which, f.center[0], f.center[1], name, fullName);
+    });
+    suggestions.appendChild(el);
   });
-});
+  suggestions.classList.add('show');
+}
+
+function selectPlaceCoords(which, lng, lat, name, displayName) {
+  var input       = document.getElementById(which + 'Input');
+  var suggestions = document.getElementById(which + 'Suggestions');
+  var confirmed   = document.getElementById(which + 'Confirmed');
+  var confirmedTx = document.getElementById(which + 'ConfirmedText');
+
+  geoCache[which] = { lat: lat, lng: lng, label: displayName.split(',').slice(0,3).join(',').trim() };
+
+  input.value = displayName;
+  input.classList.add('confirmed');
+  suggestions.classList.remove('show');
+  suggestions.innerHTML = '';
+  confirmedTx.textContent = name;
+  confirmed.classList.add('show');
+}
+
+
+function selectPlace(which, feature, displayName) {
+  var input       = document.getElementById(which + 'Input');
+  var suggestions = document.getElementById(which + 'Suggestions');
+  var confirmed   = document.getElementById(which + 'Confirmed');
+  var confirmedTx = document.getElementById(which + 'ConfirmedText');
+
+  geoCache[which] = {
+    lat:   feature.center[1],
+    lng:   feature.center[0],
+    label: feature.place_name.split(',').slice(0,3).join(',').trim()
+  };
+
+  input.value = displayName;
+  input.classList.add('confirmed');
+  suggestions.classList.remove('show');
+  suggestions.innerHTML = '';
+  confirmedTx.textContent = feature.text || geoCache[which].label;
+  confirmed.classList.add('show');
+}
+
+setupLocationField('from');
+setupLocationField('to');
 
 // ════════════════════════════════════════════════
 // DATA LOADING
@@ -1103,8 +1240,8 @@ async function runSearch() {
 
   var fromGeo = geoCache['from'];
   var toGeo   = geoCache['to'];
-  var fromTxt = document.getElementById('f-from').value.toLowerCase().trim();
-  var toTxt   = document.getElementById('f-to').value.toLowerCase().trim();
+  var fromTxt = document.getElementById('fromInput').value.toLowerCase().trim();
+  var toTxt   = document.getElementById('toInput').value.toLowerCase().trim();
   var dateVal = document.getElementById('f-date').value;
   var timeVal = document.getElementById('f-time').value;
   var radius  = parseInt(document.getElementById('radius-slider').value);
@@ -1500,8 +1637,8 @@ function renderSaved() {
 }
 function applySaved(q) {
   var parts = q.split(' → ');
-  if (parts[0]) document.getElementById('f-from').value = parts[0];
-  if (parts[1]) document.getElementById('f-to').value   = parts[1];
+  if (parts[0]) document.getElementById('fromInput').value = parts[0];
+  if (parts[1]) document.getElementById('toInput').value   = parts[1];
   if (parts[2]) document.getElementById('f-date').value = parts[2];
   expandSearch();
 }
