@@ -830,23 +830,40 @@ function initials(n) { return (n||'?').split(' ').map(function(w){return w[0];})
 // ════════════════════════════════════════════════
 // HELPERS
 // ════════════════════════════════════════════════
-function todayStr() { return new Date().toISOString().slice(0,10); }
+function todayStr() {
+  // Use local date — NOT toISOString() which is UTC and drifts overnight
+  var n = new Date();
+  var y = n.getFullYear();
+  var m = String(n.getMonth()+1).padStart(2,'0');
+  var dd = String(n.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dd;
+}
 
+function tomorrowStr() {
+  var n = new Date(); n.setDate(n.getDate()+1);
+  var y = n.getFullYear();
+  var m = String(n.getMonth()+1).padStart(2,'0');
+  var dd = String(n.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dd;
+}
+
+// timeAgo: both Date.now() and new Date(utcString) are UTC — subtraction is always correct
 function timeAgo(iso) {
   if (!iso) return '';
-  var d = Math.floor((Date.now() - new Date(iso)) / 1000);
-  if (d < 60)    return 'just now';
-  if (d < 3600)  return Math.floor(d/60)+'m ago';
-  if (d < 86400) return Math.floor(d/3600)+'h ago';
-  return Math.floor(d/86400)+'d ago';
+  var diff = Date.now() - new Date(iso).getTime();
+  var mins  = Math.floor(diff / 60000);
+  var hours = Math.floor(mins / 60);
+  var days  = Math.floor(hours / 24);
+  if (mins < 1)   return 'just now';
+  if (mins < 60)  return mins + 'm ago';
+  if (hours < 24) return hours + 'h ago';
+  return days + 'd ago';
 }
 
 function fmtDate(d) {
   if (!d) return '—';
-  var t = todayStr();
-  if (d === t) return 'Today';
-  var tom = new Date(); tom.setDate(tom.getDate()+1);
-  if (d === tom.toISOString().slice(0,10)) return 'Tomorrow';
+  if (d === todayStr())    return 'Today';
+  if (d === tomorrowStr()) return 'Tomorrow';
   return new Date(d+'T00:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
 }
 
@@ -879,11 +896,17 @@ function isOutdated(row) {
   if (!d) return false;
   if (d < today) return true;
   if (d === today && t) {
+    // ride time is stored as UTC (e.g. "13:00:00+00")
+    // convert to local minutes for comparison
     var now = new Date();
-    var mins = now.getHours()*60 + now.getMinutes();
-    var p = t.slice(0,5).split(':').map(Number);
-    var rideMins = p[0]*60 + p[1];
-    if (rideMins < mins - 60) return true;
+    var nowMins = now.getHours()*60 + now.getMinutes();
+    // parse the time part — it's a UTC timetz, so convert to local
+    var rideUtcH = parseInt(t.slice(0,2));
+    var rideUtcM = parseInt(t.slice(3,5));
+    var rideLocal = new Date();
+    rideLocal.setUTCHours(rideUtcH, rideUtcM, 0, 0);
+    var rideMins = rideLocal.getHours()*60 + rideLocal.getMinutes();
+    if (rideMins < nowMins - 60) return true;
   }
   return false;
 }
@@ -964,11 +987,15 @@ function placeIcon(type) { return PLACE_ICONS[type] || PLACE_ICONS['poi']; }
     sugBox.classList.add('show');
 
     geoTimers[which] = setTimeout(function() {
-      var url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(q)
-        + '.json?access_token=' + MAPBOX_TOKEN
-        + '&limit=5&country=CA,US'
+      // Mapbox Geocoding v6 (current API — v5 mapbox.places is deprecated)
+      var url = 'https://api.mapbox.com/search/geocode/v6/forward'
+        + '?q=' + encodeURIComponent(q)
+        + '&access_token=' + MAPBOX_TOKEN
+        + '&limit=5'
+        + '&country=CA,US'
         + '&types=country,region,postcode,district,place,locality,neighborhood,street,address,poi'
-        + '&proximity=-79.3832,43.6532';
+        + '&proximity=-79.3832,43.6532'
+        + '&language=en';
 
       fetch(url).then(function(r){ return r.json(); }).then(function(data) {
         sugBox.innerHTML = '';
@@ -977,18 +1004,26 @@ function placeIcon(type) { return PLACE_ICONS[type] || PLACE_ICONS['poi']; }
           return;
         }
         data.features.forEach(function(f) {
-          var type = f.place_type ? f.place_type[0] : 'poi';
-          var name = f.text || f.place_name;
-          var context = f.place_name.replace(f.text+', ','').split(',').slice(0,2).join(',').trim();
+          var props  = f.properties || {};
+          var coords = f.geometry && f.geometry.coordinates;
+          var type   = (props.feature_type) || 'place';
+          // v6 uses full_address, name, and place_formatted
+          var name        = props.name || props.full_address || '';
+          var fullAddress = props.full_address || props.place_formatted || name;
+          var sub         = props.place_formatted || fullAddress;
+          // strip leading name from sub if it repeats
+          if (sub.startsWith(name + ', ')) sub = sub.slice(name.length + 2);
+
           var item = document.createElement('div');
           item.className = 'sug-item';
           item.innerHTML = placeIcon(type)
-            + '<div><div class="sug-name">' + f.place_name.split(',').slice(0,2).join(',') + '</div>'
-            + '<div class="sug-sub">' + context + '</div></div>';
+            + '<div><div class="sug-name">' + name + '</div>'
+            + '<div class="sug-sub">' + sub + '</div></div>';
           item.addEventListener('mousedown', function(e) { e.preventDefault(); });
           item.addEventListener('click', function() {
-            geoCache[which] = { lat: f.center[1], lng: f.center[0], label: name + ', ' + context };
-            input.value = f.place_name;
+            if (!coords) return;
+            geoCache[which] = { lat: coords[1], lng: coords[0], label: name };
+            input.value = fullAddress;
             input.classList.add('geo-confirmed');
             sugBox.classList.remove('show');
             sugBox.innerHTML = '';
@@ -997,8 +1032,8 @@ function placeIcon(type) { return PLACE_ICONS[type] || PLACE_ICONS['poi']; }
           });
           sugBox.appendChild(item);
         });
-      }).catch(function() {
-        sugBox.innerHTML = '<div class="sug-loading">Connection error</div>';
+      }).catch(function(err) {
+        sugBox.innerHTML = '<div class="sug-loading">Connection error — ' + err.message + '</div>';
       });
     }, 400);
   });
@@ -1159,8 +1194,8 @@ function applyFiltersAndRender() {
   var dateVal = document.getElementById('f-date').value;
 
   if (result.length === 0 && dateVal === today) {
-    var tom = new Date(); tom.setDate(tom.getDate()+1);
-    var tomStr = tom.toISOString().slice(0,10);
+    var tomStr = tomorrowStr();
+    var tom    = new Date(); tom.setDate(tom.getDate()+1);
     var nextDay = nonOutdated.filter(function(r){ return r['pick up date'] === tomStr; });
     if (nextDay.length) {
       result = nextDay;
