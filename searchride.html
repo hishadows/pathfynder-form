@@ -388,15 +388,14 @@ function todayStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMont
 function tomorrowStr(){var n=new Date();n.setDate(n.getDate()+1);return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
 function timeAgo(iso){if(!iso)return '';var diff=Date.now()-new Date(iso).getTime(),mins=Math.floor(diff/60000),hours=Math.floor(mins/60),days=Math.floor(hours/24);if(mins<1)return 'just now';if(mins<60)return mins+'m ago';if(hours<24)return hours+'h ago';return days+'d ago';}
 function fmtDate(d){if(!d)return '—';if(d===todayStr())return 'Today';if(d===tomorrowStr())return 'Tomorrow';return new Date(d+'T00:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});}
-function fmtTime(t){if(!t)return '—';var h=parseInt(t.slice(0,2),10),m=parseInt(t.slice(3,5),10);var d=new Date();d.setUTCHours(h,m,0,0);var lh=d.getHours(),lm=d.getMinutes(),ap=lh>=12?'PM':'AM',h12=lh%12||12;return h12+':'+(lm<10?'0':'')+lm+' '+ap;}
-function utcToLocalMins(t){var d=new Date();d.setUTCHours(parseInt(t.slice(0,2),10),parseInt(t.slice(3,5),10),0,0);return d.getHours()*60+d.getMinutes();}
-function timeDiffMins(storedUtc,localStr){return Math.abs(utcToLocalMins(storedUtc)-(parseInt(localStr.slice(0,2),10)*60+parseInt(localStr.slice(3,5),10)));}
+function fmtTime(t){if(!t||t==='—')return '—';var h=parseInt(t.slice(0,2),10),m=parseInt(t.slice(3,5),10);var ap=h>=12?'PM':'AM',h12=h%12||12;return h12+':'+(m<10?'0':'')+m+' '+ap;}
+function timeDiffMins(t1,t2){var a=t1.slice(0,2)*60+parseInt(t1.slice(3,5),10),b=t2.slice(0,2)*60+parseInt(t2.slice(3,5),10);return Math.abs(a-b);}
 function showDebug(msg){var el=document.getElementById('debug-box');el.textContent=msg;el.classList.add('show');}
 
 function isOutdated(row){
   var d=row['pick up date'],t=row['pick up time'],today=todayStr();
   if(!d)return false; if(d<today)return true;
-  if(d===today&&t){var now=new Date(),nowMins=now.getHours()*60+now.getMinutes(),rideLocal=new Date();rideLocal.setUTCHours(parseInt(t.slice(0,2)),parseInt(t.slice(3,5)),0,0);var rideMins=rideLocal.getHours()*60+rideLocal.getMinutes();if(rideMins<nowMins-60)return true;}
+  if(d===today&&t){var now=new Date(),nowMins=now.getHours()*60+now.getMinutes();var rideMins=parseInt(t.slice(0,2),10)*60+parseInt(t.slice(3,5),10);if(rideMins<nowMins-60)return true;}
   return false;
 }
 function getImportantRide(row){var v=(row.important_ride||'').toLowerCase().trim();if(v==='urgent')return 'urgent';if(v==='airport')return 'airport';return null;}
@@ -414,7 +413,7 @@ function updateCollapsedSummary(){
   if(from)parts.push(from.split(',')[0]);
   if(to)parts.push(to.split(',')[0]);
   if(date)parts.push(fmtDate(date));
-  if(time)parts.push(fmtTime(time+':00'));
+  if(time)parts.push(fmtTime(time));
   parts.push(r+'km');
   document.getElementById('search-summary').textContent=parts.join(' · ');
 }
