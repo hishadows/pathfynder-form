@@ -103,9 +103,7 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
 .saved-wrap.show { display:block; }
 .saved-label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:6px; }
 .saved-pills { display:flex; gap:5px; flex-wrap:wrap; }
-.saved-pill { display:flex; align-items:center; gap:4px; padding:4px 9px; border-radius:20px; font-size:11px; border:1px solid var(--border); background:var(--surface2); color:var(--text-dim); cursor:pointer; max-width:140px; overflow:hidden; }
-.saved-pill-text { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0; }
-.pill-x { flex-shrink:0; opacity:1 !important; padding:2px; }
+/* saved-pill replaced above */
 .saved-pill svg { width:10px; height:10px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .pill-x { opacity:.5; transition:opacity .15s; }
 .pill-x:hover { opacity:1; }
@@ -192,19 +190,22 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
   .pax-name { max-width:160px; }
 }
 
-.past-rides-wrap { margin:6px 12px 0; }
-.past-rides-toggle {
-  display:none; width:100%; padding:10px 14px;
+.past-rides-wrap { margin:8px 12px 0; }
+.past-rides-btn {
+  display:none; width:100%; padding:11px 14px;
   background:var(--surface2); border:1px solid var(--border);
-  border-radius:10px; color:var(--text-dim); font-size:12px;
+  border-radius:10px; color:var(--text-dim); font-size:12px; font-weight:500;
   cursor:pointer; text-align:left; font-family:var(--font-body);
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  align-items:center; justify-content:space-between; gap:8px;
 }
-.past-rides-toggle.show { display:flex; }
-.past-rides-toggle svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; transition:transform .2s; }
-.past-rides-toggle.open svg { transform:rotate(180deg); }
-.past-rides-list { display:none; margin-top:6px; display:flex; flex-direction:column; gap:7px; }
+.past-rides-btn.show { display:flex; }
+.past-rides-btn svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; transition:transform .2s; }
+.past-rides-btn.open svg { transform:rotate(180deg); }
+.past-rides-list { display:none; flex-direction:column; gap:7px; margin-top:6px; }
 .past-rides-list.open { display:flex; }
+.saved-pill { display:flex; align-items:center; gap:5px; padding:4px 9px; border-radius:20px; font-size:11px; border:1px solid var(--border); background:var(--surface2); color:var(--text-dim); cursor:pointer; max-width:160px; min-width:0; overflow:hidden; }
+.saved-pill-text { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0; font-size:11px; }
+.pill-x { flex-shrink:0; width:10px; height:10px; stroke:var(--text-muted); fill:none; stroke-width:2.5; stroke-linecap:round; opacity:1; }
 </style>
 </head>
 <body>
@@ -289,7 +290,6 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
         Edit
       </button>
     </div>
-
   </div>
 
   <div class="filter-row">
@@ -333,7 +333,6 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <span id="fallback-msg">No rides today — showing next available</span>
   </div>
-
   <div class="sec-label" id="sec-label">
     <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
     <span id="sec-label-txt">Passenger requests</span>
@@ -341,8 +340,8 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
   <div class="card-list" id="card-list">
     <div class="skel"></div><div class="skel"></div><div class="skel"></div>
   </div>
-  <div class="past-rides-wrap">
-    <button class="past-rides-toggle" id="past-rides-toggle" onclick="togglePastRides()">
+  <div class="past-rides-wrap" id="past-rides-wrap">
+    <button class="past-rides-btn" id="past-rides-btn" onclick="togglePastRides()">
       <span id="past-rides-label">Past ride requests</span>
       <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
@@ -389,21 +388,9 @@ function todayStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMont
 function tomorrowStr(){var n=new Date();n.setDate(n.getDate()+1);return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
 function timeAgo(iso){if(!iso)return '';var diff=Date.now()-new Date(iso).getTime(),mins=Math.floor(diff/60000),hours=Math.floor(mins/60),days=Math.floor(hours/24);if(mins<1)return 'just now';if(mins<60)return mins+'m ago';if(hours<24)return hours+'h ago';return days+'d ago';}
 function fmtDate(d){if(!d)return '—';if(d===todayStr())return 'Today';if(d===tomorrowStr())return 'Tomorrow';return new Date(d+'T00:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});}
-function fmtTime(t){if(!t)return '—';return t.slice(0,5);}
-function utcTimeToLocalMins(t){
-  // t is stored UTC timetz e.g. "14:30:00+00"
-  // Convert to local minutes so user-typed time matches correctly
-  var h=parseInt(t.slice(0,2),10), m=parseInt(t.slice(3,5),10);
-  var d=new Date(); d.setUTCHours(h,m,0,0);
-  return d.getHours()*60+d.getMinutes();
-}
-function timeDiffMins(storedUtcTime, localTimeStr){
-  // storedUtcTime: "14:30:00+00" (from DB, UTC)
-  // localTimeStr:  "10:30:00" (user typed, local)
-  var localMins=parseInt(localTimeStr.slice(0,2),10)*60+parseInt(localTimeStr.slice(3,5),10);
-  var storedLocalMins=utcTimeToLocalMins(storedUtcTime);
-  return Math.abs(storedLocalMins-localMins);
-}
+function fmtTime(t){if(!t)return '—';var h=parseInt(t.slice(0,2),10),m=parseInt(t.slice(3,5),10);var d=new Date();d.setUTCHours(h,m,0,0);var lh=d.getHours(),lm=d.getMinutes(),ap=lh>=12?'PM':'AM',h12=lh%12||12;return h12+':'+(lm<10?'0':'')+lm+' '+ap;}
+function utcToLocalMins(t){var d=new Date();d.setUTCHours(parseInt(t.slice(0,2),10),parseInt(t.slice(3,5),10),0,0);return d.getHours()*60+d.getMinutes();}
+function timeDiffMins(storedUtc,localStr){return Math.abs(utcToLocalMins(storedUtc)-(parseInt(localStr.slice(0,2),10)*60+parseInt(localStr.slice(3,5),10)));}
 function showDebug(msg){var el=document.getElementById('debug-box');el.textContent=msg;el.classList.add('show');}
 
 function isOutdated(row){
@@ -427,7 +414,7 @@ function updateCollapsedSummary(){
   if(from)parts.push(from.split(',')[0]);
   if(to)parts.push(to.split(',')[0]);
   if(date)parts.push(fmtDate(date));
-  if(time)parts.push(fmtTime(time+':00'));  // show as 12hr in summary
+  if(time)parts.push(fmtTime(time+':00'));
   parts.push(r+'km');
   document.getElementById('search-summary').textContent=parts.join(' · ');
 }
@@ -563,7 +550,6 @@ function applyFiltersAndRender(){
   var today=todayStr();
   var outdatedCount=0;
   var nonOutdated=base.filter(function(r){if(isOutdated(r)){outdatedCount++;return false;}return true;});
-  // Note: pastRideData collected below after stats
   var result=nonOutdated.filter(function(r){
     var s=(r.important_ride||'').toLowerCase().trim();
     if(activeFilter==='today'&&r['pick up date']!==today)return false;
@@ -596,9 +582,9 @@ function applyFiltersAndRender(){
     if(nextDay.length){result=nextDay;banner.classList.add('show');bannerMsg.textContent='No rides today — showing '+tom.toLocaleDateString('en-CA',{weekday:'long',month:'short',day:'numeric'});}
     else{banner.classList.add('show');bannerMsg.textContent='No rides today or tomorrow';}
   } else {banner.classList.remove('show');}
-  // Past rides — collect outdated rides separately for collapsible section
-  var pastRideData=base.filter(function(r){return isOutdated(r);});
-  renderPastRides(pastRideData);
+  // Render past rides at bottom
+  var pastRides=base.filter(function(r){return isOutdated(r);});
+  renderPastRides(pastRides);
   updateStats(base,true,result.length);
   document.getElementById('sec-label-txt').textContent=result.length===0?'No results':result.length+' ride'+(result.length!==1?'s':'')+' found';
   renderCards(result);
@@ -636,13 +622,13 @@ function renderCards(data){
     var waBtn=card.querySelector('.wa-btn');
     if(waBtn)waBtn.addEventListener('click',function(e){
       e.stopPropagation();
-      var num=waBtn.dataset.num;
-      var senderName=decodeURIComponent(waBtn.dataset.name||'');
-      var from=decodeURIComponent(waBtn.dataset.from||'');
+      var n=waBtn.dataset.num;
+      var nm=decodeURIComponent(waBtn.dataset.name||'');
+      var fr=decodeURIComponent(waBtn.dataset.from||'');
       var to=decodeURIComponent(waBtn.dataset.to||'');
-      var time=waBtn.dataset.time||'';
-      var msg='Hi '+senderName+', I am driving from '+from+' to '+to+(time&&time!=='—'?' around '+time:'')+'. Do you still need a ride?';
-      window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');
+      var tm=waBtn.dataset.time||'';
+      var msg='Hi '+nm+', I am driving from '+fr+' to '+to+(tm&&tm!=='—'?' around '+tm:'')+'. Do you still need a ride?';
+      window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank');
     });
     var tgBtn=card.querySelector('.tg-btn');
     if(tgBtn)tgBtn.addEventListener('click',function(e){e.stopPropagation();if(tgBtn.dataset.user)window.open('https://t.me/'+tgBtn.dataset.user,'_blank');});
@@ -681,27 +667,17 @@ function buildCard(r,i){
 function setFilter(f){activeFilter=f;document.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('active',c.dataset.f===f);});applyFiltersAndRender();}
 function toggleTW(){twOn=!twOn;var btn=document.getElementById('tw-btn'),lbl=document.getElementById('tw-label');btn.classList.toggle('active',twOn);lbl.textContent=twOn?'±1 hr':'Any time';}
 
-function saveSearch(q){
-  if(!q)return;
-  // Normalize: trim each part so 'A → B → date' doesn't dupe with slight variations
-  var norm=q.trim();
-  // Remove if already exists (move to top instead of duping)
-  savedSearches=savedSearches.filter(function(s){return s!==norm;});
-  savedSearches.unshift(norm);
-  if(savedSearches.length>3)savedSearches=savedSearches.slice(0,3);
-  try{localStorage.setItem('pf_s3',JSON.stringify(savedSearches));}catch(e){}
-  renderSaved();
-}
+function saveSearch(q){if(!q)return;q=q.trim();savedSearches=savedSearches.filter(function(s){return s!==q;});savedSearches.unshift(q);if(savedSearches.length>3)savedSearches=savedSearches.slice(0,3);try{localStorage.setItem('pf_s3',JSON.stringify(savedSearches));}catch(e){}renderSaved();}
 function removeSaved(q){savedSearches=savedSearches.filter(function(s){return s!==q;});try{localStorage.setItem('pf_s3',JSON.stringify(savedSearches));}catch(e){}renderSaved();}
 function renderSaved(){
   var wrap=document.getElementById('saved-wrap'),pills=document.getElementById('saved-pills');
   if(!savedSearches.length){wrap.classList.remove('show');return;}
   wrap.classList.add('show');
   pills.innerHTML=savedSearches.map(function(s){
-    var safe=s.replace(/'/g,"\'");
+    var safe=s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return '<div class="saved-pill" onclick="applySaved(\''+safe+'\')">'+
       '<span class="saved-pill-text">'+s+'</span>'+
-      '<svg class="pill-x" onclick="event.stopPropagation();removeSaved(\''+safe+'\');" viewBox="0 0 24 24" style="width:10px;height:10px;stroke:var(--text-muted);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'+
+      '<svg class="pill-x" onclick="event.stopPropagation();removeSaved(\''+safe+'\');" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'+
     '</div>';
   }).join('');
 }
@@ -712,56 +688,53 @@ renderSaved();
 loadData();
 
 function togglePastRides(){
-  var btn=document.getElementById('past-rides-toggle');
+  var btn=document.getElementById('past-rides-btn');
   var list=document.getElementById('past-rides-list');
-  btn.classList.toggle('open');
-  list.classList.toggle('open');
+  var isOpen=btn.classList.contains('open');
+  btn.classList.toggle('open',!isOpen);
+  list.classList.toggle('open',!isOpen);
 }
 
 function renderPastRides(data){
-  var btn=document.getElementById('past-rides-toggle');
+  var btn=document.getElementById('past-rides-btn');
   var list=document.getElementById('past-rides-list');
-  var label=document.getElementById('past-rides-label');
+  var lbl=document.getElementById('past-rides-label');
   if(!data||!data.length){
-    btn.classList.remove('show');
+    btn.classList.remove('show','open');
     list.classList.remove('open');
     list.innerHTML='';
     return;
   }
-  label.textContent='Past ride requests ('+data.length+')';
+  lbl.textContent='Past ride requests ('+data.length+')';
   btn.classList.add('show');
-  // Render cards into past list
+  btn.classList.remove('open'); // always collapsed by default on each render
+  list.classList.remove('open');
   var html='';
-  data.forEach(function(r,i){html+=buildCard(r,i+1000);});
+  data.forEach(function(r,i){html+=buildCard(r,i);});
   list.innerHTML=html;
-  // Wire up events in past list
   list.querySelectorAll('.ride-card').forEach(function(card){
     card.addEventListener('click',function(e){
       if(e.target.closest('.c-btn'))return;
       var id=card.dataset.id;
       expandedId=(expandedId===id)?null:id;
-      // Re-render both lists
       var base=searchActive?filtered:allData;
-      var nonOutdated=base.filter(function(r){return !isOutdated(r);});
-      renderCards(nonOutdated);
       renderPastRides(base.filter(function(r){return isOutdated(r);}));
     });
     var waBtn=card.querySelector('.wa-btn');
     if(waBtn)waBtn.addEventListener('click',function(e){
       e.stopPropagation();
-      var num=waBtn.dataset.num;
-      var senderName=decodeURIComponent(waBtn.dataset.name||'');
-      var from=decodeURIComponent(waBtn.dataset.from||'');
+      var n=waBtn.dataset.num;
+      var nm=decodeURIComponent(waBtn.dataset.name||'');
+      var fr=decodeURIComponent(waBtn.dataset.from||'');
       var to=decodeURIComponent(waBtn.dataset.to||'');
-      var time=waBtn.dataset.time||'';
-      var msg='Hi '+senderName+', I am driving from '+from+' to '+to+(time&&time!=='—'?' around '+time:'')+'. Do you still need a ride?';
-      window.open('https://wa.me/'+num+'?text='+encodeURIComponent(msg),'_blank');
+      var tm=waBtn.dataset.time||'';
+      var msg='Hi '+nm+', I am driving from '+fr+' to '+to+(tm&&tm!=='—'?' around '+tm:'')+'. Do you still need a ride?';
+      window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank');
     });
     var tgBtn=card.querySelector('.tg-btn');
     if(tgBtn)tgBtn.addEventListener('click',function(e){e.stopPropagation();if(tgBtn.dataset.user)window.open('https://t.me/'+tgBtn.dataset.user,'_blank');});
   });
 }
-
 </script>
 </body>
 </html>
