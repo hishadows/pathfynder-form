@@ -242,18 +242,27 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .suggestion-item {
   padding: 11px 14px;
+  font-size: 13px;
+  color: var(--text-dim);
   cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   border-bottom: 1px solid var(--border);
-  transition: background .1s;
+  line-height: 1.4;
 }
+
 .suggestion-item:last-child { border-bottom: none; }
-.suggestion-item:hover { background: rgba(255,255,255,0.04); }
+.suggestion-item:hover { background: var(--surface2); }
+
 .suggestion-item.loading-item {
-  cursor: default; font-size: 12px;
-  color: var(--text-muted); font-style: italic; padding: 12px 14px;
+  cursor: default;
+  color: var(--text-muted);
+  font-style: italic;
 }
-.sug-main { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sug-ctx  { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.suggestion-name { font-weight: 500; color: var(--text); }
+.suggestion-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
 .confirmed-tag {
   display: none;
@@ -410,10 +419,23 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .warn-box.show { display: block; }
 
 @media (max-width: 520px) {
-  body { padding: 16px 10px 40px; }
-  .form-body { padding: 16px; }
-  .row { grid-template-columns: 1fr; }
-  .card, .header, .warn-box { max-width: 100%; }
+  body {
+    padding: 16px 10px 40px;
+  }
+
+  .form-body {
+    padding: 16px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .card,
+  .header,
+  .warn-box {
+    max-width: 100%;
+  }
 }
 </style>
 </head>
@@ -519,87 +541,89 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 </div>
 
 <script>
-var N8N_WEBHOOK_URL = 'https://pathy.dpdns.org/webhook/telegram-ride-submit';
-var MBTK = 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw';
+var N8N_WEBHOOK_URL = 'https://pathy.dpdns.org/webhook/telegram-ride-submit';                                                                 // N8N WEBHOOK URL
 
 var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-if (tg) { tg.ready(); tg.expand(); }
 
-var params  = new URLSearchParams(location.search);
-var tgUser  = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
-var chatId  = tgUser && tgUser.id       ? String(tgUser.id)         : (params.get('chat_id') || '');
-var uName   = tgUser && tgUser.first_name ? tgUser.first_name       : (params.get('name')    || '');
-
-var role         = 'passenger';
-var selectedSeat = 2;
-var geoCache     = { pickup: null, dropoff: null };
-var geoTimers    = { pickup: null, dropoff: null };
-
-// Session token for Mapbox Search Box (shared across both fields, reset on page load only)
-if (!window._SB_SID) window._SB_SID = 'pf-' + Date.now();
-
-// Set today as default date and minimum
-var today = new Date().toISOString().split('T')[0];
-document.getElementById('dateInput').min   = today;
-document.getElementById('dateInput').value = today;
-
-// Show user pill
-if (uName) {
-  document.getElementById('userName').textContent    = uName;
-  document.getElementById('userInitial').textContent = uName[0].toUpperCase();
-  document.getElementById('userPill').style.display  = 'flex';
+if (tg) {
+  tg.ready();
+  tg.expand();
 }
 
-// Show warning if no Telegram identity
+var params = new URLSearchParams(location.search);
+var tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+
+var chatId = tgUser && tgUser.id ? String(tgUser.id) : (params.get('chat_id') || '');
+var userName = tgUser && tgUser.first_name ? tgUser.first_name : (params.get('name') || '');
+
+var role = 'passenger';
+var selectedSeat = 2;
+var geoCache = { pickup: null, dropoff: null };
+var geoTimers = { pickup: null, dropoff: null };
+
+var today = new Date().toISOString().split('T')[0];
+document.getElementById('dateInput').min = today;
+document.getElementById('dateInput').value = today;
+
+if (userName) {
+  document.getElementById('userName').textContent = userName;
+  document.getElementById('userInitial').textContent = userName[0].toUpperCase();
+  document.getElementById('userPill').style.display = 'flex';
+}
+
 if (!chatId) {
   document.getElementById('warnBox').classList.add('show');
 }
 
-// ── Role toggle ──────────────────────────────────────────────
-document.getElementById('btnPassenger').addEventListener('click', function() { setRole('passenger'); });
-document.getElementById('btnDriver').addEventListener('click',    function() { setRole('driver');    });
+document.getElementById('btnPassenger').addEventListener('click', function() {
+  setRole('passenger');
+});
+
+document.getElementById('btnDriver').addEventListener('click', function() {
+  setRole('driver');
+});
 
 function setRole(r) {
   role = r;
+
   document.getElementById('btnPassenger').classList.toggle('active', r === 'passenger');
-  document.getElementById('btnDriver').classList.toggle('active',    r === 'driver');
+  document.getElementById('btnDriver').classList.toggle('active', r === 'driver');
+
   document.getElementById('seatsField').style.display = r === 'driver' ? '' : 'none';
   document.getElementById('timeLabel').textContent = r === 'driver' ? 'Departure time' : 'Time';
+
   document.getElementById('submitBtn').querySelector('.btn-text').textContent =
     r === 'passenger' ? 'Submit request' : 'Register route';
-  // Update success message based on role
-  document.getElementById('successTitle').textContent =
-    r === 'passenger' ? 'Request received!' : 'Route registered!';
-  document.getElementById('successSub').textContent =
-    r === 'passenger'
-      ? "We'll notify you on Telegram as soon as we find a match."
-      : "We'll notify you when a passenger matches your route.";
 }
 
-// ── Seat selector ────────────────────────────────────────────
-document.querySelectorAll('.seat-btn').forEach(function(btn) {
+var seatBtns = document.querySelectorAll('.seat-btn');
+seatBtns.forEach(function(btn) {
   btn.addEventListener('click', function() {
     selectedSeat = parseInt(btn.getAttribute('data-seat'), 10);
-    document.querySelectorAll('.seat-btn').forEach(function(b) { b.classList.remove('active'); });
+
+    seatBtns.forEach(function(b) {
+      b.classList.remove('active');
+    });
+
     btn.classList.add('active');
   });
 });
 
-// ── Location autocomplete ────────────────────────────────────
 setupLocationField('pickup');
 setupLocationField('dropoff');
 
 function setupLocationField(which) {
-  var input       = document.getElementById(which + 'Input');
+  var input = document.getElementById(which + 'Input');
   var suggestions = document.getElementById(which + 'Suggestions');
 
   input.addEventListener('input', function() {
-    // Clear confirmed geo when user types again
     geoCache[which] = null;
+
     document.getElementById(which + 'Confirmed').classList.remove('show');
     input.classList.remove('confirmed');
 
     clearTimeout(geoTimers[which]);
+
     var query = input.value.trim();
 
     if (query.length < 3) {
@@ -613,10 +637,9 @@ function setupLocationField(which) {
 
     geoTimers[which] = setTimeout(function() {
       fetchSuggestions(which, query);
-    }, 400);
+    }, 500);
   });
 
-  // Close suggestions on outside click
   document.addEventListener('click', function(e) {
     if (!input.contains(e.target) && !suggestions.contains(e.target)) {
       suggestions.classList.remove('show');
@@ -626,10 +649,12 @@ function setupLocationField(which) {
 
 function fetchSuggestions(which, query) {
   var suggestions = document.getElementById(which + 'Suggestions');
+  var input       = document.getElementById(which + 'Input');
+  if (!window._SB_SID) window._SB_SID = 'pf-' + Date.now();
 
   fetch('https://api.mapbox.com/search/searchbox/v1/suggest'
     + '?q='             + encodeURIComponent(query)
-    + '&access_token='  + MBTK
+    + '&access_token='  + 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'                   // MAPBOX TOKEN
     + '&session_token=' + window._SB_SID
     + '&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
     .then(function(r) { return r.json(); })
@@ -637,7 +662,7 @@ function fetchSuggestions(which, query) {
       suggestions.innerHTML = '';
       var items = (data && data.suggestions) || [];
       if (!items.length) {
-        suggestions.innerHTML = '<div class="suggestion-item loading-item">No results found</div>';
+        suggestions.innerHTML = '<div class="suggestion-item loading-item">No results — try a different name</div>';
         return;
       }
       items.forEach(function(item) {
@@ -649,10 +674,10 @@ function fetchSuggestions(which, query) {
         el.innerHTML = '<div class="sug-main">' + name + '</div>'
           + (ctx ? '<div class="sug-ctx">' + ctx + '</div>' : '');
         el.addEventListener('click', function() {
-          document.getElementById(which + 'Input').value = name + (ctx ? ', ' + ctx : '');
+          input.value = name + (ctx ? ', ' + ctx : '');
           suggestions.classList.remove('show');
           suggestions.innerHTML = '';
-          retrieveAndConfirm(which, item.mapbox_id, name, ctx);
+          retrieveAndSelect(which, item.mapbox_id, name, ctx);
         });
         suggestions.appendChild(el);
       });
@@ -663,132 +688,143 @@ function fetchSuggestions(which, query) {
     });
 }
 
-function retrieveAndConfirm(which, mapboxId, name, ctx) {
-  var input       = document.getElementById(which + 'Input');
+function retrieveAndSelect(which, mapboxId, name, ctx) {
   var confirmed   = document.getElementById(which + 'Confirmed');
   var confirmedTx = document.getElementById(which + 'ConfirmedText');
+  var input       = document.getElementById(which + 'Input');
 
   fetch('https://api.mapbox.com/search/searchbox/v1/retrieve/' + mapboxId
-    + '?access_token=' + MBTK
+    + '?access_token=pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
     + '&session_token=' + window._SB_SID)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var feat   = data.features && data.features[0];
       var coords = feat && feat.geometry && feat.geometry.coordinates;
       if (!coords) return;
-      var label = name + (ctx ? ', ' + ctx : '');
-      geoCache[which] = { lat: coords[1], lng: coords[0], label: label };
+      geoCache[which] = { lat: coords[1], lng: coords[0], label: name + (ctx ? ', ' + ctx : '') };
       input.classList.add('confirmed');
       confirmedTx.textContent = name;
       confirmed.classList.add('show');
     })
-    .catch(function() {
-      showError('Could not confirm location. Please try selecting again.');
-    });
+    .catch(function() {});
 }
 
-// ── Error helper ─────────────────────────────────────────────
-function showError(msg) {
-  var banner = document.getElementById('errorBanner');
-  banner.textContent = msg;
-  banner.classList.add('show');
-}
-
-function clearError() {
-  var banner = document.getElementById('errorBanner');
-  banner.textContent = '';
-  banner.classList.remove('show');
-}
-
-// ── Form submit ───────────────────────────────────────────────
 document.getElementById('mainForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  clearError();
+  hideError();
 
-  // Validate Telegram identity
-  if (!chatId) {
-    showError('Could not identify your Telegram account. Please open this form from the Pathfynder bot.');
+  if (!N8N_WEBHOOK_URL || N8N_WEBHOOK_URL.includes('YOUR-N8N-DOMAIN')) {
+    showError('Replace N8N_WEBHOOK_URL in the code first.');
     return;
   }
 
-  // Validate pickup location confirmed from suggestions
-  if (!geoCache.pickup) {
-    showError('Please select a pickup location from the suggestions list.');
-    document.getElementById('pickupInput').focus();
+  if (!geoCache.pickup || !geoCache.dropoff) {
+    showError('Please select both pickup and dropoff locations from the dropdown.');
     return;
   }
 
-  // Validate dropoff location confirmed from suggestions
-  if (!geoCache.dropoff) {
-    showError('Please select a drop-off location from the suggestions list.');
-    document.getElementById('dropoffInput').focus();
+  var dateVal = document.getElementById('dateInput').value;
+  var timeVal = document.getElementById('timeInput').value;
+
+  if (!dateVal || !timeVal) {
+    showError('Please fill in date and time.');
     return;
   }
 
-  // Validate date and time
-  var date = document.getElementById('dateInput').value;
-  var time = document.getElementById('timeInput').value;
+  var dtLocal = dateVal + 'T' + timeVal + ':00';
 
-  if (!date) {
-    showError('Please select a date.');
-    return;
-  }
+  var tzOffset = new Date().getTimezoneOffset();
+  var sign = tzOffset <= 0 ? '+' : '-';
+  var absOff = Math.abs(tzOffset);
+  var hh = String(Math.floor(absOff / 60)).padStart(2, '0');
+  var mm = String(absOff % 60).padStart(2, '0');
+  var dtISO = dtLocal + sign + hh + ':' + mm;
 
-  if (!time) {
-    showError('Please select a time.');
-    return;
-  }
+  setLoading(true);
 
-  // Build payload
   var payload = {
-    chat_id:       chatId,
-    user_name:     uName,
-    role:          role,
-    pickup_label:  geoCache.pickup.label,
-    pickup_lat:    geoCache.pickup.lat,
-    pickup_lng:    geoCache.pickup.lng,
+    role: role,
+    platform: 'Telegram_form',
+
+    telegram_chat_id: chatId || null,
+    telegram_user_id: chatId || null,
+    name: userName || null,
+
+    pickup_lat: geoCache.pickup.lat,
+    pickup_lng: geoCache.pickup.lng,
+    pickup_label: geoCache.pickup.label,
+
+    dropoff_lat: geoCache.dropoff.lat,
+    dropoff_lng: geoCache.dropoff.lng,
     dropoff_label: geoCache.dropoff.label,
-    dropoff_lat:   geoCache.dropoff.lat,
-    dropoff_lng:   geoCache.dropoff.lng,
-    date:          date,
-    time:          time,
-    seats:         role === 'driver' ? selectedSeat : null,
-    submitted_at:  new Date().toISOString()
+
+    date: dateVal,
+    time: role === 'passenger' ? timeVal + ':00+00' : timeVal + ':00',
+
+    requested_datetime: dtISO,
+    departure_time: timeVal + ':00',
+    departure_datetime: dtISO,
+    dates: dateVal,
+
+    available_seats: selectedSeat,
+    status: 'pending',
+    is_active: true
   };
 
-  // Set loading state
-  var btn = document.getElementById('submitBtn');
-  btn.classList.add('loading');
-  btn.disabled = true;
-
   fetch(N8N_WEBHOOK_URL, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(payload)
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
   })
-  .then(function(r) {
-    if (!r.ok) throw new Error('Server error ' + r.status);
-    return r.json().catch(function() { return {}; }); // some webhooks return empty body
-  })
-  .then(function() {
-    // Hide form, show success
-    document.getElementById('mainForm').style.display  = 'none';
+  .then(function(res) {
+    if (!res.ok) {
+      throw new Error('n8n webhook returned HTTP ' + res.status);
+    }
+
+    if (tg && tg.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    document.getElementById('mainForm').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
 
-    // Also close Telegram Mini App after 2.5s if inside Telegram
-    if (tg && tg.close) {
-      setTimeout(function() { tg.close(); }, 2500);
+    if (role === 'driver') {
+      document.getElementById('successTitle').textContent = 'Route registered!';
+      document.getElementById('successSub').textContent = "Your route is live. We'll message you if there's a match.";
+    } else {
+      document.getElementById('successTitle').textContent = 'Request received!';
+      document.getElementById('successSub').textContent = "Your request is saved. We'll message you if there's a matching driver.";
     }
   })
   .catch(function(err) {
-    showError('Something went wrong submitting your request. Please try again.');
-    console.error(err);
+    if (tg && tg.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred('error');
+    }
+
+    showError('Something went wrong: ' + err.message);
   })
   .finally(function() {
-    btn.classList.remove('loading');
-    btn.disabled = false;
+    setLoading(false);
   });
 });
+
+function setLoading(on) {
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+}
+
+function showError(msg) {
+  var el = document.getElementById('errorBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('errorBanner').classList.remove('show');
+}
 </script>
 
 </body>
