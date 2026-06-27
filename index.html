@@ -242,14 +242,9 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .suggestion-item {
   padding: 11px 14px;
-  font-size: 13px;
-  color: var(--text-dim);
   cursor: pointer;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
   border-bottom: 1px solid var(--border);
-  line-height: 1.4;
+  transition: background .1s;
 }
 
 .suggestion-item:last-child { border-bottom: none; }
@@ -257,12 +252,13 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .suggestion-item.loading-item {
   cursor: default;
+  font-size: 12px;
   color: var(--text-muted);
   font-style: italic;
 }
 
-.suggestion-name { font-weight: 500; color: var(--text); }
-.suggestion-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.sug-main { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sug-ctx  { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .confirmed-tag {
   display: none;
@@ -654,7 +650,7 @@ function fetchSuggestions(which, query) {
 
   fetch('https://api.mapbox.com/search/searchbox/v1/suggest'
     + '?q='             + encodeURIComponent(query)
-    + '&access_token='  + 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'                   // MAPBOX TOKEN
+    + '&access_token='  + 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
     + '&session_token=' + window._SB_SID
     + '&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
     .then(function(r) { return r.json(); })
