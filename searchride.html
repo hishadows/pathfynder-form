@@ -114,7 +114,7 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
 .info-banner svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
 .banner-blue { background:rgba(79,142,247,0.08); border:1px solid rgba(79,142,247,0.2); color:var(--accent); }
 .banner-amber { background:var(--amber-dim); border:1px solid rgba(245,158,11,0.2); color:var(--amber); }
-.card-list { padding:0 12px 80px; display:flex; flex-direction:column; gap:7px; }
+.card-list { padding:0 12px 12px; display:flex; flex-direction:column; gap:7px; }
 .divider-row { font-size:10px; color:var(--text-muted); display:flex; align-items:center; gap:8px; padding:4px 0; }
 .divider-row::before,.divider-row::after { content:''; flex:1; height:1px; background:var(--border); }
 .ride-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:border-color .15s; }
@@ -137,7 +137,6 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
 .b-urgent  { background:var(--red-dim); color:var(--red); border:1px solid rgba(239,68,68,0.3); }
 .b-airport { background:var(--purple-dim); color:var(--purple); border:1px solid rgba(168,85,247,0.25); }
 .b-recurring { background:var(--accent-dim); color:var(--accent); border:1px solid rgba(79,142,247,0.25); }
-.b-inferred { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(245,158,11,0.25); }
 .route-strip { display:flex; align-items:stretch; gap:9px; }
 .route-nodes { display:flex; flex-direction:column; align-items:center; padding:2px 0; width:12px; flex-shrink:0; }
 .nd-o { width:7px; height:7px; border-radius:50%; border:1.5px solid var(--text-muted); }
@@ -182,7 +181,7 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
   .stats-bar .stat-n { font-size:16px; }
   .warn-box,.debug-box { margin:8px 20px 0; }
   .info-banner { margin:0 16px 8px; }
-  .card-list { padding:0 16px 80px; }
+  .card-list { padding:0 16px 12px; }
   .saved-wrap { padding:12px 20px 0; }
   .sec-label { padding:10px 20px 5px; }
 }
@@ -190,11 +189,11 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
   .pax-name { max-width:160px; }
 }
 
-.past-rides-wrap { margin:8px 12px 0; }
+.past-rides-wrap { margin:8px 12px 0; padding-bottom:80px; }
 .past-rides-btn {
   display:none; width:100%; padding:11px 14px;
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:10px; color:var(--text-dim); font-size:12px; font-weight:500;
+  background:var(--amber-dim); border:1px solid rgba(245,158,11,0.35);
+  border-radius:10px; color:var(--amber); font-size:12px; font-weight:600;
   cursor:pointer; text-align:left; font-family:var(--font-body);
   align-items:center; justify-content:space-between; gap:8px;
 }
@@ -648,7 +647,7 @@ function buildCard(r,i){
   var badges='';
   if(isUrg)badges+='<span class="badge b-urgent"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>urgent</span>';
   if(isAir)badges+='<span class="badge b-airport"><svg viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2 3.5 6.5l6 3-2 2-4-1-1.5 1.5L5 15l4-1 2 2-3 6 1.5 1.5L13 11l3 6 1.5-1.5L17.8 19.2z"/></svg>airport</span>';
-  if(isInf)badges+='<span class="badge b-inferred"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="17"/></svg>inferred</span>';
+  // inferred badge removed from top-right — shown via route-sub label instead
   if(r.ride_frequency&&r.ride_frequency!=='one-time'&&r.ride_frequency!=='not_specified')badges+='<span class="badge b-recurring"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'+r.ride_frequency+'</span>';
   else badges+='<span class="badge b-onetime">one-time</span>';
   badges+='<span class="badge '+(isMatch?'b-matched':'b-pending')+'">'+(isMatch?'matched':'pending')+'</span>';
