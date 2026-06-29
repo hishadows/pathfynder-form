@@ -646,12 +646,14 @@ function setupLocationField(which) {
 function fetchSuggestions(which, query) {
   var suggestions = document.getElementById(which + 'Suggestions');
   var input       = document.getElementById(which + 'Input');
+  // Create session once per page load — same token MUST be used for suggest + retrieve
   if (!window._SB_SID) window._SB_SID = 'pf-' + Date.now();
+  var sid = window._SB_SID;
 
   fetch('https://api.mapbox.com/search/searchbox/v1/suggest'
     + '?q='             + encodeURIComponent(query)
     + '&access_token='  + 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
-    + '&session_token=' + window._SB_SID
+    + '&session_token=' + sid
     + '&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
     .then(function(r) { return r.json(); })
     .then(function(data) {
@@ -673,7 +675,7 @@ function fetchSuggestions(which, query) {
           input.value = name + (ctx ? ', ' + ctx : '');
           suggestions.classList.remove('show');
           suggestions.innerHTML = '';
-          retrieveAndSelect(which, item.mapbox_id, name, ctx);
+          retrieveAndSelect(which, item.mapbox_id, name, ctx, sid);
         });
         suggestions.appendChild(el);
       });
@@ -684,14 +686,14 @@ function fetchSuggestions(which, query) {
     });
 }
 
-function retrieveAndSelect(which, mapboxId, name, ctx) {
+function retrieveAndSelect(which, mapboxId, name, ctx, sid) {
   var confirmed   = document.getElementById(which + 'Confirmed');
   var confirmedTx = document.getElementById(which + 'ConfirmedText');
   var input       = document.getElementById(which + 'Input');
 
   fetch('https://api.mapbox.com/search/searchbox/v1/retrieve/' + mapboxId
     + '?access_token=pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
-    + '&session_token=' + window._SB_SID)
+    + '&session_token=' + (sid || window._SB_SID))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var feat   = data.features && data.features[0];
