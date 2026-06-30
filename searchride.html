@@ -87,6 +87,8 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
 .chip.chip-urgent.active { background:var(--red-dim); border-color:var(--red); }
 .chip.chip-airport { border-color:rgba(168,85,247,0.3); color:var(--purple); background:var(--purple-dim); }
 .chip.chip-airport.active { background:var(--purple-dim); border-color:var(--purple); }
+.chip.chip-recurring { border-color:rgba(79,142,247,0.3); color:var(--accent); background:var(--accent-dim); }
+.chip.chip-recurring.active { background:var(--accent-dim); border-color:var(--accent); }
 .stats-bar { display:flex; border-top:1px solid var(--border); margin-top:7px; }
 .stat { flex:1; text-align:center; padding:7px 2px 9px; border-right:1px solid var(--border); }
 .stat:last-child { border:none; }
@@ -303,6 +305,12 @@ html,body { height:100%; background:var(--bg); color:var(--text); font-family:va
     </div>
     <div class="chip chip-airport" data-f="airport" onclick="setFilter('airport')">
       <svg viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5S18 2 16.5 3.5L13 7 4.8 5.2 3.5 6.5l6 3-2 2-4-1-1.5 1.5L5 15l4-1 2 2-3 6 1.5 1.5L13 11l3 6 1.5-1.5L17.8 19.2z"/></svg>Airport
+    </div>
+    <div class="chip chip-recurring" data-f="daily" onclick="setFilter('daily')">
+      <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Daily
+    </div>
+    <div class="chip chip-recurring" data-f="weekly" onclick="setFilter('weekly')">
+      <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Weekly
     </div>
     <div class="chip" data-f="pending" onclick="setFilter('pending')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pending
@@ -551,9 +559,12 @@ function applyFiltersAndRender(){
   var nonOutdated=base.filter(function(r){if(isOutdated(r)){outdatedCount++;return false;}return true;});
   var result=nonOutdated.filter(function(r){
     var s=(r.important_ride||'').toLowerCase().trim();
+    var freq=(r.ride_frequency||'').toLowerCase().trim();
     if(activeFilter==='today'&&r['pick up date']!==today)return false;
     if(activeFilter==='urgent'&&s!=='urgent')return false;
     if(activeFilter==='airport'&&s!=='airport')return false;
+    if(activeFilter==='daily'&&freq!=='daily')return false;
+    if(activeFilter==='weekly'&&freq!=='weekly')return false;
     if(activeFilter==='pending'&&!!(r.matched_drivers_id&&r.matched_drivers_id.length))return false;
     if(activeFilter==='matched'&&!(r.matched_drivers_id&&r.matched_drivers_id.length))return false;
     return true;
