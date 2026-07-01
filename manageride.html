@@ -402,10 +402,11 @@ function renderDriverView(mv){
 
   wirePublicCard();
   document.getElementById('d-share').onclick=function(){doShare(rideUrl(false),'Join my ride from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time));};
-  document.getElementById('d-maps').onclick=openMaps;
-  var ds=document.getElementById('d-start');if(ds)ds.onclick=startRide;
-  var de=document.getElementById('d-end');if(de)de.onclick=endRide;
-  var dc=document.getElementById('d-close');if(dc)dc.onclick=toggleClose;
+  var dmaps=document.getElementById('d-maps');
+  if(dmaps){dmaps.onclick=function(e){e.preventDefault();e.stopPropagation();openMaps();};}
+  var ds=document.getElementById('d-start');if(ds)ds.onclick=function(e){e.preventDefault();startRide();};
+  var de=document.getElementById('d-end');if(de)de.onclick=function(e){e.preventDefault();endRide();};
+  var dc=document.getElementById('d-close');if(dc)dc.onclick=function(e){e.preventDefault();toggleClose();};
 
   renderTab();
 }
@@ -612,13 +613,23 @@ async function renderMatchedTab(){
     html+='</div>';
     tc.innerHTML=html;
 
-    // Wire match card clicks
+    // Wire match card clicks — toggle inline without re-rendering (prevents scroll to top)
     tc.querySelectorAll('[data-match-id]').forEach(function(card){
       card.addEventListener('click',function(e){
+        e.preventDefault();
         if(e.target.closest('.c-btn'))return;
         var mid=card.dataset.matchId;
-        expandedMatchId=(expandedMatchId===mid)?null:mid;
-        renderMatchedTab();
+        var detail=card.querySelector('.card-detail');
+        if(!detail)return;
+        var opening=!detail.classList.contains('open');
+        // Close all others first
+        tc.querySelectorAll('.card-detail').forEach(function(d){d.classList.remove('open');});
+        tc.querySelectorAll('.ride-card').forEach(function(rc){rc.classList.remove('expanded');});
+        if(opening){
+          detail.classList.add('open');
+          card.classList.add('expanded');
+        }
+        expandedMatchId=opening?mid:null;
       });
       var waBtn=card.querySelector('.match-wa-btn');
       if(waBtn)waBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.num+'?text='+this.dataset.msg,'_blank');});
@@ -680,7 +691,7 @@ async function submitJoin(shiftOn){
       passenger_name:name,pickup_label:pu,dropoff_label:doLoc,
       pickup_lat:geoCache['j-pu']?geoCache['j-pu'].lat:null,pickup_lng:geoCache['j-pu']?geoCache['j-pu'].lng:null,
       dropoff_lat:geoCache['j-do']?geoCache['j-do'].lat:null,dropoff_lng:geoCache['j-do']?geoCache['j-do'].lng:null,
-      is_shift_start:shiftOn,status:'confirmed',platform:'web',date:ride.dates};
+      is_shift_start:shiftOn,status:'pending',platform:'web',date:ride.dates};
     if(time)row.pickup_time=time;
     if(TG_ID)row.telegram_chat_id=TG_ID;
     var {error}=await db.from('passenger_requests').insert(row);
