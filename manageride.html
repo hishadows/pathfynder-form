@@ -779,80 +779,78 @@ function openMaps(){
     return;
   }
 
-  function buildURL(dLat,dLng){
-    // Origin = driver GPS or ride pickup
+  // Show loading state on the button immediately
+  var mapsBtn=document.getElementById('d-maps');
+  var origLabel=mapsBtn?mapsBtn.innerHTML:'';
+  if(mapsBtn){mapsBtn.disabled=true;mapsBtn.innerHTML='Getting location…';}
+
+  function buildAndGo(dLat,dLng){
+    // Restore button
+    if(mapsBtn){mapsBtn.disabled=false;mapsBtn.innerHTML=origLabel;}
+
     var oLat=dLat!=null?dLat:ride.pickup_lat;
     var oLng=dLng!=null?dLng:ride.pickup_lng;
-
-    // Final destination = ride dropoff (always last stop)
     var dest={lat:ride.dropoff_lat,lng:ride.dropoff_lng};
 
-    // ROUTE ORDER:
-    // 1. Sort passenger PICKUPS by distance from driver (closest first)
-    // 2. Then sort passenger DROPOFFS by distance from last pickup (closest first)
-    // 3. Final stop = ride destination (driver's dropoff)
+    // Sort pickups by distance from driver
     var pickups=conf.map(function(p){
-      return {lat:p.pickup_lat,lng:p.pickup_lng,id:p.id,
-              dLat:p.dropoff_lat,dLng:p.dropoff_lng};
+      return{lat:p.pickup_lat,lng:p.pickup_lng,
+             dlat:p.dropoff_lat,dlng:p.dropoff_lng};
     });
     pickups.sort(function(a,b){
       return haversine(oLat,oLng,a.lat,a.lng)-haversine(oLat,oLng,b.lat,b.lng);
     });
 
-    // Dropoffs sorted from last pickup position
+    // Sort dropoffs by distance from last pickup
     var lastLat=pickups.length?pickups[pickups.length-1].lat:oLat;
     var lastLng=pickups.length?pickups[pickups.length-1].lng:oLng;
-    var dropoffs=conf
-      .filter(function(p){return p.dropoff_lat&&p.dropoff_lng;})
-      .map(function(p){return {lat:p.dropoff_lat,lng:p.dropoff_lng};});
+    var dropoffs=conf.filter(function(p){return p.dropoff_lat&&p.dropoff_lng;})
+      .map(function(p){return{lat:p.dropoff_lat,lng:p.dropoff_lng};});
     dropoffs.sort(function(a,b){
       return haversine(lastLat,lastLng,a.lat,a.lng)-haversine(lastLat,lastLng,b.lat,b.lng);
     });
 
-    // All waypoints: pickups first, then dropoffs, then ride dest is the final destination
-    var wpts=pickups.map(function(p){return {lat:p.lat,lng:p.lng};})
-               .concat(dropoffs);
+    // Waypoints = pickups + dropoffs (ride dest is the final destination)
+    var wpts=pickups.map(function(p){return{lat:p.lat,lng:p.lng};}).concat(dropoffs);
 
-    return {oLat:oLat,oLng:oLng,dest:dest,wpts:wpts};
-  }
-
-  function openURL(dLat,dLng){
-    var r=buildURL(dLat,dLng);
     var url;
     if(isIOS()){
-      url='http://maps.apple.com/?saddr='+r.oLat+','+r.oLng+'&dirflg=d';
-      if(r.wpts.length){
-        url+='&daddr='+r.wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:'+r.dest.lat+','+r.dest.lng;
+      // Apple Maps deep link — opens Maps app directly
+      url='http://maps.apple.com/?saddr='+oLat+','+oLng+'&dirflg=d';
+      if(wpts.length){
+        url+='&daddr='+wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:'+dest.lat+','+dest.lng;
       } else {
-        url+='&daddr='+r.dest.lat+','+r.dest.lng;
+        url+='&daddr='+dest.lat+','+dest.lng;
       }
     } else {
+      // Google Maps deep link — opens Maps app on Android
+      // Using comgooglemaps:// first, fall back to https://
       url='https://www.google.com/maps/dir/?api=1'+
-        '&origin='+r.oLat+','+r.oLng+
-        '&destination='+r.dest.lat+','+r.dest.lng+
+        '&origin='+oLat+','+oLng+
+        '&destination='+dest.lat+','+dest.lng+
         '&travelmode=driving';
-      if(r.wpts.length){
-        url+='&waypoints='+r.wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
+      if(wpts.length){
+        url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
       }
     }
-    // Open in new tab — avoids popup blocking and keeps the app open
-    var a=document.createElement('a');
-    a.href=url;
-    a.target='_blank';
-    a.rel='noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+
+    // On mobile: location.href opens Maps app directly (replaces browser tab)
+    // On desktop: open in new tab since we don't want to lose the page
+    if(/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)){
+      location.href=url;
+    } else {
+      window.open(url,'_blank','noopener');
+    }
   }
 
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      function(pos){openURL(pos.coords.latitude,pos.coords.longitude);},
-      function(){openURL(null,null);},
-      {timeout:6000,enableHighAccuracy:true}
+      function(pos){buildAndGo(pos.coords.latitude,pos.coords.longitude);},
+      function(){buildAndGo(null,null);},
+      {timeout:5000,enableHighAccuracy:false,maximumAge:60000}
     );
   } else {
-    openURL(null,null);
+    buildAndGo(null,null);
   }
 }
 
