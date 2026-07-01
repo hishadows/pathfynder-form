@@ -228,7 +228,7 @@ function fmtTime(t){if(!t||t==='—')return '—';var h=parseInt(t.slice(0,2),10
 function seatsLeft(){return Math.max(0,(ride.available_seats||4)-passengers.filter(function(p){return p.status!=='cancelled';}).length);}
 function rideExpired(){var t=new Date();t.setHours(0,0,0,0);var r=new Date((ride.dates||'2000-01-01')+'T00:00:00');r.setHours(0,0,0,0);return r<t;}
 function rideUrl(withToken){var u=location.origin+location.pathname.replace(/[^/]*$/,'')+'manageride.html?id='+ride.id;if(withToken&&ride.share_token)u+='&token='+ride.share_token;return u;}
-function haversine(la1,ln1,la2,ln2){var R=6371,dL=(la2-la1)*Math.PI/180,dG=(ln2-ln1)*Math.PI/180,a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dG/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function haversine(la1,ln1,la2,ln2){var R=6371,dL=(la2-la1)*Math.PI/180,dG=(ln2-ln1)*Math.PI/180,a=Math.pow(Math.sin(dL/2),2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.pow(Math.sin(dG/2),2);return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 function isIOS(){return /iPhone|iPad|iPod/i.test(navigator.userAgent);}
 function getSaved(){try{return JSON.parse(localStorage.getItem('pf_passenger_v1')||'null');}catch(e){return null;}}
 function setSaved(p){try{localStorage.setItem('pf_passenger_v1',JSON.stringify(p));}catch(e){}}
