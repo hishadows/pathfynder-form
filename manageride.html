@@ -19,24 +19,20 @@
   --radius:12px;--font-display:'Space Grotesk',sans-serif;--font-body:'Inter',sans-serif;
 }
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden}
-#app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+#app{max-width:520px;margin:0 auto;display:flex;flex-direction:column;min-height:100vh}
 
-/* HEADER */
+/* ── HEADER ── */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;flex-shrink:0}
 .logo{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo svg{width:20px;height:20px}
 .brand{font-family:var(--font-display);font-size:17px;font-weight:700;letter-spacing:-.3px}
 .brand span{color:var(--accent)}
 .status-pill{margin-left:auto;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:none}
-.sp-open   {background:var(--green-dim);border:1px solid rgba(34,197,94,.25);color:var(--green)}
+.sp-open{background:var(--green-dim);border:1px solid rgba(34,197,94,.25);color:var(--green)}
 .sp-started{background:var(--accent-dim);border:1px solid rgba(79,142,247,.25);color:var(--accent)}
-.sp-closed {background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)}
-.sp-ended  {background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)}
+.sp-closed,.sp-ended{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)}
 
-/* CONTENT */
-.content{flex:1;padding:12px 12px 40px;display:flex;flex-direction:column;gap:10px}
-
-/* ── EXACT CARD STYLES FROM searchride.html ── */
+/* ── EXACT searchride.html CARD CSS ── */
 .ride-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s}
 .ride-card:active{opacity:.9}
 .ride-card.expanded{border-color:var(--accent)}
@@ -48,7 +44,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--font-display)}
 .pax-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;font-family:var(--font-display)}
 .time-ago{font-size:10px;color:var(--text-muted);margin-top:1px}
-.badges{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:135px}
+.badges{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:145px}
 .badge{font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;text-transform:uppercase;letter-spacing:.02em;display:flex;align-items:center;gap:2px;white-space:nowrap}
 .badge svg{width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .b-pending  {background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.25)}
@@ -57,6 +53,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .b-urgent   {background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
 .b-airport  {background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,0.25)}
 .b-recurring{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(79,142,247,0.25)}
+.b-shift    {background:var(--accent-dim);color:var(--accent);border:1px solid rgba(79,142,247,0.25)}
 .b-confirmed{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
 .b-driver   {background:var(--accent-dim);color:var(--accent);border:1px solid rgba(79,142,247,0.25)}
 .route-strip{display:flex;align-items:stretch;gap:9px}
@@ -80,47 +77,63 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .c-btn:active{background:var(--surface2)}
 .c-btn svg{width:19px;height:19px}
 .icon-wa{fill:none;stroke:#25D366;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.icon-tg{fill:none;stroke:#2AABEE;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-share{fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .icon-dim{fill:none;stroke:var(--border);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .card-detail{border-top:1px solid var(--border);padding:11px 13px;display:none}
 .card-detail.open{display:block}
 .det-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:flex;align-items:center;gap:4px}
 .det-label svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .msg-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:8px;max-height:80px;overflow:hidden;position:relative}
-.msg-box p{font-size:12px;color:var(--text-dim);line-height:1.55}
+.msg-box p{font-size:12px;color:var(--text-dim);line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .msg-fade{position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(transparent,var(--bg));pointer-events:none}
 
-/* SEATS BAR */
-.seats-bar-wrap{margin:8px 0 4px}
-.seats-bar{background:var(--surface2);border-radius:3px;height:5px;overflow:hidden}
+/* ── SEATS BAR ── */
+.seats-bar-wrap{background:var(--surface2);border-radius:8px;padding:10px 13px;margin-top:6px}
+.seats-bar{background:var(--border);border-radius:3px;height:6px;overflow:hidden;margin:6px 0 5px}
 .seats-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
-.seats-label{font-size:10px;color:var(--text-muted);margin-top:3px}
+.seats-row-info{display:flex;justify-content:space-between;align-items:center}
+.seats-count{font-size:13px;font-weight:600;color:var(--text);font-family:var(--font-display)}
+.seats-sub{font-size:11px;color:var(--text-muted)}
 
-/* DRIVER ACTION CARD */
-.action-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.action-row{padding:10px 13px;display:flex;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+/* ── PASSENGERS JOINED HIGHLIGHT ── */
+.pax-joined-banner{background:var(--green-dim);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.paj-num{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--green);flex-shrink:0}
+.paj-text{font-size:12px;color:var(--green);font-weight:500;line-height:1.4}
+
+/* ── NOTES BOX (always open) ── */
+.notes-box{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--text-dim);line-height:1.55;margin-top:6px}
+.notes-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+
+/* ── DRIVER ACTION ROW ── */
+.action-strip{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:4px}
+.action-row{padding:10px 12px;display:flex;gap:7px;border-bottom:1px solid var(--border)}
 .action-row:last-child{border:none}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:9px;font-family:var(--font-body);font-weight:600;cursor:pointer;border:none;transition:opacity .15s;white-space:nowrap;font-size:12px}
-.btn:active{opacity:.8}
-.btn:disabled{opacity:.4;cursor:default}
-.btn-primary{background:var(--accent);color:#fff;padding:0 14px;height:36px}
-.btn-green  {background:var(--green);color:#fff;padding:0 14px;height:36px}
-.btn-ghost  {background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);padding:0 12px;height:36px}
-.btn-wa     {background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);color:#25D366;padding:0 12px;height:36px}
-.btn-amber  {background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber);padding:0 12px;height:34px}
-.btn-red    {background:var(--red-dim);border:1px solid rgba(239,68,68,.25);color:var(--red);padding:0 10px;height:30px;font-size:11px}
-.btn-icon   {width:36px;height:36px;padding:0;flex-shrink:0}
-.btn-full   {width:100%;height:44px;font-size:14px;border-radius:10px}
-.btn-full-sm{width:100%;height:38px;font-size:13px;border-radius:9px}
-
-/* TABS */
-.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:60px;z-index:90;flex-shrink:0}
+/* ── TABS ── */
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;position:sticky;top:60px;z-index:90;flex-shrink:0}
 .tab{flex:1;padding:11px 8px;font-size:12px;font-weight:500;color:var(--text-muted);text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* FORM (matching index.html exactly) */
+/* ── CONTENT SECTIONS ── */
+.sec{padding:12px 12px 0}
+.sec-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.card-list{display:flex;flex-direction:column;gap:8px;padding:0 12px 16px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:9px;font-family:var(--font-body);font-weight:600;cursor:pointer;border:none;transition:opacity .15s;white-space:nowrap}
+.btn:active{opacity:.8}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-primary{background:var(--accent);color:#fff;padding:0 14px;height:36px;font-size:12px}
+.btn-green  {background:var(--green);color:#fff;padding:0 14px;height:36px;font-size:12px}
+.btn-ghost  {background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);padding:0 12px;height:36px;font-size:12px}
+.btn-wa     {background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);color:#25D366;padding:0 12px;height:36px;font-size:12px}
+.btn-amber  {background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber);padding:0 12px;height:34px;font-size:12px}
+.btn-red    {background:var(--red-dim);border:1px solid rgba(239,68,68,.25);color:var(--red);padding:0 10px;height:30px;font-size:11px}
+.btn-sm     {height:30px;font-size:11px;padding:0 10px}
+.btn-full   {width:100%;height:44px;font-size:14px;border-radius:10px}
+.btn-full-sm{width:100%;height:38px;font-size:13px;border-radius:9px}
+
+/* ── FORM (same as index.html) ── */
 .field{display:flex;flex-direction:column;gap:6px;position:relative}
 .field label{font-size:13px;font-weight:500;color:var(--text-dim)}
 .input-wrap{position:relative}
@@ -129,8 +142,6 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .field-input::placeholder{color:var(--text-muted)}
 .field-input.confirmed{border-color:var(--green)}
 input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
-
-/* SUGGESTIONS (matching index.html exactly) */
 .suggestions{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 .suggestions.show{display:block}
 .suggestion-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
@@ -138,14 +149,10 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
 .suggestion-item:hover{background:var(--surface)}
 .suggestion-item.loading-item{cursor:default;font-size:12px;color:var(--text-muted);font-style:italic}
 .sug-main{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sug-ctx {font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* CONFIRMED TAG (matching index.html exactly) */
+.sug-ctx{font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .confirmed-tag{display:none;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;font-size:12px;color:var(--green);background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2)}
 .confirmed-tag.show{display:flex}
 .confirmed-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
-
-/* TOGGLE */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;cursor:pointer}
 .toggle-lbl{font-size:13px;font-weight:500;color:var(--text)}
 .toggle-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
@@ -153,42 +160,24 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
 .toggle-track.on{background:var(--accent)}
 .toggle-thumb{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .toggle-track.on .toggle-thumb{left:18px}
-
-/* NOTE BOX */
-.note-box{background:var(--accent-dim);border:1px solid rgba(79,142,247,.2);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--text-dim);line-height:1.55}
-.note-box b{color:var(--accent)}
-
-/* STATUS */
-.otw-banner{background:var(--green-dim);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:14px 16px;text-align:center}
-.otw-title{font-size:14px;font-weight:600;color:var(--green);margin-bottom:3px}
-.otw-sub{font-size:12px;color:var(--text-dim)}
-.status-screen{text-align:center;padding:32px 20px}
-.status-icon{font-size:44px;margin-bottom:14px}
-.status-title{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px}
-.status-sub{font-size:13px;color:var(--text-dim);line-height:1.6}
-
-/* PAXCARD (driver list) */
-.pax-extra{border-top:1px solid var(--border);padding:10px 13px;display:flex;flex-direction:column;gap:8px}
-.pax-detail-row{display:flex;gap:6px;flex-wrap:wrap}
-
-/* SECTION LABEL */
-.sec-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;padding:4px 0 2px}
-
-/* SKELETONS */
-.skel{background:var(--surface);border:1px solid var(--border);border-radius:14px;animation:pulse 1.4s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ERR */
+.note-box-join{background:var(--accent-dim);border:1px solid rgba(79,142,247,.2);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--text-dim);line-height:1.55}
+.note-box-join b{color:var(--accent)}
 .err-box{display:none;padding:10px 13px;border-radius:9px;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);color:var(--red);font-size:13px;line-height:1.5}
 .err-box.show{display:block}
 
-@media(max-width:520px){.content{padding:10px 10px 40px}}
+/* ── OTW ── */
+.otw-banner{background:var(--green-dim);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:14px 16px;text-align:center;margin:12px 12px 0}
+.otw-title{font-size:14px;font-weight:600;color:var(--green);margin-bottom:3px}
+.otw-sub{font-size:12px;color:var(--text-dim)}
+
+/* ── SKELETONS ── */
+.skel{background:var(--surface);border:1px solid var(--border);border-radius:14px;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- HEADER -->
 <div class="header">
   <div class="logo">
     <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -200,36 +189,22 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
   <div id="status-pill" class="status-pill"></div>
 </div>
 
-<!-- SKELETONS while loading -->
-<div class="content" id="loading-view">
-  <div class="skel" style="height:200px"></div>
-  <div class="skel" style="height:80px;margin-top:2px"></div>
+<div id="loading-view" style="padding:12px;display:flex;flex-direction:column;gap:10px">
+  <div class="skel" style="height:210px"></div>
+  <div class="skel" style="height:80px"></div>
 </div>
 
-<!-- DRIVER TABS (hidden until driver loads) -->
-<div class="tabs" id="driver-tabs" style="display:none">
-  <div class="tab active" id="tab-pax" onclick="switchTab('passengers')">Passengers <span id="pax-count-lbl"></span></div>
-  <div class="tab" id="tab-match" onclick="switchTab('matched')">Matched rides</div>
+<div id="main-view" style="display:none;flex:1;display:none;flex-direction:column"></div>
+
 </div>
-
-<!-- MAIN VIEW -->
-<div id="main-view" style="display:none;flex:1"></div>
-
-</div><!-- end #app -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// ════════════════════════════════════════════
-// CONFIG
-// ════════════════════════════════════════════
 var SUPABASE_URL  = 'https://omussxfyrztjahbdrrpi.supabase.co';
 var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';
 var MAPBOX_TOKEN  = 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw';
 var db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ════════════════════════════════════════════
-// URL + TELEGRAM
-// ════════════════════════════════════════════
 var urlP     = new URLSearchParams(location.search);
 var RIDE_ID  = urlP.get('id');
 var SHARE_TK = urlP.get('token');
@@ -238,22 +213,11 @@ if(tg){tg.ready();tg.expand();}
 var tgUser   = tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user?tg.initDataUnsafe.user:null;
 var TG_ID    = tgUser?String(tgUser.id):null;
 
-// ════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════
 var ride=null, passengers=[], isDriver=false, activeTab='passengers';
-var geoCache={}, geoTimers={}, expandedId=null;
+var geoCache={}, geoTimers={}, expandedMatchId=null;
 
-// ════════════════════════════════════════════
-// HELPERS — same as searchride.html exactly
-// ════════════════════════════════════════════
-var AV=[
-  {bg:'rgba(79,142,247,0.15)',c:'#4f8ef7'},
-  {bg:'rgba(34,197,94,0.12)',c:'#22c55e'},
-  {bg:'rgba(245,158,11,0.12)',c:'#f59e0b'},
-  {bg:'rgba(239,68,68,0.12)',c:'#ef4444'},
-  {bg:'rgba(168,85,247,0.12)',c:'#a855f7'},
-];
+/* ── HELPERS (same as searchride.html) ── */
+var AV=[{bg:'rgba(79,142,247,0.15)',c:'#4f8ef7'},{bg:'rgba(34,197,94,0.12)',c:'#22c55e'},{bg:'rgba(245,158,11,0.12)',c:'#f59e0b'},{bg:'rgba(239,68,68,0.12)',c:'#ef4444'},{bg:'rgba(168,85,247,0.12)',c:'#a855f7'}];
 function avCol(i){return AV[i%AV.length];}
 function initials(n){return (n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
 function todayStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
@@ -262,30 +226,19 @@ function timeAgo(iso){if(!iso)return '';var diff=Date.now()-new Date(iso).getTim
 function fmtDate(d){if(!d)return '—';if(d===todayStr())return 'Today';if(d===tomorrowStr())return 'Tomorrow';return new Date(d+'T00:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});}
 function fmtTime(t){if(!t||t==='—')return '—';var h=parseInt(t.slice(0,2),10),m=parseInt(t.slice(3,5),10);var ap=h>=12?'PM':'AM',h12=h%12||12;return h12+':'+(m<10?'0':'')+m+' '+ap;}
 function seatsLeft(){return Math.max(0,(ride.available_seats||4)-passengers.filter(function(p){return p.status!=='cancelled';}).length);}
-function rideExpired(){var t=new Date();t.setHours(0,0,0,0);var r=new Date(ride.dates+'T00:00:00');r.setHours(0,0,0,0);return r<t;}
-function rideUrl(withToken){var u=location.origin+'/manageride.html?id='+ride.id;if(withToken&&ride.share_token)u+='&token='+ride.share_token;return u;}
+function rideExpired(){var t=new Date();t.setHours(0,0,0,0);var r=new Date((ride.dates||'2000-01-01')+'T00:00:00');r.setHours(0,0,0,0);return r<t;}
+function rideUrl(withToken){var u=location.origin+location.pathname.replace(/[^/]*$/,'')+'manageride.html?id='+ride.id;if(withToken&&ride.share_token)u+='&token='+ride.share_token;return u;}
 function haversine(la1,ln1,la2,ln2){var R=6371,dL=(la2-la1)*Math.PI/180,dG=(ln2-ln1)*Math.PI/180,a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dG/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 function isIOS(){return /iPhone|iPad|iPod/i.test(navigator.userAgent);}
 function getSaved(){try{return JSON.parse(localStorage.getItem('pf_passenger_v1')||'null');}catch(e){return null;}}
 function setSaved(p){try{localStorage.setItem('pf_passenger_v1',JSON.stringify(p));}catch(e){}}
 
-// Share — uses native Web Share API with fallback
-function shareRideLink(){
-  var url=rideUrl(false);
-  var txt='Join my ride: '+(ride.pickup_label||'')+'→'+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time);
-  if(navigator.share){
-    navigator.share({title:'Pathfynder Ride',text:txt,url:url}).catch(function(){});
-  } else {
-    // Fallback: copy to clipboard
-    if(navigator.clipboard)navigator.clipboard.writeText(url);
-    else{var el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);}
-    alert('Link copied to clipboard!');
-  }
+function doShare(url, text){
+  if(navigator.share){navigator.share({title:'Pathfynder Ride',text:text,url:url}).catch(function(){});}
+  else{if(navigator.clipboard)navigator.clipboard.writeText(url);else{var el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);}alert('Link copied!');}
 }
 
-// ════════════════════════════════════════════
-// LOAD
-// ════════════════════════════════════════════
+/* ── LOAD ── */
 async function load(){
   if(!RIDE_ID){showErr('No ride ID in URL.');return;}
   try{
@@ -299,42 +252,38 @@ async function load(){
   }catch(e){showErr(e.message);}
 }
 
-// ════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════
+/* ── RENDER ── */
 function render(){
   document.getElementById('loading-view').style.display='none';
   var mv=document.getElementById('main-view');
-  mv.style.display='';
+  mv.style.display='flex';
 
-  // Status pill
   var st=ride.ride_status||'open';
   var pill=document.getElementById('status-pill');
   pill.textContent=st.charAt(0).toUpperCase()+st.slice(1);
   pill.className='status-pill sp-'+st;
   pill.style.display='';
 
-  if(rideExpired()&&st==='open'){mv.innerHTML=expiredHTML();document.getElementById('driver-tabs').style.display='none';return;}
+  if(rideExpired()&&st==='open'){
+    mv.innerHTML='<div style="padding:12px">'+expiredHTML()+'</div>';
+    return;
+  }
 
   if(isDriver){
-    mv.innerHTML='<div class="content" id="driver-top"></div><div class="content" id="tab-content"></div>';
-    renderDriverTop();
-    document.getElementById('driver-tabs').style.display='';
-    renderTab();
+    renderDriverView(mv);
   } else if(st==='started'){
-    mv.innerHTML='<div class="content">'+otwHTML()+rideCardHTML()+'</div>';
-    document.getElementById('driver-tabs').style.display='none';
+    mv.innerHTML='<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">'+(ride.driver_name||'Driver')+' has started the ride</div></div>'+
+      '<div style="padding:12px">'+rideCardHTML()+'</div>';
   } else {
-    mv.innerHTML='<div class="content">'+rideCardHTML()+publicActionsHTML()+'</div>';
-    document.getElementById('driver-tabs').style.display='none';
-    wirePublic();
+    mv.innerHTML='<div style="padding:12px;display:flex;flex-direction:column;gap:10px">'+rideCardHTML()+publicBelowHTML()+'</div>';
+    wirePublicCard();
   }
 }
 
-// ════════════════════════════════════════════
-// RIDE CARD — exact same structure as searchride.html buildCard
-// ════════════════════════════════════════════
-function rideCardHTML(paxRow){
+/* ══════════════════════════════════════════
+   RIDE CARD — exact searchride.html structure
+══════════════════════════════════════════ */
+function rideCardHTML(){
   var left=seatsLeft(), total=ride.available_seats||4, taken=total-left;
   var pct=Math.round((taken/total)*100);
   var av=avCol(0);
@@ -342,30 +291,38 @@ function rideCardHTML(paxRow){
   var rDate=fmtDate(ride.dates);
   var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
 
-  // Badges
   var badges='<span class="badge b-driver">Driver</span>';
-  if(ride.ride_status==='started')badges+='<span class="badge b-matched">Started</span>';
-  else if(ride.ride_status==='open')badges+='<span class="badge b-pending">Open</span>';
-  else badges+='<span class="badge b-onetime">'+ride.ride_status+'</span>';
+  if(confs>0)badges+='<span class="badge b-confirmed">'+confs+' joined</span>';
 
-  // WA button for driver contact
-  var waHtml=ride.driver_phone
-    ?'<button class="c-btn wa-btn" data-num="'+ride.driver_phone.replace(/\D/g,'')+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
-    :'<button class="c-btn" style="opacity:0.3" aria-label="No phone"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+  // WA contact button
+  var waBtn=ride.driver_phone
+    ?'<button class="c-btn wa-btn-driver" aria-label="Contact driver"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+    :'<button class="c-btn" style="opacity:0.25" aria-label="No contact"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
 
-  var shareHtml='<button class="c-btn" id="main-share-btn" aria-label="Share"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>';
+  var shareBtn='<button class="c-btn main-share-btn" aria-label="Share"><svg viewBox="0 0 24 24" class="icon-share" width="19" height="19"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>';
 
-  var expHtml=expandedId==='main'
-    ?'<div class="card-detail open"><div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Notes</div>'+(ride.notes?'<div class="msg-box"><p>'+ride.notes+'</p></div>':'<p style="font-size:12px;color:var(--text-muted)">No notes added</p>')+'<div class="seats-bar-wrap"><div class="seats-bar"><div class="seats-fill" style="width:'+pct+'%"></div></div><div class="seats-label">'+taken+' of '+total+' seats taken · '+confs+' passenger'+(confs!==1?'s':'')+' joined</div></div></div>'
+  // Seats bar + passengers joined highlight — always visible (not tapped)
+  var seatsSection=
+    '<div class="seats-bar-wrap">'+
+      '<div class="seats-row-info">'+
+        '<span class="seats-count">'+left+' / '+total+' seats left</span>'+
+        (confs>0?'<span style="font-size:11px;color:var(--green);font-weight:600">'+confs+' joining</span>':'<span style="font-size:11px;color:var(--text-muted)">No bookings yet</span>')+
+      '</div>'+
+      '<div class="seats-bar"><div class="seats-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="seats-sub">'+taken+' of '+total+' seats taken</div>'+
+    '</div>';
+
+  // Notes — always visible if present
+  var notesSection=ride.notes
+    ?'<div class="notes-box"><div class="notes-label">Notes from driver</div>'+ride.notes+'</div>'
     :'';
 
-  return '<div class="ride-card'+(expandedId==='main'?' expanded':'')+'" id="main-ride-card">'+
+  return '<div class="ride-card" id="main-ride-card">'+
     '<div class="card-top">'+
       '<div class="card-row1">'+
         '<div class="pax-info">'+
           '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(ride.driver_name)+'</div>'+
-          '<div><div class="pax-name">'+(ride.driver_name||'Driver')+'</div>'+
-          '<div class="time-ago">'+confs+' passenger'+(confs!==1?'s':'')+' joining</div></div>'+
+          '<div><div class="pax-name">'+(ride.driver_name||'Driver')+'</div><div class="time-ago">Sharing a ride</div></div>'+
         '</div>'+
         '<div class="badges">'+badges+'</div>'+
       '</div>'+
@@ -377,78 +334,328 @@ function rideCardHTML(paxRow){
         '</div>'+
         '<div class="route-meta"><div class="ride-time">'+rTime+'</div><div class="ride-date">'+rDate+'</div></div>'+
       '</div>'+
+      seatsSection+
+      notesSection+
     '</div>'+
     '<div class="card-footer">'+
       '<div class="footer-info">'+
         '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>'+
         '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
       '</div>'+
-      '<div class="contact-btns">'+waHtml+shareHtml+'</div>'+
+      '<div class="contact-btns">'+waBtn+shareBtn+'</div>'+
     '</div>'+
-    expHtml+
   '</div>';
 }
 
-function wireRideCard(){
-  var card=document.getElementById('main-ride-card');
-  if(!card)return;
-  card.addEventListener('click',function(e){
-    if(e.target.closest('.c-btn'))return;
-    expandedId=(expandedId==='main')?null:'main';
-    render();
-  });
-  var waBtn=card.querySelector('.wa-btn');
-  if(waBtn)waBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.num,'_blank');});
-  var shareBtn=document.getElementById('main-share-btn');
-  if(shareBtn)shareBtn.addEventListener('click',function(e){e.stopPropagation();shareRideLink();});
+function wirePublicCard(){
+  var waBtn=document.querySelector('.wa-btn-driver');
+  if(waBtn)waBtn.addEventListener('click',function(){if(ride.driver_phone)window.open('https://wa.me/'+ride.driver_phone.replace(/\D/g,''),'_blank');});
+  var shareBtn=document.querySelector('.main-share-btn');
+  if(shareBtn)shareBtn.addEventListener('click',function(){doShare(rideUrl(false),'Join my ride from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time));});
 }
 
-// ════════════════════════════════════════════
-// PUBLIC VIEW
-// ════════════════════════════════════════════
-function publicActionsHTML(){
+/* ── PUBLIC BELOW CARD ── */
+function publicBelowHTML(){
   var left=seatsLeft(), st=ride.ride_status||'open';
   var full=left===0, closed=st==='closed'||st==='ended'||st==='started';
-  var joinBtn='';
-  if(full)joinBtn='<button class="btn btn-full" disabled style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">Ride Full</button>';
-  else if(closed)joinBtn='<button class="btn btn-full" disabled style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)">Ride Closed</button>';
-  else joinBtn='<button class="btn btn-green btn-full" id="btn-join">Join this ride</button>';
-  return '<div style="margin-top:2px">'+joinBtn+'</div>';
+  if(full)return '<button class="btn btn-full" disabled style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">Ride Full</button>';
+  if(closed)return '<button class="btn btn-full" disabled style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)">Ride Closed</button>';
+  return '<button class="btn btn-green btn-full" id="btn-join">Join this ride</button>';
 }
-function wirePublic(){
-  wireRideCard();
+
+/* ══════════════════════════════════════════
+   DRIVER VIEW — card + actions + tabs below
+══════════════════════════════════════════ */
+function renderDriverView(mv){
+  var st=ride.ride_status||'open';
+  var started=st==='started';
+  var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
+
+  // Passengers joined highlight banner
+  var paxBanner=confs>0
+    ?'<div class="pax-joined-banner"><div class="paj-num">'+confs+'</div><div class="paj-text">passenger'+(confs!==1?'s':'')+' joined<br>'+seatsLeft()+' seat'+(seatsLeft()!==1?'s':'')+' remaining</div></div>'
+    :'';
+
+  mv.innerHTML=
+    // Top section: ride card + passengers banner + action strip
+    '<div style="padding:12px;display:flex;flex-direction:column;gap:8px">'+
+      rideCardHTML()+
+      paxBanner+
+      '<div class="action-strip">'+
+        '<div class="action-row">'+
+          '<button class="btn btn-wa" id="d-share" style="flex:1"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share ride link</button>'+
+          '<button class="btn btn-ghost" id="d-maps" style="flex:1"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Open in Maps</button>'+
+        '</div>'+
+        '<div class="action-row">'+
+          (!started?'<button class="btn btn-green" id="d-start" style="flex:1">▶ Start Ride</button>':'<button class="btn btn-red" id="d-end" style="flex:1">■ End Ride</button>')+
+          (!started?'<button class="btn btn-amber" id="d-close">'+(st==='closed'?'Reopen':'Close Ride')+'</button>':'')+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    // TABS
+    '<div class="tabs">'+
+      '<div class="tab active" id="tab-pax" onclick="switchTab(\'passengers\')">Passengers <span id="pax-count-lbl"></span></div>'+
+      '<div class="tab" id="tab-match" onclick="switchTab(\'matched\')">Matched rides</div>'+
+    '</div>'+
+    // TAB CONTENT
+    '<div id="tab-content" style="flex:1"></div>';
+
+  wirePublicCard();
+  document.getElementById('d-share').onclick=function(){doShare(rideUrl(false),'Join my ride from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time));};
+  document.getElementById('d-maps').onclick=openMaps;
+  var ds=document.getElementById('d-start');if(ds)ds.onclick=startRide;
+  var de=document.getElementById('d-end');if(de)de.onclick=endRide;
+  var dc=document.getElementById('d-close');if(dc)dc.onclick=toggleClose;
+
+  renderTab();
+}
+
+function switchTab(t){
+  activeTab=t;
+  document.getElementById('tab-pax').classList.toggle('active',t==='passengers');
+  document.getElementById('tab-match').classList.toggle('active',t==='matched');
+  renderTab();
+}
+function renderTab(){if(activeTab==='passengers')renderPaxTab();else renderMatchedTab();}
+
+/* ── PASSENGERS TAB ── */
+function renderPaxTab(){
+  var tc=document.getElementById('tab-content');
+  if(!tc)return;
+  var conf=passengers.filter(function(p){return p.status!=='cancelled';});
+  var lbl=document.getElementById('pax-count-lbl');
+  if(lbl)lbl.textContent='('+conf.length+')';
+
+  if(!conf.length){
+    tc.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No passengers yet.<br>Share your ride link to get bookings.</div>'+
+      '<div style="padding:0 12px 16px"><button class="btn btn-ghost btn-full" id="d-add-btn" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button></div>';
+    document.getElementById('d-add-btn').onclick=showAddForm;
+    return;
+  }
+
+  var html='<div class="card-list">';
+  conf.forEach(function(p,i){
+    var av=avCol(i+1);
+    var name=p.passenger_name_web||p.passenger_name||'Passenger';
+    var phone=p.passenger_phone_web||p.passenger_wa_id||'';
+    var pu=p.pickup_label||'—', dro=p.dropoff_label||'—';
+    var pt=p.pickup_time?fmtTime(p.pickup_time):'—';
+    var done=p.status==='picked_up';
+
+    var badges='<span class="badge b-confirmed">confirmed</span>';
+    if(p.is_shift_start)badges+='<span class="badge b-shift">shift</span>';
+    if(done)badges+='<span class="badge b-matched">picked up ✓</span>';
+
+    var waBtn=phone
+      ?'<button class="c-btn wa-btn-pax" data-phone="'+phone.replace(/\D/g,'')+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+      :'<button class="c-btn" style="opacity:.3"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+
+    // Expand: shows actions + details (like original message in searchride)
+    var expId='pax-'+p.id;
+    var isExp=expandedMatchId===expId;
+    var expHtml=isExp
+      ?'<div class="card-detail open">'+
+        '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Passenger details</div>'+
+        '<div class="msg-box"><p>📍 Pickup: '+pu+'\n🏁 Dropoff: '+dro+'\n🕐 Time: '+pt+(p.is_shift_start?'\n⚡ Shift start time':'')+(phone?'\n📱 '+phone:'')+'</p><div class="msg-fade"></div></div>'+
+        '<div style="display:flex;gap:7px;flex-wrap:wrap">'+
+          (phone?'<button class="btn btn-wa btn-sm outside-btn" data-phone="'+phone.replace(/\D/g,'')+'" style="flex:1">💬 I\'m outside</button>':'')+
+          (!done?'<button class="btn btn-ghost btn-sm pickup-btn" data-pid="'+p.id+'" style="color:var(--green);border-color:rgba(34,197,94,.3);background:var(--green-dim)">✓ Picked up</button>':'')+
+          '<button class="btn btn-red btn-sm remove-btn" data-pid="'+p.id+'">Remove</button>'+
+        '</div>'+
+      '</div>'
+      :'';
+
+    html+='<div class="ride-card'+(isExp?' expanded':'')+(done?' card-urgent':'')+'" data-pax-id="'+p.id+'">'+
+      '<div class="card-top">'+
+        '<div class="card-row1">'+
+          '<div class="pax-info">'+
+            '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
+            '<div><div class="pax-name">'+name+'</div><div class="time-ago">tap for details</div></div>'+
+          '</div>'+
+          '<div class="badges">'+badges+'</div>'+
+        '</div>'+
+        '<div class="route-strip">'+
+          '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>'+
+          '<div class="route-labels">'+
+            '<div><div class="route-place">'+pu+'</div><div class="route-sub">Pickup</div></div>'+
+            '<div><div class="route-place">'+dro+'</div><div class="route-sub">Dropoff</div></div>'+
+          '</div>'+
+          '<div class="route-meta"><div class="ride-time">'+pt+'</div><div class="ride-date">'+fmtDate(p.date||ride.dates)+'</div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card-footer">'+
+        '<div class="footer-info">'+
+          '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+pt+'</div>'+
+          (p.is_shift_start?'<div class="f-chip">⚡ Shift start</div>':'')+
+        '</div>'+
+        '<div class="contact-btns">'+waBtn+'</div>'+
+      '</div>'+
+      expHtml+
+    '</div>';
+  });
+  html+='</div><div style="padding:0 12px 16px"><button class="btn btn-ghost btn-full" id="d-add-btn" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button></div>';
+  tc.innerHTML=html;
+
+  tc.querySelectorAll('[data-pax-id]').forEach(function(card){
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.c-btn')||e.target.closest('.btn'))return;
+      var eid='pax-'+card.dataset.paxId;
+      expandedMatchId=(expandedMatchId===eid)?null:eid;
+      renderPaxTab();
+    });
+    var waBtn=card.querySelector('.wa-btn-pax');
+    if(waBtn)waBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"),'_blank');});
+    var outBtn=card.querySelector('.outside-btn');
+    if(outBtn)outBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"),'_blank');});
+    var puBtn=card.querySelector('.pickup-btn');
+    if(puBtn)puBtn.addEventListener('click',async function(e){e.stopPropagation();await db.from('passenger_requests').update({status:'picked_up'}).eq('id',this.dataset.pid);var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);passengers=r.data||[];renderPaxTab();});
+    var rmBtn=card.querySelector('.remove-btn');
+    if(rmBtn)rmBtn.addEventListener('click',async function(e){e.stopPropagation();if(!confirm('Remove this passenger?'))return;await db.from('passenger_requests').update({status:'cancelled'}).eq('id',this.dataset.pid);var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);passengers=r.data||[];renderPaxTab();});
+  });
+  var addBtn=document.getElementById('d-add-btn');
+  if(addBtn)addBtn.onclick=showAddForm;
+}
+
+/* ── MATCHED TAB — exact searchride card style ── */
+async function renderMatchedTab(){
+  var tc=document.getElementById('tab-content');
+  if(!tc)return;
+  tc.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--text-muted)">Finding matched passengers…</div>';
+
+  if(!ride.pickup_lat||!ride.pickup_lng){
+    tc.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No location data for this ride — matched passengers unavailable.</div>';
+    return;
+  }
+  try{
+    var {data,error}=await db.rpc('find_matched_passengers',{
+      p_driver_id:RIDE_ID,
+      p_from_lat:ride.pickup_lat,p_from_lng:ride.pickup_lng,
+      p_to_lat:ride.dropoff_lat||ride.pickup_lat,
+      p_to_lng:ride.dropoff_lng||ride.pickup_lng,
+      p_ride_date:ride.dates,p_radius_km:25
+    });
+    if(error)throw error;
+    var matches=data||[];
+    if(!matches.length){
+      tc.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No matched passengers found near your route for this date.</div>';
+      return;
+    }
+
+    var shareUrl=rideUrl(false);
+    var html='<div class="card-list">';
+    matches.forEach(function(m,i){
+      var av=avCol(i);
+      var name=m.sender_name||'Passenger';
+      var phone=m.sender_number?String(m.sender_number):'';
+      var waNum=phone.replace(/\D/g,'');
+      var rTime=fmtTime(m.pick_up_time);
+      var rDate=fmtDate(m.pick_up_date);
+      // dist_km from DB — show as X.X km away
+      var distKm=m.dist_km!=null?m.dist_km:null;
+      var distLabel=distKm!=null?(distKm===0?'Same area':(distKm<1?'< 1 km away':distKm.toFixed(1)+' km away')):'';
+
+      var imp=(m.important_ride||'').toLowerCase();
+      var badges='';
+      if(imp==='urgent')badges+='<span class="badge b-urgent"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>urgent</span>';
+      if(imp==='airport')badges+='<span class="badge b-airport">airport</span>';
+      if(distLabel)badges+='<span class="badge b-driver">'+distLabel+'</span>';
+      badges+='<span class="badge b-pending">pending</span>';
+
+      var contactMsg='Hi '+name+', I am driving from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time)+'. Do you still need a ride? Join here: '+shareUrl;
+
+      // Two buttons: Contact WA + Share link — same c-btn style as searchride
+      var waBtnHtml=waNum
+        ?'<button class="c-btn match-wa-btn" data-num="'+waNum+'" data-msg="'+encodeURIComponent(contactMsg)+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+        :'<button class="c-btn" style="opacity:.3"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+
+      var shareBtnHtml='<button class="c-btn match-share-btn" data-url="'+shareUrl+'" data-msg="'+encodeURIComponent(contactMsg)+'" aria-label="Share link"><svg viewBox="0 0 24 24" class="icon-share" width="19" height="19"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>';
+
+      // Original message only on tap — same card-detail pattern as searchride
+      var expId='match-'+i;
+      var isExp=expandedMatchId===expId;
+      var origMsg=m.original_message||'';
+      var expHtml=isExp
+        ?'<div class="card-detail open">'+
+          '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div>'+
+          '<div class="msg-box"><p>'+origMsg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p><div class="msg-fade"></div></div>'+
+        '</div>'
+        :'';
+
+      html+='<div class="ride-card'+(isExp?' expanded':'')+'" data-match-id="'+expId+'">'+
+        '<div class="card-top">'+
+          '<div class="card-row1">'+
+            '<div class="pax-info">'+
+              '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
+              '<div><div class="pax-name">'+name+'</div><div class="time-ago">tap to see message</div></div>'+
+            '</div>'+
+            '<div class="badges">'+badges+'</div>'+
+          '</div>'+
+          '<div class="route-strip">'+
+            '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>'+
+            '<div class="route-labels">'+
+              '<div><div class="route-place">'+(m.pickup_label||'—')+'</div><div class="route-sub">Pickup</div></div>'+
+              '<div><div class="route-place">'+(m.dropoff_label||'—')+'</div><div class="route-sub">Dropoff</div></div>'+
+            '</div>'+
+            '<div class="route-meta"><div class="ride-time">'+rTime+'</div><div class="ride-date">'+rDate+'</div></div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="card-footer">'+
+          '<div class="footer-info">'+
+            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>'+
+            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
+          '</div>'+
+          '<div class="contact-btns">'+waBtnHtml+shareBtnHtml+'</div>'+
+        '</div>'+
+        expHtml+
+      '</div>';
+    });
+    html+='</div>';
+    tc.innerHTML=html;
+
+    // Wire match card clicks
+    tc.querySelectorAll('[data-match-id]').forEach(function(card){
+      card.addEventListener('click',function(e){
+        if(e.target.closest('.c-btn'))return;
+        var mid=card.dataset.matchId;
+        expandedMatchId=(expandedMatchId===mid)?null:mid;
+        renderMatchedTab();
+      });
+      var waBtn=card.querySelector('.match-wa-btn');
+      if(waBtn)waBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.num+'?text='+this.dataset.msg,'_blank');});
+      var shareBtn=card.querySelector('.match-share-btn');
+      if(shareBtn)shareBtn.addEventListener('click',function(e){e.stopPropagation();doShare(this.dataset.url,decodeURIComponent(this.dataset.msg));});
+    });
+  }catch(e){
+    tc.innerHTML='<div style="padding:16px;font-size:12px;color:var(--red)">Error loading matches: '+e.message+'</div>';
+  }
+}
+
+/* ── JOIN FORM ── */
+function wireJoinBtn(){
   var jb=document.getElementById('btn-join');
   if(jb)jb.onclick=showJoinForm;
 }
 
-// ════════════════════════════════════════════
-// JOIN FORM
-// ════════════════════════════════════════════
 function showJoinForm(){
   var saved=getSaved();
-  var prefillName=saved&&saved.name||(tgUser?((tgUser.first_name||'')+(tgUser.last_name?' '+tgUser.last_name:'')).trim():'');
+  var prefill=saved&&saved.name||(tgUser?((tgUser.first_name||'')+(tgUser.last_name?' '+tgUser.last_name:'')).trim():'');
   var mv=document.getElementById('main-view');
-  mv.innerHTML='<div class="content" style="gap:12px">'+
-    '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:2px 0">'+
+  mv.innerHTML=
+    '<div style="padding:12px;font-size:12px;color:var(--text-muted);text-align:center">'+
       (ride.driver_name||'Driver')+' · '+(ride.pickup_label||'')+'→'+(ride.dropoff_label||'')+' · '+fmtTime(ride.departure_time)+
     '</div>'+
-    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
-    '<div style="padding:16px;display:flex;flex-direction:column;gap:14px">'+
-      '<div class="field"><label>Your name *</label><div class="input-wrap"><input class="field-input" id="j-name" placeholder="Full name" value="'+prefillName+'"></div></div>'+
+    '<div style="padding:0 12px 20px;display:flex;flex-direction:column;gap:12px">'+
+      '<div class="field"><label>Your name *</label><div class="input-wrap"><input class="field-input" id="j-name" placeholder="Full name" value="'+prefill+'"></div></div>'+
       '<div class="field"><label>WhatsApp number *</label><div class="input-wrap"><input class="field-input" id="j-phone" type="tel" placeholder="+1 416 555 0000" value="'+(saved&&saved.phone||'')+'"></div></div>'+
       '<div class="field"><label>Your pickup location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="j-pu" placeholder="Where should driver pick you up?" autocomplete="off"><div class="suggestions" id="j-pu-sug"></div></div><div class="confirmed-tag" id="j-pu-tag"><div class="confirmed-dot"></div><span id="j-pu-txt"></span></div></div>'+
       '<div class="field"><label>Your dropoff location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="j-do" placeholder="Where are you going?" autocomplete="off"><div class="suggestions" id="j-do-sug"></div></div><div class="confirmed-tag" id="j-do-tag"><div class="confirmed-dot"></div><span id="j-do-txt"></span></div></div>'+
       '<div class="field"><label>Pickup time</label><div class="input-wrap"><input class="field-input" id="j-time" type="time" value="'+(ride.departure_time||'').slice(0,5)+'"></div></div>'+
-      '<div class="toggle-row" id="shift-toggle">'+
-        '<div><div class="toggle-lbl">Is this shift start time?</div><div class="toggle-sub">Driver will plan around your shift</div></div>'+
-        '<div class="toggle-track" id="shift-track"><div class="toggle-thumb"></div></div>'+
-      '</div>'+
-      '<div class="note-box"><b>Note:</b> Confirming means your seat is booked. Driver will contact you on WhatsApp before departure.</div>'+
+      '<div class="toggle-row" id="shift-toggle"><div><div class="toggle-lbl">Is this shift start time?</div><div class="toggle-sub">Driver will plan around your shift schedule</div></div><div class="toggle-track" id="shift-track"><div class="toggle-thumb"></div></div></div>'+
+      '<div class="note-box-join"><b>Note:</b> Confirming means your seat is booked. Driver will contact you on WhatsApp before departure.</div>'+
       '<div class="err-box" id="j-err"></div>'+
       '<button class="btn btn-green btn-full" id="j-submit">Confirm my seat</button>'+
       '<button class="btn btn-ghost btn-full-sm" id="j-back" style="margin-top:2px">← Back</button>'+
-    '</div></div>'+
-  '</div>';
+    '</div>';
 
   setupLoc('j-pu','j-pu-sug','j-pu-tag','j-pu-txt','j-pu');
   setupLoc('j-do','j-do-sug','j-do-tag','j-do-txt','j-do');
@@ -488,316 +695,51 @@ async function submitJoin(shiftOn){
 function showConfirmed(name,pu,doLoc,time,shiftOn){
   var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
   var mv=document.getElementById('main-view');
-  mv.innerHTML='<div class="content">'+
-    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
-    '<div style="padding:20px;text-align:center">'+
-      '<div style="font-size:40px;margin-bottom:12px">✅</div>'+
-      '<div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">You\'re on this ride</div>'+
-      '<div style="font-size:12px;color:var(--text-dim)">'+(ride.driver_name||'Driver')+' · '+fmtDate(ride.dates)+' · '+fmtTime(ride.departure_time)+'</div>'+
+  mv.innerHTML=
+    '<div style="padding:12px;display:flex;flex-direction:column;gap:10px">'+
+    rideCardHTML()+
+    '<div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:20px;text-align:center">'+
+      '<div style="font-size:36px;margin-bottom:10px">✅</div>'+
+      '<div style="font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--green);margin-bottom:4px">You\'re on this ride!</div>'+
+      '<div style="font-size:12px;color:var(--text-dim)">Driver will contact you on WhatsApp before departure</div>'+
     '</div>'+
-    '<div style="border-top:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:8px">'+
-      '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Pickup</span><span style="color:var(--text-dim);text-align:right;max-width:60%">'+pu+'</span></div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Dropoff</span><span style="color:var(--text-dim);text-align:right;max-width:60%">'+doLoc+'</span></div>'+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px">'+
+      '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Name</span><span style="color:var(--text)">'+name+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Pickup</span><span style="color:var(--text-dim);text-align:right;max-width:55%">'+pu+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Dropoff</span><span style="color:var(--text-dim);text-align:right;max-width:55%">'+doLoc+'</span></div>'+
       (time?'<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Pickup time</span><span style="color:var(--accent);font-weight:600">'+fmtTime(time+':00')+'</span></div>':'')+
-      (shiftOn?'<div style="font-size:11px;color:var(--accent)">✓ Marked as shift start time</div>':'')+
-      '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+confs+' person'+(confs!==1?'s':'')+' joining this ride including you</div>'+
-    '</div></div>'+
-    (ride.ride_status==='started'?'<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">Be ready at your pickup</div></div>':'')+
-  '</div>';
-}
-
-// ════════════════════════════════════════════
-// DRIVER TOP
-// ════════════════════════════════════════════
-function renderDriverTop(){
-  var st=ride.ride_status||'open';
-  var started=st==='started';
-  var dt=document.getElementById('driver-top');
-  dt.innerHTML=rideCardHTML()+
-    '<div class="action-card">'+
-      '<div class="action-row">'+
-        '<button class="btn btn-wa" id="d-wa"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Share ride</button>'+
-        '<button class="btn btn-ghost" id="d-maps" style="flex:1"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Open in Maps</button>'+
-        (!started?'<button class="btn btn-green" id="d-start" style="flex:1">▶ Start Ride</button>':'<button class="btn btn-red" id="d-end">■ End Ride</button>')+
-      '</div>'+
-      (!started?'<div class="action-row" style="border:none;padding-top:4px"><button class="btn btn-amber" id="d-close" style="flex:1">'+(st==='closed'?'Reopen Ride':'Close Ride')+'</button></div>':'')+
+      (shiftOn?'<div style="font-size:11px;color:var(--accent)">⚡ Marked as shift start time</div>':'')+
+      '<div style="height:1px;background:var(--border)"></div>'+
+      '<div style="font-size:11px;color:var(--text-muted)">'+confs+' person'+(confs!==1?'s':'')+' joining this ride including you</div>'+
+    '</div>'+
     '</div>';
-
-  wireRideCard();
-  document.getElementById('d-wa').onclick=function(){shareRideLink();};
-  document.getElementById('d-maps').onclick=openMaps;
-  var ds=document.getElementById('d-start');if(ds)ds.onclick=startRide;
-  var de=document.getElementById('d-end');if(de)de.onclick=endRide;
-  var dc=document.getElementById('d-close');if(dc)dc.onclick=toggleClose;
+  wirePublicCard();
 }
 
-// ════════════════════════════════════════════
-// TABS
-// ════════════════════════════════════════════
-function switchTab(t){
-  activeTab=t;
-  document.getElementById('tab-pax').classList.toggle('active',t==='passengers');
-  document.getElementById('tab-match').classList.toggle('active',t==='matched');
-  renderTab();
-}
-function renderTab(){if(activeTab==='passengers')renderPaxTab();else renderMatchedTab();}
-
-// ── PASSENGERS TAB — cards same style as searchride ──
-function renderPaxTab(){
-  var tc=document.getElementById('tab-content');
-  var conf=passengers.filter(function(p){return p.status!=='cancelled';});
-  document.getElementById('pax-count-lbl').textContent='('+conf.length+')';
-
-  if(!conf.length){
-    tc.innerHTML='<div style="text-align:center;padding:28px 20px;font-size:13px;color:var(--text-muted)">No passengers yet.<br>Share your ride link to get bookings.</div>'+
-      '<button class="btn btn-ghost btn-full" id="d-add" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button>';
-    document.getElementById('d-add').onclick=showAddForm;
-    return;
-  }
-
-  var html='';
-  conf.forEach(function(p,i){
-    var av=avCol(i+1);
-    var name=p.passenger_name_web||p.passenger_name||'Passenger';
-    var phone=p.passenger_phone_web||p.passenger_wa_id||'';
-    var pu=p.pickup_label||'—', dro=p.dropoff_label||'—';
-    var pt=p.pickup_time?fmtTime(p.pickup_time):'—';
-    var done=p.status==='picked_up';
-    var exp=expandedId===('pax-'+p.id);
-
-    // same badge style as searchride
-    var badges='<span class="badge b-confirmed">confirmed</span>';
-    if(p.is_shift_start)badges+='<span class="badge b-recurring">shift</span>';
-    if(done)badges+='<span class="badge b-matched">picked up</span>';
-
-    // Contact buttons — same c-btn style as searchride
-    var waHtml=phone
-      ?'<button class="c-btn wa-btn" data-phone="'+phone.replace(/\D/g,'')+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
-      :'<button class="c-btn" style="opacity:0.3" aria-label="No phone"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
-
-    // Expand shows pickup/dropoff + action buttons (same pattern as original message in searchride)
-    var expHtml=exp
-      ?'<div class="card-detail open">'+
-        '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Passenger details</div>'+
-        '<div class="msg-box"><p>'+
-          '📍 Pickup: '+pu+'<br>'+
-          '🏁 Dropoff: '+dro+'<br>'+
-          '🕐 Pickup time: '+pt+
-          (p.is_shift_start?'<br>⚡ Shift start time':'')+
-          (phone?'<br>📱 '+phone:'')+
-        '</p><div class="msg-fade"></div></div>'+
-        '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-          (phone?'<button class="btn btn-wa btn-sm" data-action="outside" data-phone="'+phone.replace(/\D/g,'')+'" style="flex:1">💬 I\'m outside</button>':'')+
-          (!done?'<button class="btn btn-ghost btn-sm" data-action="pickup" data-pid="'+p.id+'" style="color:var(--green);border-color:rgba(34,197,94,.3);background:var(--green-dim)">✓ Picked up</button>':'')+
-          '<button class="btn btn-red btn-sm" data-action="remove" data-pid="'+p.id+'">Remove</button>'+
-        '</div>'+
-      '</div>'
-      :'';
-
-    html+='<div class="ride-card'+(exp?' expanded':'')+(done?' card-urgent':'')+'" data-pax-id="'+p.id+'">'+
-      '<div class="card-top">'+
-        '<div class="card-row1">'+
-          '<div class="pax-info">'+
-            '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
-            '<div><div class="pax-name">'+name+'</div><div class="time-ago">'+(pt!=='—'?pt+' pickup':'joined')+'</div></div>'+
-          '</div>'+
-          '<div class="badges">'+badges+'</div>'+
-        '</div>'+
-        '<div class="route-strip">'+
-          '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>'+
-          '<div class="route-labels">'+
-            '<div><div class="route-place">'+pu+'</div><div class="route-sub">Pickup</div></div>'+
-            '<div><div class="route-place">'+dro+'</div><div class="route-sub">Dropoff</div></div>'+
-          '</div>'+
-          '<div class="route-meta"><div class="ride-time">'+pt+'</div><div class="ride-date">tap for more</div></div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="card-footer">'+
-        '<div class="footer-info">'+
-          '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+pt+'</div>'+
-          (p.is_shift_start?'<div class="f-chip">⚡ Shift</div>':'')+
-        '</div>'+
-        '<div class="contact-btns">'+waHtml+'</div>'+
-      '</div>'+
-      expHtml+
-    '</div>';
-  });
-
-  html+='<button class="btn btn-ghost btn-full" id="d-add" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3);margin-top:4px">+ Add passenger manually</button>';
-  tc.innerHTML=html;
-
-  // Wire pax card events
-  tc.querySelectorAll('[data-pax-id]').forEach(function(card){
-    card.addEventListener('click',function(e){
-      if(e.target.closest('.c-btn')||e.target.closest('[data-action]'))return;
-      var pid='pax-'+card.dataset.paxId;
-      expandedId=(expandedId===pid)?null:pid;
-      renderPaxTab();
-    });
-    var waBtn=card.querySelector('.wa-btn');
-    if(waBtn)waBtn.addEventListener('click',function(e){
-      e.stopPropagation();
-      window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"),'_blank');
-    });
-  });
-  tc.querySelectorAll('[data-action="pickup"]').forEach(function(btn){
-    btn.addEventListener('click',async function(e){
-      e.stopPropagation();
-      await db.from('passenger_requests').update({status:'picked_up'}).eq('id',this.dataset.pid);
-      var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
-      passengers=r.data||[];renderPaxTab();
-    });
-  });
-  tc.querySelectorAll('[data-action="remove"]').forEach(function(btn){
-    btn.addEventListener('click',async function(e){
-      e.stopPropagation();
-      if(!confirm('Remove this passenger?'))return;
-      await db.from('passenger_requests').update({status:'cancelled'}).eq('id',this.dataset.pid);
-      var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
-      passengers=r.data||[];renderPaxTab();
-    });
-  });
-  var addBtn=document.getElementById('d-add');
-  if(addBtn)addBtn.onclick=showAddForm;
-}
-
-// ── MATCHED TAB — exact same card style as searchride ──
-async function renderMatchedTab(){
-  var tc=document.getElementById('tab-content');
-  tc.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--text-muted)">Finding matched passengers…</div>';
-  if(!ride.pickup_lat||!ride.pickup_lng){
-    tc.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">No location data for this ride — matched passengers unavailable.</div>';return;
-  }
-  try{
-    var {data,error}=await db.rpc('find_matched_passengers',{
-      p_driver_id:RIDE_ID,p_from_lat:ride.pickup_lat,p_from_lng:ride.pickup_lng,
-      p_to_lat:ride.dropoff_lat,p_to_lng:ride.dropoff_lng,p_ride_date:ride.dates,p_radius_km:15
-    });
-    if(error)throw error;
-    var matches=data||[];
-    if(!matches.length){tc.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No matched passengers found near your route for this date.</div>';return;}
-
-    var shareUrl=rideUrl(false);
-    var html='';
-    var matchExpandedId=null; // local for this tab
-
-    matches.forEach(function(m,i){
-      var av=avCol(i);
-      var name=m.sender_name||'Passenger';
-      var phone=m.sender_number?String(m.sender_number):'';
-      var dist=m.dist_km?m.dist_km+' km away':'';
-      var rTime=fmtTime(m.pick_up_time);
-      var rDate=fmtDate(m.pick_up_date);
-      var waNum=phone.replace(/\D/g,'');
-      var waMsg='Hi '+name+', I am driving from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time)+'. Do you still need a ride? Join here: '+shareUrl;
-      var waBtnHtml=waNum
-        ?'<button class="c-btn wa-btn" data-num="'+waNum+'" data-msg="'+encodeURIComponent(waMsg)+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
-        :'<button class="c-btn" style="opacity:0.3"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
-
-      var shareBtnHtml='<button class="c-btn share-btn" data-url="'+shareUrl+'" data-msg="'+encodeURIComponent(waMsg)+'" aria-label="Share"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>';
-
-      // Badges same as searchride
-      var badges='';
-      if((m.important_ride||'').toLowerCase()==='urgent')badges+='<span class="badge b-urgent"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>urgent</span>';
-      if((m.important_ride||'').toLowerCase()==='airport')badges+='<span class="badge b-airport">airport</span>';
-      badges+='<span class="badge b-pending">pending</span>';
-      if(dist)badges+='<span class="badge" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(79,142,247,.25)">'+dist+'</span>';
-
-      // Expanded shows original message — exactly like searchride
-      var expId='match-'+i;
-      var expHtml=''; // will be injected dynamically
-
-      html+='<div class="ride-card" data-match-idx="'+i+'">'+
-        '<div class="card-top">'+
-          '<div class="card-row1">'+
-            '<div class="pax-info">'+
-              '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
-              '<div><div class="pax-name">'+name+'</div><div class="time-ago">'+timeAgo(m['D&T of msg'] || m.d_t_of_msg || '')+'</div></div>'+
-            '</div>'+
-            '<div class="badges">'+badges+'</div>'+
-          '</div>'+
-          '<div class="route-strip">'+
-            '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>'+
-            '<div class="route-labels">'+
-              '<div><div class="route-place">'+(m.pickup_label||'—')+'</div><div class="route-sub">Pickup</div></div>'+
-              '<div><div class="route-place">'+(m.dropoff_label||'—')+'</div><div class="route-sub">Dropoff</div></div>'+
-            '</div>'+
-            '<div class="route-meta"><div class="ride-time">'+rTime+'</div><div class="ride-date">'+rDate+'</div></div>'+
-          '</div>'+
-        '</div>'+
-        '<div class="card-footer">'+
-          '<div class="footer-info">'+
-            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>'+
-            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
-          '</div>'+
-          '<div class="contact-btns">'+waBtnHtml+shareBtnHtml+'</div>'+
-        '</div>'+
-        '<div class="card-detail" id="match-detail-'+i+'">'+
-          '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div>'+
-          '<div class="msg-box"><p>'+(m.original_message||m.text_body||'No message available')+'</p><div class="msg-fade"></div></div>'+
-        '</div>'+
-      '</div>';
-    });
-
-    tc.innerHTML=html;
-
-    // Wire match card events
-    tc.querySelectorAll('[data-match-idx]').forEach(function(card){
-      card.addEventListener('click',function(e){
-        if(e.target.closest('.c-btn'))return;
-        var idx=card.dataset.matchIdx;
-        var det=document.getElementById('match-detail-'+idx);
-        if(!det)return;
-        var open=det.classList.contains('open');
-        tc.querySelectorAll('.card-detail').forEach(function(d){d.classList.remove('open');});
-        tc.querySelectorAll('.ride-card').forEach(function(c){c.classList.remove('expanded');});
-        if(!open){det.classList.add('open');card.classList.add('expanded');}
-      });
-      card.querySelectorAll('.wa-btn').forEach(function(btn){
-        btn.addEventListener('click',function(e){
-          e.stopPropagation();
-          window.open('https://wa.me/'+this.dataset.num+'?text='+this.dataset.msg,'_blank');
-        });
-      });
-      card.querySelectorAll('.share-btn').forEach(function(btn){
-        btn.addEventListener('click',function(e){
-          e.stopPropagation();
-          var url=this.dataset.url;
-          var msg=decodeURIComponent(this.dataset.msg);
-          if(navigator.share){navigator.share({title:'Pathfynder Ride',text:msg,url:url}).catch(function(){});}
-          else{if(navigator.clipboard)navigator.clipboard.writeText(url);else{var el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);}alert('Link copied!');}
-        });
-      });
-    });
-  }catch(e){tc.innerHTML='<div style="padding:16px;font-size:12px;color:var(--red)">Error: '+e.message+'</div>';}
-}
-
-// ════════════════════════════════════════════
-// ADD PASSENGER FORM
-// ════════════════════════════════════════════
+/* ── ADD PASSENGER FORM ── */
 function showAddForm(){
   var tc=document.getElementById('tab-content');
-  tc.innerHTML='<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Add passenger manually</div>'+
-    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"><div style="padding:14px;display:flex;flex-direction:column;gap:12px">'+
-      '<div class="field"><label>Name *</label><div class="input-wrap"><input class="field-input" id="ap-name" placeholder="Passenger name"></div></div>'+
-      '<div class="field"><label>WhatsApp *</label><div class="input-wrap"><input class="field-input" id="ap-phone" type="tel" placeholder="+1 416 555 0000"></div></div>'+
-      '<div class="field"><label>Pickup *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-pu" placeholder="Pickup location" autocomplete="off"><div class="suggestions" id="ap-pu-sug"></div></div><div class="confirmed-tag" id="ap-pu-tag"><div class="confirmed-dot"></div><span id="ap-pu-txt"></span></div></div>'+
-      '<div class="field"><label>Dropoff *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-do" placeholder="Dropoff location" autocomplete="off"><div class="suggestions" id="ap-do-sug"></div></div><div class="confirmed-tag" id="ap-do-tag"><div class="confirmed-dot"></div><span id="ap-do-txt"></span></div></div>'+
-      '<div class="field"><label>Pickup time</label><div class="input-wrap"><input class="field-input" id="ap-time" type="time"></div></div>'+
-      '<div class="err-box" id="ap-err"></div>'+
-      '<button class="btn btn-primary btn-full" id="ap-submit">Add passenger</button>'+
-      '<button class="btn btn-ghost btn-full-sm" id="ap-back" style="margin-top:2px">← Back</button>'+
-    '</div></div>';
+  if(!tc)return;
+  tc.innerHTML=
+    '<div style="padding:12px;display:flex;flex-direction:column;gap:12px">'+
+    '<div style="font-size:14px;font-weight:600;color:var(--text)">Add passenger manually</div>'+
+    '<div class="field"><label>Name *</label><div class="input-wrap"><input class="field-input" id="ap-name" placeholder="Passenger name"></div></div>'+
+    '<div class="field"><label>WhatsApp *</label><div class="input-wrap"><input class="field-input" id="ap-phone" type="tel" placeholder="+1 416 555 0000"></div></div>'+
+    '<div class="field"><label>Pickup location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-pu" placeholder="Pickup" autocomplete="off"><div class="suggestions" id="ap-pu-sug"></div></div><div class="confirmed-tag" id="ap-pu-tag"><div class="confirmed-dot"></div><span id="ap-pu-txt"></span></div></div>'+
+    '<div class="field"><label>Dropoff location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-do" placeholder="Dropoff" autocomplete="off"><div class="suggestions" id="ap-do-sug"></div></div><div class="confirmed-tag" id="ap-do-tag"><div class="confirmed-dot"></div><span id="ap-do-txt"></span></div></div>'+
+    '<div class="field"><label>Pickup time</label><div class="input-wrap"><input class="field-input" id="ap-time" type="time"></div></div>'+
+    '<div class="err-box" id="ap-err"></div>'+
+    '<button class="btn btn-primary btn-full" id="ap-submit">Add passenger</button>'+
+    '<button class="btn btn-ghost btn-full-sm" id="ap-back" style="margin-top:2px">← Back</button>'+
+    '</div>';
+
   setupLoc('ap-pu','ap-pu-sug','ap-pu-tag','ap-pu-txt','ap-pu');
   setupLoc('ap-do','ap-do-sug','ap-do-tag','ap-do-txt','ap-do');
   document.getElementById('ap-back').onclick=function(){activeTab='passengers';renderPaxTab();};
   document.getElementById('ap-submit').onclick=async function(){
-    var name=document.getElementById('ap-name').value.trim();
-    var ph=document.getElementById('ap-phone').value.trim();
-    var pu=document.getElementById('ap-pu').value.trim();
-    var dro=document.getElementById('ap-do').value.trim();
-    var t=document.getElementById('ap-time').value;
-    var err=document.getElementById('ap-err');
+    var name=document.getElementById('ap-name').value.trim(),ph=document.getElementById('ap-phone').value.trim();
+    var pu=document.getElementById('ap-pu').value.trim(),dro=document.getElementById('ap-do').value.trim();
+    var t=document.getElementById('ap-time').value,err=document.getElementById('ap-err');
     if(!name||!ph||!pu||!dro){err.textContent='All fields required.';err.classList.add('show');return;}
     err.classList.remove('show');this.disabled=true;this.textContent='Adding…';
     await db.from('passenger_requests').insert({
@@ -808,47 +750,68 @@ function showAddForm(){
       pickup_time:t||null,status:'confirmed',platform:'web',date:ride.dates
     });
     var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
-    passengers=r.data||[];activeTab='passengers';renderDriverTop();renderPaxTab();
+    passengers=r.data||[];activeTab='passengers';
+    render(); // re-render full driver view to update banner
   };
 }
 
-// ════════════════════════════════════════════
-// MAPS
-// ════════════════════════════════════════════
+/* ── MAPS — fixed to actually work ── */
 function openMaps(){
-  if(!navigator.geolocation){alert('Location not available.');return;}
-  navigator.geolocation.getCurrentPosition(function(pos){
-    var dLat=pos.coords.latitude,dLng=pos.coords.longitude;
-    var stops=passengers.filter(function(p){return p.status!=='cancelled'&&p.pickup_lat&&p.pickup_lng;})
-      .map(function(p){return{lat:p.pickup_lat,lng:p.pickup_lng};});
-    stops.sort(function(a,b){return haversine(dLat,dLng,a.lat,a.lng)-haversine(dLat,dLng,b.lat,b.lng);});
-    if(ride.dropoff_lat&&ride.dropoff_lng)stops.push({lat:ride.dropoff_lat,lng:ride.dropoff_lng});
-    if(!stops.length){alert('No passengers with location data yet.');return;}
-    var dest=stops[stops.length-1];
+  var conf=passengers.filter(function(p){return p.status!=='cancelled'&&p.pickup_lat&&p.pickup_lng;});
+
+  // Build stops without needing geolocation first — we sort and open
+  // then show directions from current location
+  var dest=ride.dropoff_lat&&ride.dropoff_lng?{lat:ride.dropoff_lat,lng:ride.dropoff_lng}:null;
+
+  if(!conf.length&&!dest){alert('No passenger locations or dropoff data yet.');return;}
+
+  // Try to get current location, fall back to just opening with ride stops
+  function buildAndOpen(dLat,dLng){
+    var stops=conf.map(function(p){return{lat:p.pickup_lat,lng:p.pickup_lng};});
+    if(dLat&&dLng){
+      stops.sort(function(a,b){return haversine(dLat,dLng,a.lat,a.lng)-haversine(dLat,dLng,b.lat,b.lng);});
+    }
+    if(dest)stops.push(dest);
+    if(!stops.length){alert('No stops to navigate to.');return;}
+
+    var finalDest=stops[stops.length-1];
     var wpts=stops.slice(0,-1);
+
     if(isIOS()){
-      var url='http://maps.apple.com/?saddr=Current+Location&daddr=';
+      // Apple Maps — supports waypoints via 'daddr' chaining
+      var url='http://maps.apple.com/?saddr='+(dLat&&dLng?dLat+','+dLng:'Current+Location')+'&daddr=';
       if(wpts.length)url+=wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:';
-      url+=dest.lat+','+dest.lng;
+      url+=finalDest.lat+','+finalDest.lng;
       window.open(url,'_blank');
-    }else{
-      var url='https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination='+dest.lat+','+dest.lng+'&travelmode=driving';
+    } else {
+      // Google Maps
+      var origin=dLat&&dLng?(dLat+','+dLng):'Current+Location';
+      var url='https://www.google.com/maps/dir/?api=1'+
+        '&origin='+origin+
+        '&destination='+finalDest.lat+','+finalDest.lng+
+        '&travelmode=driving';
       if(wpts.length)url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
       window.open(url,'_blank');
     }
-  },function(){alert('Could not get your location. Please allow location access.');});
+  }
+
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      function(pos){buildAndOpen(pos.coords.latitude,pos.coords.longitude);},
+      function(){buildAndOpen(null,null);}, // fallback: open without current location
+      {timeout:5000}
+    );
+  } else {
+    buildAndOpen(null,null);
+  }
 }
 
-// ════════════════════════════════════════════
-// RIDE STATUS ACTIONS
-// ════════════════════════════════════════════
-async function startRide(){var b=document.getElementById('d-start');if(b){b.disabled=true;b.textContent='Starting…';}await db.from('driver_routines').update({ride_status:'started'}).eq('id',RIDE_ID);ride.ride_status='started';document.getElementById('status-pill').textContent='Started';document.getElementById('status-pill').className='status-pill sp-started';renderDriverTop();renderTab();}
-async function endRide(){if(!confirm('End this ride?'))return;await db.from('driver_routines').update({ride_status:'ended'}).eq('id',RIDE_ID);ride.ride_status='ended';document.getElementById('status-pill').textContent='Ended';document.getElementById('status-pill').className='status-pill sp-ended';renderDriverTop();renderTab();}
-async function toggleClose(){var s=ride.ride_status==='closed'?'open':'closed';await db.from('driver_routines').update({ride_status:s}).eq('id',RIDE_ID);ride.ride_status=s;document.getElementById('status-pill').textContent=s.charAt(0).toUpperCase()+s.slice(1);document.getElementById('status-pill').className='status-pill sp-'+s;renderDriverTop();renderTab();}
+/* ── RIDE ACTIONS ── */
+async function startRide(){var b=document.getElementById('d-start');if(b){b.disabled=true;b.textContent='Starting…';}await db.from('driver_routines').update({ride_status:'started'}).eq('id',RIDE_ID);ride.ride_status='started';var p=document.getElementById('status-pill');p.textContent='Started';p.className='status-pill sp-started';render();}
+async function endRide(){if(!confirm('End this ride?'))return;await db.from('driver_routines').update({ride_status:'ended'}).eq('id',RIDE_ID);ride.ride_status='ended';var p=document.getElementById('status-pill');p.textContent='Ended';p.className='status-pill sp-ended';render();}
+async function toggleClose(){var s=ride.ride_status==='closed'?'open':'closed';await db.from('driver_routines').update({ride_status:s}).eq('id',RIDE_ID);ride.ride_status=s;var p=document.getElementById('status-pill');p.textContent=s.charAt(0).toUpperCase()+s.slice(1);p.className='status-pill sp-'+s;render();}
 
-// ════════════════════════════════════════════
-// MAPBOX — same as index.html session token pattern
-// ════════════════════════════════════════════
+/* ── MAPBOX LOCATION ── */
 function setupLoc(inputId,sugId,tagId,tagTxtId,cacheKey){
   var input=document.getElementById(inputId),sug=document.getElementById(sugId);
   if(!input||!sug)return;
@@ -858,16 +821,14 @@ function setupLoc(inputId,sugId,tagId,tagTxtId,cacheKey){
     clearTimeout(geoTimers[cacheKey]);
     var q=input.value.trim();
     if(q.length<3){sug.classList.remove('show');sug.innerHTML='';return;}
-    sug.innerHTML='<div class="suggestion-item loading-item">Searching…</div>';
-    sug.classList.add('show');
-    if(!window._SB_SID)window._SB_SID='pf-ride-'+Date.now();
+    sug.innerHTML='<div class="suggestion-item loading-item">Searching…</div>';sug.classList.add('show');
+    if(!window._SB_SID)window._SB_SID='pf-'+Date.now();
     var sid=window._SB_SID;
     geoTimers[cacheKey]=setTimeout(function(){
       fetch('https://api.mapbox.com/search/searchbox/v1/suggest?q='+encodeURIComponent(q)+'&access_token='+MAPBOX_TOKEN+'&session_token='+sid+'&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
         .then(function(r){return r.json();})
         .then(function(d){
-          sug.innerHTML='';
-          var items=(d&&d.suggestions)||[];
+          sug.innerHTML='';var items=(d&&d.suggestions)||[];
           if(!items.length){sug.innerHTML='<div class="suggestion-item loading-item">No results</div>';return;}
           items.forEach(function(item){
             var name=item.name||'',ctx=item.place_formatted||item.full_address||'';
@@ -897,14 +858,14 @@ function setupLoc(inputId,sugId,tagId,tagTxtId,cacheKey){
   document.addEventListener('click',function(e){if(!input.contains(e.target)&&!sug.contains(e.target))sug.classList.remove('show');});
 }
 
-// ════════════════════════════════════════════
-// SPECIAL SCREENS
-// ════════════════════════════════════════════
-function otwHTML(){return '<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">'+(ride.driver_name||'Driver')+' has started the ride — be ready at your pickup</div></div>';}
-function expiredHTML(){return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"><div style="padding:32px 20px;text-align:center"><div style="font-size:44px;margin-bottom:14px">🏁</div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px">This ride has ended</div><div style="font-size:13px;color:var(--text-dim)">'+(ride.pickup_label||'')+' → '+(ride.dropoff_label||'')+'<br>'+fmtDate(ride.dates)+' · '+fmtTime(ride.departure_time)+'</div></div></div>';}
-function showErr(msg){document.getElementById('loading-view').style.display='none';document.getElementById('main-view').style.display='';document.getElementById('main-view').innerHTML='<div class="content"><div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 20px;text-align:center"><div style="font-size:44px;margin-bottom:14px">🔍</div><div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">Ride not found</div><div style="font-size:13px;color:var(--text-dim)">'+msg+'</div></div></div>';}
+/* ── SPECIAL SCREENS ── */
+function expiredHTML(){return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 20px;text-align:center"><div style="font-size:40px;margin-bottom:12px">🏁</div><div style="font-family:var(--font-display);font-size:19px;font-weight:700;color:var(--text);margin-bottom:6px">This ride has ended</div><div style="font-size:13px;color:var(--text-dim)">'+(ride.pickup_label||'')+' → '+(ride.dropoff_label||'')+'<br>'+fmtDate(ride.dates)+' · '+fmtTime(ride.departure_time)+'</div></div>';}
+function showErr(msg){document.getElementById('loading-view').style.display='none';var mv=document.getElementById('main-view');mv.style.display='flex';mv.innerHTML='<div style="padding:12px"><div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 20px;text-align:center"><div style="font-size:40px;margin-bottom:12px">🔍</div><div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">Not found</div><div style="font-size:13px;color:var(--text-dim)">'+msg+'</div></div></div>';}
 
-// Boot
+/* ── WIRE JOIN BUTTON ON RENDER ── */
+var _origRender=render;
+render=function(){_origRender();setTimeout(function(){var jb=document.getElementById('btn-join');if(jb)jb.onclick=showJoinForm;},0);};
+
 load();
 </script>
 </body>
