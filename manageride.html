@@ -229,7 +229,6 @@ function seatsLeft(){return Math.max(0,(ride.available_seats||4)-passengers.filt
 function rideExpired(){var t=new Date();t.setHours(0,0,0,0);var r=new Date((ride.dates||'2000-01-01')+'T00:00:00');r.setHours(0,0,0,0);return r<t;}
 function rideUrl(withToken){var u=location.origin+location.pathname.replace(/[^/]*$/,'')+'manageride.html?id='+ride.id;if(withToken&&ride.share_token)u+='&token='+ride.share_token;return u;}
 function haversine(la1,ln1,la2,ln2){var R=6371,dL=(la2-la1)*Math.PI/180,dG=(ln2-ln1)*Math.PI/180,a=Math.pow(Math.sin(dL/2),2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.pow(Math.sin(dG/2),2);return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
-function isIOS(){return /iPhone|iPad|iPod/i.test(navigator.userAgent);}
 function getSaved(){try{return JSON.parse(localStorage.getItem('pf_passenger_v1')||'null');}catch(e){return null;}}
 function setSaved(p){try{localStorage.setItem('pf_passenger_v1',JSON.stringify(p));}catch(e){}}
 
@@ -813,25 +812,13 @@ function openMaps(){
     // Waypoints = pickups + dropoffs (ride dest is the final destination)
     var wpts=pickups.map(function(p){return{lat:p.lat,lng:p.lng};}).concat(dropoffs);
 
-    var url;
-    if(isIOS()){
-      // Apple Maps deep link — opens Maps app directly
-      url='http://maps.apple.com/?saddr='+oLat+','+oLng+'&dirflg=d';
-      if(wpts.length){
-        url+='&daddr='+wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:'+dest.lat+','+dest.lng;
-      } else {
-        url+='&daddr='+dest.lat+','+dest.lng;
-      }
-    } else {
-      // Google Maps deep link — opens Maps app on Android
-      // Using comgooglemaps:// first, fall back to https://
-      url='https://www.google.com/maps/dir/?api=1'+
-        '&origin='+oLat+','+oLng+
-        '&destination='+dest.lat+','+dest.lng+
-        '&travelmode=driving';
-      if(wpts.length){
-        url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
-      }
+    // Always Google Maps
+    var url='https://www.google.com/maps/dir/?api=1'+
+      '&origin='+oLat+','+oLng+
+      '&destination='+dest.lat+','+dest.lng+
+      '&travelmode=driving';
+    if(wpts.length){
+      url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
     }
 
     // On mobile: location.href opens Maps app directly (replaces browser tab)
