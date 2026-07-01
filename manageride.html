@@ -770,72 +770,89 @@ function showAddForm(){
 
 /* ── MAPS ── */
 function openMaps(){
-  // Collect confirmed passengers that have coords
   var conf=passengers.filter(function(p){
     return p.status!=='cancelled'&&p.pickup_lat&&p.pickup_lng;
   });
 
-  // Always need at least the ride dropoff
   if(!ride.dropoff_lat||!ride.dropoff_lng){
-    alert('This ride does not have location data yet.');
+    alert('This ride does not have destination data yet.');
     return;
   }
 
-  function buildAndOpen(dLat,dLng){
-    // Passenger pickup stops — sort closest to driver first if we have GPS
-    var paxStops=conf.map(function(p){
-      return{lat:p.pickup_lat,lng:p.pickup_lng};
-    });
-    if(dLat!=null&&dLng!=null&&paxStops.length>1){
-      paxStops.sort(function(a,b){
-        return haversine(dLat,dLng,a.lat,a.lng)-haversine(dLat,dLng,b.lat,b.lng);
-      });
-    }
-    // Final destination = ride dropoff
-    var dest={lat:ride.dropoff_lat,lng:ride.dropoff_lng};
-    // All waypoints = passenger pickups (the dropoff is the destination)
-    var wpts=paxStops;
+  function buildURL(dLat,dLng){
+    // Origin = driver GPS or ride pickup
+    var oLat=dLat!=null?dLat:ride.pickup_lat;
+    var oLng=dLng!=null?dLng:ride.pickup_lng;
 
-    if(isIOS()){
-      // Apple Maps
-      // saddr = driver current location (or pickup if no GPS)
-      var saddr=dLat!=null?(dLat+','+dLng):(ride.pickup_lat+','+ride.pickup_lng);
-      var url='http://maps.apple.com/?saddr='+saddr;
-      if(wpts.length){
-        url+='&daddr='+wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:'+dest.lat+','+dest.lng;
-      } else {
-        url+='&daddr='+dest.lat+','+dest.lng;
-      }
-      url+='&dirflg=d';
-      location.href=url;
-    } else {
-      // Google Maps — origin must be real coords, not string
-      var origin=dLat!=null?(dLat+','+dLng):(ride.pickup_lat+','+ride.pickup_lng);
-      var url='https://www.google.com/maps/dir/?api=1'+
-        '&origin='+origin+
-        '&destination='+dest.lat+','+dest.lng+
-        '&travelmode=driving';
-      if(wpts.length){
-        url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
-      }
-      location.href=url;
-    }
+    // Final destination = ride dropoff (always last stop)
+    var dest={lat:ride.dropoff_lat,lng:ride.dropoff_lng};
+
+    // ROUTE ORDER:
+    // 1. Sort passenger PICKUPS by distance from driver (closest first)
+    // 2. Then sort passenger DROPOFFS by distance from last pickup (closest first)
+    // 3. Final stop = ride destination (driver's dropoff)
+    var pickups=conf.map(function(p){
+      return {lat:p.pickup_lat,lng:p.pickup_lng,id:p.id,
+              dLat:p.dropoff_lat,dLng:p.dropoff_lng};
+    });
+    pickups.sort(function(a,b){
+      return haversine(oLat,oLng,a.lat,a.lng)-haversine(oLat,oLng,b.lat,b.lng);
+    });
+
+    // Dropoffs sorted from last pickup position
+    var lastLat=pickups.length?pickups[pickups.length-1].lat:oLat;
+    var lastLng=pickups.length?pickups[pickups.length-1].lng:oLng;
+    var dropoffs=conf
+      .filter(function(p){return p.dropoff_lat&&p.dropoff_lng;})
+      .map(function(p){return {lat:p.dropoff_lat,lng:p.dropoff_lng};});
+    dropoffs.sort(function(a,b){
+      return haversine(lastLat,lastLng,a.lat,a.lng)-haversine(lastLat,lastLng,b.lat,b.lng);
+    });
+
+    // All waypoints: pickups first, then dropoffs, then ride dest is the final destination
+    var wpts=pickups.map(function(p){return {lat:p.lat,lng:p.lng};})
+               .concat(dropoffs);
+
+    return {oLat:oLat,oLng:oLng,dest:dest,wpts:wpts};
   }
 
-  // Try to get GPS first; fall back to ride pickup coords
+  function openURL(dLat,dLng){
+    var r=buildURL(dLat,dLng);
+    var url;
+    if(isIOS()){
+      url='http://maps.apple.com/?saddr='+r.oLat+','+r.oLng+'&dirflg=d';
+      if(r.wpts.length){
+        url+='&daddr='+r.wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:'+r.dest.lat+','+r.dest.lng;
+      } else {
+        url+='&daddr='+r.dest.lat+','+r.dest.lng;
+      }
+    } else {
+      url='https://www.google.com/maps/dir/?api=1'+
+        '&origin='+r.oLat+','+r.oLng+
+        '&destination='+r.dest.lat+','+r.dest.lng+
+        '&travelmode=driving';
+      if(r.wpts.length){
+        url+='&waypoints='+r.wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
+      }
+    }
+    // Open in new tab — avoids popup blocking and keeps the app open
+    var a=document.createElement('a');
+    a.href=url;
+    a.target='_blank';
+    a.rel='noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      function(pos){
-        buildAndOpen(pos.coords.latitude,pos.coords.longitude);
-      },
-      function(){
-        // Permission denied or error — use ride pickup as starting point
-        buildAndOpen(null,null);
-      },
-      {timeout:6000,enableHighAccuracy:false}
+      function(pos){openURL(pos.coords.latitude,pos.coords.longitude);},
+      function(){openURL(null,null);},
+      {timeout:6000,enableHighAccuracy:true}
     );
   } else {
-    buildAndOpen(null,null);
+    openURL(null,null);
   }
 }
 
