@@ -7,425 +7,186 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-:root {
-  --bg: #0e1117;
-  --surface: #161b27;
-  --surface2: #1e2535;
-  --border: #2a3348;
-  --accent: #4f8ef7;
-  --accent-dim: rgba(79,142,247,0.12);
-  --accent-hover: #6ba3ff;
-  --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.10);
-  --amber: #f59e0b;
-  --amber-dim: rgba(245,158,11,0.12);
-  --red: #ef4444;
-  --red-dim: rgba(239,68,68,0.10);
-  --purple: #a855f7;
-  --purple-dim: rgba(168,85,247,0.10);
-  --text: #e8edf5;
-  --text-dim: #8a95a8;
-  --text-muted: #4e5a6e;
-  --radius: 12px;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--border:#2a3348;
+  --accent:#4f8ef7;--accent-dim:rgba(79,142,247,0.12);--accent-hover:#6ba3ff;
+  --green:#22c55e;--green-dim:rgba(34,197,94,0.10);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.12);
+  --red:#ef4444;--red-dim:rgba(239,68,68,0.10);
+  --purple:#a855f7;--purple-dim:rgba(168,85,247,0.10);
+  --text:#e8edf5;--text-dim:#8a95a8;--text-muted:#4e5a6e;
+  --radius:12px;--font-display:'Space Grotesk',sans-serif;--font-body:'Inter',sans-serif;
 }
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden}
+#app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 0 60px;
-  overflow-x: hidden;
-}
+/* HEADER */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;flex-shrink:0}
+.logo{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:20px;height:20px}
+.brand{font-family:var(--font-display);font-size:17px;font-weight:700;letter-spacing:-.3px}
+.brand span{color:var(--accent)}
+.status-pill{margin-left:auto;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:none}
+.sp-open   {background:var(--green-dim);border:1px solid rgba(34,197,94,.25);color:var(--green)}
+.sp-started{background:var(--accent-dim);border:1px solid rgba(79,142,247,.25);color:var(--accent)}
+.sp-closed {background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)}
+.sp-ended  {background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)}
 
-/* ── HEADER ── */
-.header {
-  width: 100%;
-  max-width: 520px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
+/* CONTENT */
+.content{flex:1;padding:12px 12px 40px;display:flex;flex-direction:column;gap:10px}
 
-.logo {
-  width: 36px;
-  height: 36px;
-  background: var(--accent);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.logo svg { width: 20px; height: 20px; }
+/* ── EXACT CARD STYLES FROM searchride.html ── */
+.ride-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.ride-card:active{opacity:.9}
+.ride-card.expanded{border-color:var(--accent)}
+.ride-card.card-urgent{border-color:rgba(239,68,68,0.4)}
+.ride-card.card-urgent.expanded{border-color:var(--red)}
+.card-top{padding:11px 13px 9px}
+.card-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.pax-info{display:flex;align-items:center;gap:8px;min-width:0}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--font-display)}
+.pax-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;font-family:var(--font-display)}
+.time-ago{font-size:10px;color:var(--text-muted);margin-top:1px}
+.badges{display:flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:135px}
+.badge{font-size:9px;font-weight:600;padding:2px 6px;border-radius:20px;text-transform:uppercase;letter-spacing:.02em;display:flex;align-items:center;gap:2px;white-space:nowrap}
+.badge svg{width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.b-pending  {background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.25)}
+.b-matched  {background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.b-onetime  {background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+.b-urgent   {background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+.b-airport  {background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,0.25)}
+.b-recurring{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(79,142,247,0.25)}
+.b-confirmed{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.b-driver   {background:var(--accent-dim);color:var(--accent);border:1px solid rgba(79,142,247,0.25)}
+.route-strip{display:flex;align-items:stretch;gap:9px}
+.route-nodes{display:flex;flex-direction:column;align-items:center;padding:2px 0;width:12px;flex-shrink:0}
+.nd-o{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--text-muted)}
+.nd-d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.nd-line{flex:1;width:1.5px;background:repeating-linear-gradient(to bottom,var(--accent) 0px,var(--accent) 3px,transparent 3px,transparent 6px);margin:2px 0;min-height:12px;opacity:.45}
+.route-labels{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:5px}
+.route-place{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-sub{font-size:10px;color:var(--text-muted)}
+.route-meta{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:3px}
+.ride-time{font-size:17px;font-weight:700;color:var(--text);font-family:var(--font-display);letter-spacing:-.5px;line-height:1}
+.ride-date{font-size:10px;color:var(--text-dim);text-align:right}
+.card-footer{display:flex;align-items:center;border-top:1px solid var(--border)}
+.footer-info{flex:1;padding:7px 13px;display:flex;align-items:center;gap:9px}
+.f-chip{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text-muted)}
+.f-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.contact-btns{display:flex;border-left:1px solid var(--border)}
+.c-btn{width:42px;height:38px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s}
+.c-btn:first-child{border-right:1px solid var(--border)}
+.c-btn:active{background:var(--surface2)}
+.c-btn svg{width:19px;height:19px}
+.icon-wa{fill:none;stroke:#25D366;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-tg{fill:none;stroke:#2AABEE;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-dim{fill:none;stroke:var(--border);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card-detail{border-top:1px solid var(--border);padding:11px 13px;display:none}
+.card-detail.open{display:block}
+.det-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.det-label svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.msg-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:8px;max-height:80px;overflow:hidden;position:relative}
+.msg-box p{font-size:12px;color:var(--text-dim);line-height:1.55}
+.msg-fade{position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(transparent,var(--bg));pointer-events:none}
 
-.brand {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-.brand span { color: var(--accent); }
+/* SEATS BAR */
+.seats-bar-wrap{margin:8px 0 4px}
+.seats-bar{background:var(--surface2);border-radius:3px;height:5px;overflow:hidden}
+.seats-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .3s}
+.seats-label{font-size:10px;color:var(--text-muted);margin-top:3px}
 
-.status-pill {
-  margin-left: auto;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  display: none;
-}
-.status-open    { background: var(--green-dim); border: 1px solid rgba(34,197,94,.25); color: var(--green); }
-.status-started { background: var(--accent-dim); border: 1px solid rgba(79,142,247,.25); color: var(--accent); }
-.status-closed  { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); }
-.status-ended   { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); }
+/* DRIVER ACTION CARD */
+.action-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.action-row{padding:10px 13px;display:flex;gap:7px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.action-row:last-child{border:none}
 
-/* ── CONTENT WRAPPER ── */
-.content {
-  width: 100%;
-  max-width: 520px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:9px;font-family:var(--font-body);font-weight:600;cursor:pointer;border:none;transition:opacity .15s;white-space:nowrap;font-size:12px}
+.btn:active{opacity:.8}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-primary{background:var(--accent);color:#fff;padding:0 14px;height:36px}
+.btn-green  {background:var(--green);color:#fff;padding:0 14px;height:36px}
+.btn-ghost  {background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);padding:0 12px;height:36px}
+.btn-wa     {background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);color:#25D366;padding:0 12px;height:36px}
+.btn-amber  {background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber);padding:0 12px;height:34px}
+.btn-red    {background:var(--red-dim);border:1px solid rgba(239,68,68,.25);color:var(--red);padding:0 10px;height:30px;font-size:11px}
+.btn-icon   {width:36px;height:36px;padding:0;flex-shrink:0}
+.btn-full   {width:100%;height:44px;font-size:14px;border-radius:10px}
+.btn-full-sm{width:100%;height:38px;font-size:13px;border-radius:9px}
 
-/* ── CARDS ── */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-.card-body { padding: 16px; }
-.card-footer {
-  border-top: 1px solid var(--border);
-  padding: 10px 14px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:60px;z-index:90;flex-shrink:0}
+.tab{flex:1;padding:11px 8px;font-size:12px;font-weight:500;color:var(--text-muted);text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* ── ROUTE STRIP ── */
-.route-strip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 10px 0 6px;
-}
-.nd-o { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--text-muted); flex-shrink: 0; }
-.nd-line { flex: 1; height: 1.5px; background: repeating-linear-gradient(to right, var(--accent) 0, var(--accent) 4px, transparent 4px, transparent 8px); opacity: .5; }
-.nd-d { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-.route-labels { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+/* FORM (matching index.html exactly) */
+.field{display:flex;flex-direction:column;gap:6px;position:relative}
+.field label{font-size:13px;font-weight:500;color:var(--text-dim)}
+.input-wrap{position:relative}
+.field-input{width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;transition:border-color .15s;-webkit-appearance:none}
+.field-input:focus{border-color:var(--accent)}
+.field-input::placeholder{color:var(--text-muted)}
+.field-input.confirmed{border-color:var(--green)}
+input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
 
-/* ── CHIPS ── */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text-dim);
-  white-space: nowrap;
-}
-.chip.green  { background: var(--green-dim); border-color: rgba(34,197,94,.25); color: var(--green); }
-.chip.amber  { background: var(--amber-dim); border-color: rgba(245,158,11,.25); color: var(--amber); }
-.chip.blue   { background: var(--accent-dim); border-color: rgba(79,142,247,.25); color: var(--accent); }
-.chip.red    { background: var(--red-dim); border-color: rgba(239,68,68,.25); color: var(--red); }
-.meta-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+/* SUGGESTIONS (matching index.html exactly) */
+.suggestions{display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.suggestions.show{display:block}
+.suggestion-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+.suggestion-item:last-child{border:none}
+.suggestion-item:hover{background:var(--surface)}
+.suggestion-item.loading-item{cursor:default;font-size:12px;color:var(--text-muted);font-style:italic}
+.sug-main{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug-ctx {font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* ── SEATS BAR ── */
-.seats-bar-wrap { margin: 10px 0 4px; }
-.seats-bar { background: var(--surface2); border-radius: 3px; height: 5px; overflow: hidden; }
-.seats-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
-.seats-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+/* CONFIRMED TAG (matching index.html exactly) */
+.confirmed-tag{display:none;align-items:center;gap:7px;padding:7px 12px;border-radius:8px;font-size:12px;color:var(--green);background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2)}
+.confirmed-tag.show{display:flex}
+.confirmed-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 
-/* ── BUTTONS ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border-radius: 9px;
-  font-family: var(--font-body);
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: opacity .15s;
-  white-space: nowrap;
-  text-decoration: none;
-}
-.btn:active { opacity: .8; }
-.btn-primary  { background: var(--accent); color: #fff; padding: 0 16px; height: 40px; font-size: 13px; }
-.btn-green    { background: var(--green); color: #fff; padding: 0 16px; height: 40px; font-size: 13px; }
-.btn-ghost    { background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim); padding: 0 14px; height: 40px; font-size: 12px; }
-.btn-amber    { background: var(--amber-dim); border: 1px solid rgba(245,158,11,.3); color: var(--amber); padding: 0 12px; height: 36px; font-size: 12px; }
-.btn-red      { background: var(--red-dim); border: 1px solid rgba(239,68,68,.25); color: var(--red); padding: 0 10px; height: 32px; font-size: 11px; }
-.btn-wa       { background: rgba(37,211,102,.1); border: 1px solid rgba(37,211,102,.25); color: #25D366; padding: 0 14px; height: 40px; font-size: 12px; }
-.btn-icon     { width: 40px; height: 40px; padding: 0; flex-shrink: 0; }
-.btn-sm       { height: 32px; font-size: 11px; padding: 0 10px; }
-.btn-full     { width: 100%; height: 44px; font-size: 14px; margin-top: 4px; }
-.btn:disabled { opacity: .4; cursor: default; }
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;cursor:pointer}
+.toggle-lbl{font-size:13px;font-weight:500;color:var(--text)}
+.toggle-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.toggle-track{width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0}
+.toggle-track.on{background:var(--accent)}
+.toggle-thumb{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.toggle-track.on .toggle-thumb{left:18px}
 
-/* ── FORM FIELDS (same style as index.html) ── */
-.field { display: flex; flex-direction: column; gap: 6px; position: relative; }
-.field label { font-size: 13px; font-weight: 500; color: var(--text-dim); }
-.input-wrap { position: relative; }
-.input-wrap input, .field-input {
-  width: 100%;
-  padding: 11px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 14px;
-  outline: none;
-  transition: border-color .15s;
-  -webkit-appearance: none;
-}
-.input-wrap input:focus, .field-input:focus { border-color: var(--accent); }
-.input-wrap input::placeholder, .field-input::placeholder { color: var(--text-muted); }
-.input-wrap input.confirmed { border-color: var(--green); }
-input[type="time"] { cursor: pointer; }
-input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+/* NOTE BOX */
+.note-box{background:var(--accent-dim);border:1px solid rgba(79,142,247,.2);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--text-dim);line-height:1.55}
+.note-box b{color:var(--accent)}
 
-/* ── SUGGESTIONS (same as index.html) ── */
-.suggestions {
-  display: none;
-  position: absolute;
-  left: 0; right: 0;
-  top: calc(100% + 4px);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  z-index: 9999;
-  box-shadow: 0 8px 24px rgba(0,0,0,.4);
-}
-.suggestions.show { display: block; }
-.suggestion-item {
-  padding: 11px 14px;
-  cursor: pointer;
-  border-bottom: 1px solid var(--border);
-  transition: background .1s;
-}
-.suggestion-item:last-child { border-bottom: none; }
-.suggestion-item:hover { background: var(--surface); }
-.suggestion-item.loading-item { cursor: default; font-size: 12px; color: var(--text-muted); font-style: italic; }
-.sug-main { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sug-ctx  { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* STATUS */
+.otw-banner{background:var(--green-dim);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:14px 16px;text-align:center}
+.otw-title{font-size:14px;font-weight:600;color:var(--green);margin-bottom:3px}
+.otw-sub{font-size:12px;color:var(--text-dim)}
+.status-screen{text-align:center;padding:32px 20px}
+.status-icon{font-size:44px;margin-bottom:14px}
+.status-title{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px}
+.status-sub{font-size:13px;color:var(--text-dim);line-height:1.6}
 
-/* ── CONFIRMED TAG (same as index.html) ── */
-.confirmed-tag {
-  display: none;
-  align-items: center;
-  gap: 7px;
-  padding: 7px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  color: var(--green);
-  background: rgba(34,197,94,0.08);
-  border: 1px solid rgba(34,197,94,0.2);
-}
-.confirmed-tag.show { display: flex; }
-.confirmed-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+/* PAXCARD (driver list) */
+.pax-extra{border-top:1px solid var(--border);padding:10px 13px;display:flex;flex-direction:column;gap:8px}
+.pax-detail-row{display:flex;gap:6px;flex-wrap:wrap}
 
-/* ── TOGGLE ── */
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  cursor: pointer;
-}
-.toggle-label { font-size: 13px; font-weight: 500; color: var(--text); }
-.toggle-sub   { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.toggle-track { width: 36px; height: 20px; border-radius: 10px; background: var(--border); position: relative; transition: background .2s; flex-shrink: 0; }
-.toggle-track.on { background: var(--accent); }
-.toggle-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: left .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
-.toggle-track.on .toggle-thumb { left: 18px; }
+/* SECTION LABEL */
+.sec-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;padding:4px 0 2px}
 
-/* ── NOTE BOX ── */
-.note-box {
-  background: var(--accent-dim);
-  border: 1px solid rgba(79,142,247,.2);
-  border-radius: 9px;
-  padding: 10px 13px;
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.55;
-}
-.note-box b { color: var(--accent); }
+/* SKELETONS */
+.skel{background:var(--surface);border:1px solid var(--border);border-radius:14px;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-/* ── AVATAR ── */
-.av {
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-family: var(--font-display);
-  flex-shrink: 0;
-}
+/* ERR */
+.err-box{display:none;padding:10px 13px;border-radius:9px;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);color:var(--red);font-size:13px;line-height:1.5}
+.err-box.show{display:block}
 
-/* ── PASSENGER CARD ── */
-.pax-card {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 13px;
-  margin-bottom: 8px;
-}
-.pax-card.picked-up { opacity: .5; border-style: dashed; }
-.pax-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
-.pax-info { flex: 1; min-width: 0; }
-.pax-name  { font-size: 13px; font-weight: 600; color: var(--text); }
-.pax-phone { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.pax-route { font-size: 11px; color: var(--text-dim); margin: 5px 0 8px; line-height: 1.5; }
-.pax-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-
-/* ── MATCH CARD ── */
-.match-card {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 8px;
-}
-.match-header { display: flex; align-items: center; gap: 9px; margin-bottom: 5px; }
-.dist-badge {
-  margin-left: auto;
-  background: var(--accent-dim);
-  border: 1px solid rgba(79,142,247,.25);
-  border-radius: 5px;
-  padding: 2px 7px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--accent);
-  white-space: nowrap;
-}
-.match-route { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
-.match-actions { display: flex; gap: 6px; }
-
-/* ── TABS ── */
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  width: 100%;
-  max-width: 520px;
-  background: var(--surface);
-  position: sticky;
-  top: 61px;
-  z-index: 90;
-}
-.tab {
-  flex: 1;
-  padding: 12px 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-align: center;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  transition: all .15s;
-}
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-/* ── STATUS SCREENS ── */
-.status-screen { text-align: center; padding: 36px 20px; }
-.status-icon  { font-size: 44px; margin-bottom: 14px; }
-.status-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.status-sub   { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
-
-/* ── ON THE WAY BANNER ── */
-.otw-banner {
-  background: var(--green-dim);
-  border: 1px solid rgba(34,197,94,.25);
-  border-radius: 10px;
-  padding: 14px 16px;
-  text-align: center;
-}
-.otw-title { font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 3px; }
-.otw-sub   { font-size: 12px; color: var(--text-dim); }
-
-/* ── LINK BOX (success after join) ── */
-.link-section { padding: 0 16px 16px; }
-.link-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
-.link-url {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 13px;
-  font-size: 12px;
-  color: var(--text-dim);
-  word-break: break-all;
-  margin-bottom: 8px;
-  font-family: monospace;
-}
-
-/* ── SKELETONS ── */
-.skel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  animation: pulse 1.4s infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-.skel-lg { height: 200px; }
-.skel-sm { height: 80px; margin-bottom: 8px; }
-
-/* ── DIVIDER ── */
-.divider { height: 1px; background: var(--border); margin: 8px 0; }
-
-/* ── ERROR ── */
-.err-box {
-  display: none;
-  padding: 10px 14px;
-  border-radius: 9px;
-  background: var(--red-dim);
-  border: 1px solid rgba(239,68,68,.2);
-  color: var(--red);
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 8px;
-}
-.err-box.show { display: block; }
-
-/* ── STOP LIST ── */
-.stop-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.stop-item:last-child { border: none; }
-.stop-letter { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; margin-top: 1px; }
-.stop-place { font-size: 12px; font-weight: 500; color: var(--text); }
-.stop-time  { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-
-@media (max-width: 520px) {
-  .content { padding: 12px; }
-}
+@media(max-width:520px){.content{padding:10px 10px 40px}}
 </style>
 </head>
 <body>
+<div id="app">
 
 <!-- HEADER -->
 <div class="header">
@@ -439,505 +200,598 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
   <div id="status-pill" class="status-pill"></div>
 </div>
 
-<!-- LOADING -->
+<!-- SKELETONS while loading -->
 <div class="content" id="loading-view">
-  <div class="skel skel-lg"></div>
-  <div class="skel skel-sm"></div>
-  <div class="skel skel-sm"></div>
+  <div class="skel" style="height:200px"></div>
+  <div class="skel" style="height:80px;margin-top:2px"></div>
 </div>
 
-<!-- MAIN CONTENT (hidden until loaded) -->
-<div id="main-view" style="display:none;width:100%;max-width:520px;display:none">
-  <!-- injected by JS -->
+<!-- DRIVER TABS (hidden until driver loads) -->
+<div class="tabs" id="driver-tabs" style="display:none">
+  <div class="tab active" id="tab-pax" onclick="switchTab('passengers')">Passengers <span id="pax-count-lbl"></span></div>
+  <div class="tab" id="tab-match" onclick="switchTab('matched')">Matched rides</div>
 </div>
 
-<!-- TABS (driver only, shown after load) -->
-<div class="tabs" id="tabs" style="display:none">
-  <div class="tab active" id="tab-pax" onclick="switchTab('passengers')">Passengers <span id="tab-pax-count"></span></div>
-  <div class="tab" id="tab-match" onclick="switchTab('matched')">Matched</div>
-</div>
-<div class="content" id="tab-content" style="display:none"></div>
+<!-- MAIN VIEW -->
+<div id="main-view" style="display:none;flex:1"></div>
+
+</div><!-- end #app -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // CONFIG
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 var SUPABASE_URL  = 'https://omussxfyrztjahbdrrpi.supabase.co';
 var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';
 var MAPBOX_TOKEN  = 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw';
-var SITE_URL      = location.origin; // auto-detects: works on pathfynder-form.vercel.app or pathfynder.ca
-
 var db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ═══════════════════════════════════════════
-// URL PARAMS
-// ═══════════════════════════════════════════
-var params   = new URLSearchParams(location.search);
-var RIDE_ID  = params.get('id');
-var SHARE_TK = params.get('token');
+// ════════════════════════════════════════════
+// URL + TELEGRAM
+// ════════════════════════════════════════════
+var urlP     = new URLSearchParams(location.search);
+var RIDE_ID  = urlP.get('id');
+var SHARE_TK = urlP.get('token');
+var tg       = window.Telegram&&window.Telegram.WebApp?window.Telegram.WebApp:null;
+if(tg){tg.ready();tg.expand();}
+var tgUser   = tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user?tg.initDataUnsafe.user:null;
+var TG_ID    = tgUser?String(tgUser.id):null;
 
-// ═══════════════════════════════════════════
-// TELEGRAM
-// ═══════════════════════════════════════════
-var tg     = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-if (tg) { tg.ready(); tg.expand(); }
-var tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
-var TG_ID  = tgUser ? String(tgUser.id) : null;
-
-// ═══════════════════════════════════════════
-// PASSENGER PROFILE — localStorage
-// ═══════════════════════════════════════════
-function getSaved() { try { return JSON.parse(localStorage.getItem('pf_passenger_v1') || 'null'); } catch(e) { return null; } }
-function setSaved(p) { try { localStorage.setItem('pf_passenger_v1', JSON.stringify(p)); } catch(e) {} }
-
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════
-var ride       = null;
-var passengers = [];
-var isDriver   = false;
-var activeTab  = 'passengers';
-var geoCache   = {};
-var geoTimers  = {};
-var expandedPax = null;
+// ════════════════════════════════════════════
+var ride=null, passengers=[], isDriver=false, activeTab='passengers';
+var geoCache={}, geoTimers={}, expandedId=null;
 
-// ═══════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════
-var AV_COLORS = [
+// ════════════════════════════════════════════
+// HELPERS — same as searchride.html exactly
+// ════════════════════════════════════════════
+var AV=[
   {bg:'rgba(79,142,247,0.15)',c:'#4f8ef7'},
   {bg:'rgba(34,197,94,0.12)',c:'#22c55e'},
   {bg:'rgba(245,158,11,0.12)',c:'#f59e0b'},
   {bg:'rgba(239,68,68,0.12)',c:'#ef4444'},
   {bg:'rgba(168,85,247,0.12)',c:'#a855f7'},
 ];
-function avCol(i) { return AV_COLORS[i % AV_COLORS.length]; }
-function initials(n) { return (n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase(); }
+function avCol(i){return AV[i%AV.length];}
+function initials(n){return (n||'?').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
+function todayStr(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+function tomorrowStr(){var n=new Date();n.setDate(n.getDate()+1);return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+function timeAgo(iso){if(!iso)return '';var diff=Date.now()-new Date(iso).getTime(),mins=Math.floor(diff/60000),hours=Math.floor(mins/60),days=Math.floor(hours/24);if(mins<1)return 'just now';if(mins<60)return mins+'m ago';if(hours<24)return hours+'h ago';return days+'d ago';}
+function fmtDate(d){if(!d)return '—';if(d===todayStr())return 'Today';if(d===tomorrowStr())return 'Tomorrow';return new Date(d+'T00:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});}
+function fmtTime(t){if(!t||t==='—')return '—';var h=parseInt(t.slice(0,2),10),m=parseInt(t.slice(3,5),10);var ap=h>=12?'PM':'AM',h12=h%12||12;return h12+':'+(m<10?'0':'')+m+' '+ap;}
+function seatsLeft(){return Math.max(0,(ride.available_seats||4)-passengers.filter(function(p){return p.status!=='cancelled';}).length);}
+function rideExpired(){var t=new Date();t.setHours(0,0,0,0);var r=new Date(ride.dates+'T00:00:00');r.setHours(0,0,0,0);return r<t;}
+function rideUrl(withToken){var u=location.origin+'/manageride.html?id='+ride.id;if(withToken&&ride.share_token)u+='&token='+ride.share_token;return u;}
+function haversine(la1,ln1,la2,ln2){var R=6371,dL=(la2-la1)*Math.PI/180,dG=(ln2-ln1)*Math.PI/180,a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dG/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function isIOS(){return /iPhone|iPad|iPod/i.test(navigator.userAgent);}
+function getSaved(){try{return JSON.parse(localStorage.getItem('pf_passenger_v1')||'null');}catch(e){return null;}}
+function setSaved(p){try{localStorage.setItem('pf_passenger_v1',JSON.stringify(p));}catch(e){}}
 
-function fmtTime(t) {
-  if (!t) return '—';
-  var h = parseInt(t.slice(0,2),10), m = parseInt(t.slice(3,5),10);
-  var ap = h >= 12 ? 'PM' : 'AM', h12 = h % 12 || 12;
-  return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ap;
+// Share — uses native Web Share API with fallback
+function shareRideLink(){
+  var url=rideUrl(false);
+  var txt='Join my ride: '+(ride.pickup_label||'')+'→'+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time);
+  if(navigator.share){
+    navigator.share({title:'Pathfynder Ride',text:txt,url:url}).catch(function(){});
+  } else {
+    // Fallback: copy to clipboard
+    if(navigator.clipboard)navigator.clipboard.writeText(url);
+    else{var el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);}
+    alert('Link copied to clipboard!');
+  }
 }
-function fmtDate(d) {
-  if (!d) return '—';
-  var today = new Date(); today.setHours(0,0,0,0);
-  var rd = new Date(d + 'T00:00:00'); rd.setHours(0,0,0,0);
-  var diff = (rd - today) / 86400000;
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  return rd.toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric'});
-}
-function seatsLeft() {
-  var taken = passengers.filter(function(p){ return p.status !== 'cancelled'; }).length;
-  return Math.max(0, (ride.available_seats || 4) - taken);
-}
-function rideExpired() {
-  if (!ride.dates) return false;
-  var today = new Date(); today.setHours(0,0,0,0);
-  var rd = new Date(ride.dates + 'T00:00:00'); rd.setHours(0,0,0,0);
-  return rd < today;
-}
-function copyText(t) {
-  if (navigator.clipboard) { navigator.clipboard.writeText(t); return; }
-  var el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
-}
-function rideUrl(withToken) {
-  var u = SITE_URL + '/ride.html?id=' + ride.id;
-  if (withToken && ride.share_token) u += '&token=' + ride.share_token;
-  return u;
-}
-function haversine(la1,ln1,la2,ln2) {
-  var R=6371, dL=(la2-la1)*Math.PI/180, dG=(ln2-ln1)*Math.PI/180;
-  var a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dG/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-function isIOS() { return /iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // LOAD
-// ═══════════════════════════════════════════
-async function load() {
-  if (!RIDE_ID) { showError('No ride ID in URL.'); return; }
-  try {
-    var res1 = await db.from('driver_routines').select('*').eq('id', RIDE_ID).single();
-    if (res1.error || !res1.data) { showError('Ride not found.'); return; }
-    ride = res1.data;
-
-    isDriver = (SHARE_TK && SHARE_TK === ride.share_token)
-            || (TG_ID && TG_ID === String(ride.telegram_chat_id || ''));
-
-    var res2 = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID).order('created_at', {ascending:true});
-    passengers = res2.data || [];
-
+// ════════════════════════════════════════════
+async function load(){
+  if(!RIDE_ID){showErr('No ride ID in URL.');return;}
+  try{
+    var r1=await db.from('driver_routines').select('*').eq('id',RIDE_ID).single();
+    if(r1.error||!r1.data){showErr('Ride not found.');return;}
+    ride=r1.data;
+    isDriver=(SHARE_TK&&SHARE_TK===ride.share_token)||(TG_ID&&TG_ID===String(ride.telegram_chat_id||''));
+    var r2=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID).order('created_at',{ascending:true});
+    passengers=r2.data||[];
     render();
-  } catch(e) { showError(e.message); }
+  }catch(e){showErr(e.message);}
 }
 
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // RENDER
-// ═══════════════════════════════════════════
-function render() {
-  document.getElementById('loading-view').style.display = 'none';
-  document.getElementById('main-view').style.display = '';
-  var mv = document.getElementById('main-view');
+// ════════════════════════════════════════════
+function render(){
+  document.getElementById('loading-view').style.display='none';
+  var mv=document.getElementById('main-view');
+  mv.style.display='';
 
   // Status pill
-  var pill = document.getElementById('status-pill');
-  var st = ride.ride_status || 'open';
-  pill.textContent = st.charAt(0).toUpperCase() + st.slice(1);
-  pill.className = 'status-pill status-' + st;
-  pill.style.display = '';
+  var st=ride.ride_status||'open';
+  var pill=document.getElementById('status-pill');
+  pill.textContent=st.charAt(0).toUpperCase()+st.slice(1);
+  pill.className='status-pill sp-'+st;
+  pill.style.display='';
 
-  if (rideExpired() && st === 'open') { mv.innerHTML = expiredHTML(); return; }
+  if(rideExpired()&&st==='open'){mv.innerHTML=expiredHTML();document.getElementById('driver-tabs').style.display='none';return;}
 
-  if (isDriver) {
-    renderDriverTop(mv);
-    document.getElementById('tabs').style.display = '';
-    document.getElementById('tab-content').style.display = '';
+  if(isDriver){
+    mv.innerHTML='<div class="content" id="driver-top"></div><div class="content" id="tab-content"></div>';
+    renderDriverTop();
+    document.getElementById('driver-tabs').style.display='';
     renderTab();
-  } else if (st === 'started') {
-    mv.innerHTML = otwHTML() + rideCardHTML();
-    document.getElementById('tabs').style.display = 'none';
-    document.getElementById('tab-content').style.display = 'none';
+  } else if(st==='started'){
+    mv.innerHTML='<div class="content">'+otwHTML()+rideCardHTML()+'</div>';
+    document.getElementById('driver-tabs').style.display='none';
   } else {
-    mv.innerHTML = rideCardHTML() + publicActionsHTML();
-    document.getElementById('tabs').style.display = 'none';
-    document.getElementById('tab-content').style.display = 'none';
+    mv.innerHTML='<div class="content">'+rideCardHTML()+publicActionsHTML()+'</div>';
+    document.getElementById('driver-tabs').style.display='none';
     wirePublic();
   }
 }
 
-// ═══════════════════════════════════════════
-// RIDE DETAIL CARD (shared by all views)
-// ═══════════════════════════════════════════
-function rideCardHTML() {
-  var left  = seatsLeft();
-  var total = ride.available_seats || 4;
-  var taken = total - left;
-  var pct   = Math.round((taken / total) * 100);
-  var av    = avCol(0);
-  var seatChipClass = left === 0 ? 'amber' : left <= 1 ? 'amber' : 'green';
-  var confs = passengers.filter(function(p){ return p.status !== 'cancelled'; }).length;
+// ════════════════════════════════════════════
+// RIDE CARD — exact same structure as searchride.html buildCard
+// ════════════════════════════════════════════
+function rideCardHTML(paxRow){
+  var left=seatsLeft(), total=ride.available_seats||4, taken=total-left;
+  var pct=Math.round((taken/total)*100);
+  var av=avCol(0);
+  var rTime=fmtTime(ride.departure_time);
+  var rDate=fmtDate(ride.dates);
+  var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
 
-  return '<div class="card">' +
-    '<div class="card-body">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
-        '<div class="av" style="width:38px;height:38px;font-size:13px;background:'+av.bg+';color:'+av.c+'">'+initials(ride.driver_name)+'</div>' +
-        '<div>' +
-          '<div style="font-size:15px;font-weight:700;font-family:var(--font-display);color:var(--text)">'+(ride.driver_name||'Driver')+'</div>' +
-          '<div style="font-size:11px;color:var(--text-muted)">Sharing a ride</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="route-strip"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>' +
-      '<div class="route-labels"><span>'+(ride.pickup_label||'—')+'</span><span>'+(ride.dropoff_label||'—')+'</span></div>' +
-      '<div class="meta-row">' +
-        '<span class="chip">📅 '+fmtDate(ride.dates)+'</span>' +
-        '<span class="chip">🕐 '+fmtTime(ride.departure_time)+'</span>' +
-        '<span class="chip '+seatChipClass+'">'+left+' seat'+(left!==1?'s':'')+' left</span>' +
-      '</div>' +
-      '<div class="seats-bar-wrap">' +
-        '<div class="seats-bar"><div class="seats-fill" style="width:'+pct+'%"></div></div>' +
-        '<div class="seats-label">'+taken+' of '+total+' seats taken · '+confs+' passenger'+(confs!==1?'s':'')+' joining</div>' +
-      '</div>' +
-      (ride.notes ? '<div style="margin-top:10px;font-size:12px;color:var(--text-dim);background:var(--surface2);border-radius:8px;padding:8px 11px">'+ride.notes+'</div>' : '') +
-    '</div>' +
+  // Badges
+  var badges='<span class="badge b-driver">Driver</span>';
+  if(ride.ride_status==='started')badges+='<span class="badge b-matched">Started</span>';
+  else if(ride.ride_status==='open')badges+='<span class="badge b-pending">Open</span>';
+  else badges+='<span class="badge b-onetime">'+ride.ride_status+'</span>';
+
+  // WA button for driver contact
+  var waHtml=ride.driver_phone
+    ?'<button class="c-btn wa-btn" data-num="'+ride.driver_phone.replace(/\D/g,'')+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+    :'<button class="c-btn" style="opacity:0.3" aria-label="No phone"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+
+  var shareHtml='<button class="c-btn" id="main-share-btn" aria-label="Share"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>';
+
+  var expHtml=expandedId==='main'
+    ?'<div class="card-detail open"><div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Notes</div>'+(ride.notes?'<div class="msg-box"><p>'+ride.notes+'</p></div>':'<p style="font-size:12px;color:var(--text-muted)">No notes added</p>')+'<div class="seats-bar-wrap"><div class="seats-bar"><div class="seats-fill" style="width:'+pct+'%"></div></div><div class="seats-label">'+taken+' of '+total+' seats taken · '+confs+' passenger'+(confs!==1?'s':'')+' joined</div></div></div>'
+    :'';
+
+  return '<div class="ride-card'+(expandedId==='main'?' expanded':'')+'" id="main-ride-card">'+
+    '<div class="card-top">'+
+      '<div class="card-row1">'+
+        '<div class="pax-info">'+
+          '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(ride.driver_name)+'</div>'+
+          '<div><div class="pax-name">'+(ride.driver_name||'Driver')+'</div>'+
+          '<div class="time-ago">'+confs+' passenger'+(confs!==1?'s':'')+' joining</div></div>'+
+        '</div>'+
+        '<div class="badges">'+badges+'</div>'+
+      '</div>'+
+      '<div class="route-strip">'+
+        '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>'+
+        '<div class="route-labels">'+
+          '<div><div class="route-place">'+(ride.pickup_label||'—')+'</div><div class="route-sub">Pickup</div></div>'+
+          '<div><div class="route-place">'+(ride.dropoff_label||'—')+'</div><div class="route-sub">Dropoff</div></div>'+
+        '</div>'+
+        '<div class="route-meta"><div class="ride-time">'+rTime+'</div><div class="ride-date">'+rDate+'</div></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card-footer">'+
+      '<div class="footer-info">'+
+        '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>'+
+        '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
+      '</div>'+
+      '<div class="contact-btns">'+waHtml+shareHtml+'</div>'+
+    '</div>'+
+    expHtml+
   '</div>';
 }
 
-// ═══════════════════════════════════════════
+function wireRideCard(){
+  var card=document.getElementById('main-ride-card');
+  if(!card)return;
+  card.addEventListener('click',function(e){
+    if(e.target.closest('.c-btn'))return;
+    expandedId=(expandedId==='main')?null:'main';
+    render();
+  });
+  var waBtn=card.querySelector('.wa-btn');
+  if(waBtn)waBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.num,'_blank');});
+  var shareBtn=document.getElementById('main-share-btn');
+  if(shareBtn)shareBtn.addEventListener('click',function(e){e.stopPropagation();shareRideLink();});
+}
+
+// ════════════════════════════════════════════
 // PUBLIC VIEW
-// ═══════════════════════════════════════════
-function publicActionsHTML() {
-  var left = seatsLeft();
-  var st   = ride.ride_status || 'open';
-  var full = left === 0;
-  var closed = st === 'closed' || st === 'ended' || st === 'started';
+// ════════════════════════════════════════════
+function publicActionsHTML(){
+  var left=seatsLeft(), st=ride.ride_status||'open';
+  var full=left===0, closed=st==='closed'||st==='ended'||st==='started';
+  var joinBtn='';
+  if(full)joinBtn='<button class="btn btn-full" disabled style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">Ride Full</button>';
+  else if(closed)joinBtn='<button class="btn btn-full" disabled style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)">Ride Closed</button>';
+  else joinBtn='<button class="btn btn-green btn-full" id="btn-join">Join this ride</button>';
+  return '<div style="margin-top:2px">'+joinBtn+'</div>';
+}
+function wirePublic(){
+  wireRideCard();
+  var jb=document.getElementById('btn-join');
+  if(jb)jb.onclick=showJoinForm;
+}
 
-  var joinBtn = '';
-  if (full) {
-    joinBtn = '<button class="btn btn-full" disabled style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">Ride Full</button>';
-  } else if (closed) {
-    joinBtn = '<button class="btn btn-full" disabled style="background:var(--surface2);border:1px solid var(--border);color:var(--text-muted)">Ride Closed</button>';
-  } else {
-    joinBtn = '<button class="btn btn-green btn-full" id="btn-join">Join this ride</button>';
-  }
+// ════════════════════════════════════════════
+// JOIN FORM
+// ════════════════════════════════════════════
+function showJoinForm(){
+  var saved=getSaved();
+  var prefillName=saved&&saved.name||(tgUser?((tgUser.first_name||'')+(tgUser.last_name?' '+tgUser.last_name:'')).trim():'');
+  var mv=document.getElementById('main-view');
+  mv.innerHTML='<div class="content" style="gap:12px">'+
+    '<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:2px 0">'+
+      (ride.driver_name||'Driver')+' · '+(ride.pickup_label||'')+'→'+(ride.dropoff_label||'')+' · '+fmtTime(ride.departure_time)+
+    '</div>'+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
+    '<div style="padding:16px;display:flex;flex-direction:column;gap:14px">'+
+      '<div class="field"><label>Your name *</label><div class="input-wrap"><input class="field-input" id="j-name" placeholder="Full name" value="'+prefillName+'"></div></div>'+
+      '<div class="field"><label>WhatsApp number *</label><div class="input-wrap"><input class="field-input" id="j-phone" type="tel" placeholder="+1 416 555 0000" value="'+(saved&&saved.phone||'')+'"></div></div>'+
+      '<div class="field"><label>Your pickup location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="j-pu" placeholder="Where should driver pick you up?" autocomplete="off"><div class="suggestions" id="j-pu-sug"></div></div><div class="confirmed-tag" id="j-pu-tag"><div class="confirmed-dot"></div><span id="j-pu-txt"></span></div></div>'+
+      '<div class="field"><label>Your dropoff location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="j-do" placeholder="Where are you going?" autocomplete="off"><div class="suggestions" id="j-do-sug"></div></div><div class="confirmed-tag" id="j-do-tag"><div class="confirmed-dot"></div><span id="j-do-txt"></span></div></div>'+
+      '<div class="field"><label>Pickup time</label><div class="input-wrap"><input class="field-input" id="j-time" type="time" value="'+(ride.departure_time||'').slice(0,5)+'"></div></div>'+
+      '<div class="toggle-row" id="shift-toggle">'+
+        '<div><div class="toggle-lbl">Is this shift start time?</div><div class="toggle-sub">Driver will plan around your shift</div></div>'+
+        '<div class="toggle-track" id="shift-track"><div class="toggle-thumb"></div></div>'+
+      '</div>'+
+      '<div class="note-box"><b>Note:</b> Confirming means your seat is booked. Driver will contact you on WhatsApp before departure.</div>'+
+      '<div class="err-box" id="j-err"></div>'+
+      '<button class="btn btn-green btn-full" id="j-submit">Confirm my seat</button>'+
+      '<button class="btn btn-ghost btn-full-sm" id="j-back" style="margin-top:2px">← Back</button>'+
+    '</div></div>'+
+  '</div>';
 
-  return '<div class="card">' +
-    '<div class="card-footer">' +
-      (ride.driver_phone ? '<button class="btn btn-wa btn-icon" id="btn-wa-driver" title="WhatsApp driver"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>' : '') +
-      '<button class="btn btn-ghost btn-icon" id="btn-copy" title="Copy link"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>' +
-    '</div>' +
-    '<div style="padding:0 14px 14px">' + joinBtn + '</div>' +
+  setupLoc('j-pu','j-pu-sug','j-pu-tag','j-pu-txt','j-pu');
+  setupLoc('j-do','j-do-sug','j-do-tag','j-do-txt','j-do');
+  var shiftOn=false;
+  document.getElementById('shift-toggle').onclick=function(){shiftOn=!shiftOn;document.getElementById('shift-track').classList.toggle('on',shiftOn);};
+  document.getElementById('j-back').onclick=render;
+  document.getElementById('j-submit').onclick=function(){submitJoin(shiftOn);};
+}
+
+async function submitJoin(shiftOn){
+  var name=document.getElementById('j-name').value.trim();
+  var phone=document.getElementById('j-phone').value.trim();
+  var pu=document.getElementById('j-pu').value.trim();
+  var doLoc=document.getElementById('j-do').value.trim();
+  var time=document.getElementById('j-time').value;
+  var err=document.getElementById('j-err');
+  if(!name||!phone||!pu||!doLoc){err.textContent='Please fill in all required fields.';err.classList.add('show');return;}
+  err.classList.remove('show');
+  var btn=document.getElementById('j-submit');btn.disabled=true;btn.textContent='Booking…';
+  try{
+    var row={ride_id:RIDE_ID,passenger_name_web:name,passenger_phone_web:phone,passenger_wa_id:phone,
+      passenger_name:name,pickup_label:pu,dropoff_label:doLoc,
+      pickup_lat:geoCache['j-pu']?geoCache['j-pu'].lat:null,pickup_lng:geoCache['j-pu']?geoCache['j-pu'].lng:null,
+      dropoff_lat:geoCache['j-do']?geoCache['j-do'].lat:null,dropoff_lng:geoCache['j-do']?geoCache['j-do'].lng:null,
+      is_shift_start:shiftOn,status:'confirmed',platform:'web',date:ride.dates};
+    if(time)row.pickup_time=time;
+    if(TG_ID)row.telegram_chat_id=TG_ID;
+    var {error}=await db.from('passenger_requests').insert(row);
+    if(error)throw error;
+    setSaved({name:name,phone:phone});
+    var r2=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
+    passengers=r2.data||[];
+    showConfirmed(name,pu,doLoc,time,shiftOn);
+  }catch(e){btn.disabled=false;btn.textContent='Confirm my seat';err.textContent='Booking failed: '+e.message;err.classList.add('show');}
+}
+
+function showConfirmed(name,pu,doLoc,time,shiftOn){
+  var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
+  var mv=document.getElementById('main-view');
+  mv.innerHTML='<div class="content">'+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
+    '<div style="padding:20px;text-align:center">'+
+      '<div style="font-size:40px;margin-bottom:12px">✅</div>'+
+      '<div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">You\'re on this ride</div>'+
+      '<div style="font-size:12px;color:var(--text-dim)">'+(ride.driver_name||'Driver')+' · '+fmtDate(ride.dates)+' · '+fmtTime(ride.departure_time)+'</div>'+
+    '</div>'+
+    '<div style="border-top:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:8px">'+
+      '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Pickup</span><span style="color:var(--text-dim);text-align:right;max-width:60%">'+pu+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Dropoff</span><span style="color:var(--text-dim);text-align:right;max-width:60%">'+doLoc+'</span></div>'+
+      (time?'<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Pickup time</span><span style="color:var(--accent);font-weight:600">'+fmtTime(time+':00')+'</span></div>':'')+
+      (shiftOn?'<div style="font-size:11px;color:var(--accent)">✓ Marked as shift start time</div>':'')+
+      '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'+confs+' person'+(confs!==1?'s':'')+' joining this ride including you</div>'+
+    '</div></div>'+
+    (ride.ride_status==='started'?'<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">Be ready at your pickup</div></div>':'')+
   '</div>';
 }
 
-function wirePublic() {
-  var waBtn = document.getElementById('btn-wa-driver');
-  if (waBtn) waBtn.onclick = function() { window.open('https://wa.me/' + ride.driver_phone.replace(/\D/g,''), '_blank'); };
-
-  var copyBtn = document.getElementById('btn-copy');
-  if (copyBtn) copyBtn.onclick = function() {
-    copyText(rideUrl(false));
-    copyBtn.innerHTML = 'Copied!';
-    setTimeout(function(){ copyBtn.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }, 2000);
-  };
-
-  var joinBtn = document.getElementById('btn-join');
-  if (joinBtn) joinBtn.onclick = showJoinForm;
-}
-
-// ═══════════════════════════════════════════
-// JOIN FORM
-// ═══════════════════════════════════════════
-function showJoinForm() {
-  var saved = getSaved();
-  var mv = document.getElementById('main-view');
-  mv.innerHTML =
-    '<div style="padding:12px 0 0;font-size:12px;color:var(--text-muted);text-align:center">'+(ride.driver_name||'Driver')+' · '+(ride.pickup_label||'')+'→'+(ride.dropoff_label||'')+' · '+fmtTime(ride.departure_time)+'</div>' +
-    '<div class="card"><div class="card-body" style="display:flex;flex-direction:column;gap:14px">' +
-      '<div class="field"><label>Your name *</label><div class="input-wrap"><input class="field-input" id="j-name" placeholder="Full name" value="'+(saved&&saved.name||tgUser&&((tgUser.first_name||'')+(tgUser.last_name?' '+tgUser.last_name:''))||'')+'"></div></div>' +
-      '<div class="field"><label>WhatsApp number *</label><div class="input-wrap"><input class="field-input" id="j-phone" type="tel" placeholder="+1 416 555 0000" value="'+(saved&&saved.phone||'')+'"></div></div>' +
-      '<div class="field"><label>Your pickup location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="j-pu" placeholder="Where should driver pick you up?" autocomplete="off"><div class="suggestions" id="j-pu-sug"></div></div><div class="confirmed-tag" id="j-pu-tag"><div class="confirmed-dot"></div><span id="j-pu-txt"></span></div></div>' +
-      '<div class="field"><label>Your dropoff location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="j-do" placeholder="Where are you going?" autocomplete="off"><div class="suggestions" id="j-do-sug"></div></div><div class="confirmed-tag" id="j-do-tag"><div class="confirmed-dot"></div><span id="j-do-txt"></span></div></div>' +
-      '<div class="field"><label>Pickup time needed</label><div class="input-wrap"><input class="field-input" id="j-time" type="time" value="'+(ride.departure_time||'').slice(0,5)+'"></div></div>' +
-      '<div class="toggle-row" id="shift-toggle"><div><div class="toggle-label">Going to work / shift start?</div><div class="toggle-sub">Driver will plan around your schedule</div></div><div class="toggle-track" id="shift-track"><div class="toggle-thumb"></div></div></div>' +
-      '<div class="note-box"><b>Note:</b> Confirming means your seat is booked. The driver will contact you on WhatsApp.</div>' +
-      '<div class="err-box" id="j-err"></div>' +
-      '<button class="btn btn-green btn-full" id="j-submit">Confirm my seat</button>' +
-      '<button class="btn btn-ghost btn-full" id="j-back" style="margin-top:4px">← Back</button>' +
-    '</div></div>';
-
-  setupLocField('j-pu', 'j-pu-sug', 'j-pu-tag', 'j-pu-txt', 'j-pu');
-  setupLocField('j-do', 'j-do-sug', 'j-do-tag', 'j-do-txt', 'j-do');
-
-  var shiftOn = false;
-  document.getElementById('shift-toggle').onclick = function() {
-    shiftOn = !shiftOn;
-    document.getElementById('shift-track').classList.toggle('on', shiftOn);
-  };
-  document.getElementById('j-back').onclick = function() { render(); };
-  document.getElementById('j-submit').onclick = function() { submitJoin(shiftOn); };
-}
-
-async function submitJoin(shiftOn) {
-  var name  = document.getElementById('j-name').value.trim();
-  var phone = document.getElementById('j-phone').value.trim();
-  var pu    = document.getElementById('j-pu').value.trim();
-  var doLoc = document.getElementById('j-do').value.trim();
-  var time  = document.getElementById('j-time').value;
-  var err   = document.getElementById('j-err');
-
-  if (!name || !phone || !pu || !doLoc) { err.textContent='Please fill in all required fields.'; err.classList.add('show'); return; }
-  err.classList.remove('show');
-
-  var btn = document.getElementById('j-submit');
-  btn.disabled = true; btn.textContent = 'Booking…';
-
-  var puGeo = geoCache['j-pu'] || null;
-  var doGeo = geoCache['j-do'] || null;
-
-  try {
-    var row = {
-      ride_id:             RIDE_ID,
-      passenger_name_web:  name,
-      passenger_phone_web: phone,
-      passenger_wa_id:     phone,
-      passenger_name:      name,
-      pickup_label:        pu,
-      dropoff_label:       doLoc,
-      pickup_lat:          puGeo ? puGeo.lat : null,
-      pickup_lng:          puGeo ? puGeo.lng : null,
-      dropoff_lat:         doGeo ? doGeo.lat : null,
-      dropoff_lng:         doGeo ? doGeo.lng : null,
-      is_shift_start:      shiftOn,
-      status:              'confirmed',
-      platform:            'web',
-      date:                ride.dates,
-    };
-    if (time) row.pickup_time = time;
-    if (TG_ID) row.telegram_chat_id = TG_ID;
-
-    var { error } = await db.from('passenger_requests').insert(row);
-    if (error) throw error;
-
-    setSaved({ name: name, phone: phone });
-
-    var res2 = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
-    passengers = res2.data || [];
-
-    showConfirmed(name, pu, doLoc, time);
-  } catch(e) {
-    btn.disabled = false; btn.textContent = 'Confirm my seat';
-    err.textContent = 'Booking failed: ' + e.message; err.classList.add('show');
-  }
-}
-
-function showConfirmed(name, pu, doLoc, time) {
-  var mv = document.getElementById('main-view');
-  var st = ride.ride_status || 'open';
-  mv.innerHTML =
-    '<div class="card"><div class="card-body">' +
-      '<div class="status-screen">' +
-        '<div class="status-icon">✅</div>' +
-        '<div class="status-title">You\'re on this ride</div>' +
-        '<div class="status-sub">'+(ride.driver_name||'Driver')+' · '+fmtDate(ride.dates)+' · '+fmtTime(ride.departure_time)+'<br>Driver will contact you on WhatsApp before departure</div>' +
-      '</div>' +
-      '<div class="divider"></div>' +
-      '<div style="padding:0 4px 8px;display:flex;flex-direction:column;gap:8px">' +
-        '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Pickup</span><span style="color:var(--text-dim);text-align:right;max-width:60%">'+pu+'</span></div>' +
-        '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Dropoff</span><span style="color:var(--text-dim);text-align:right;max-width:60%">'+doLoc+'</span></div>' +
-        (time ? '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text-muted)">Pickup time</span><span style="color:var(--accent);font-weight:600">'+fmtTime(time+':00')+'</span></div>' : '') +
-        '<div style="font-size:11px;color:var(--text-muted);margin-top:4px">'+passengers.filter(function(p){return p.status!=='cancelled';}).length+' people joining this ride including you</div>' +
-      '</div>' +
-    '</div></div>' +
-    (st === 'started' ? '<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">Ride has started — be ready at your pickup</div></div>' : '');
-}
-
-// ═══════════════════════════════════════════
-// DRIVER TOP (info card + action buttons)
-// ═══════════════════════════════════════════
-function renderDriverTop(mv) {
-  var left = seatsLeft();
-  var st   = ride.ride_status || 'open';
-  var started = st === 'started';
-
-  mv.innerHTML = rideCardHTML() +
-    '<div class="card">' +
-      '<div class="card-footer" style="flex-wrap:wrap">' +
-        '<button class="btn btn-wa btn-icon" id="d-wa" title="Share on WhatsApp"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#25D366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>' +
-        '<button class="btn btn-ghost btn-icon" id="d-copy" title="Copy link"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>' +
-        '<button class="btn btn-ghost" id="d-maps" style="flex:1"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> Open in Maps</button>' +
-        (!started ? '<button class="btn btn-green" id="d-start" style="flex:1">Start Ride</button>'
-                  : '<button class="btn btn-red btn-sm" id="d-end">End Ride</button>') +
-      '</div>' +
-      (!started ? '<div style="padding:0 14px 12px;display:flex;gap:8px">' +
-        '<button class="btn btn-amber" id="d-close" style="flex:1">'+(st==='closed'?'Reopen Ride':'Close Ride')+'</button>' +
-      '</div>' : '') +
+// ════════════════════════════════════════════
+// DRIVER TOP
+// ════════════════════════════════════════════
+function renderDriverTop(){
+  var st=ride.ride_status||'open';
+  var started=st==='started';
+  var dt=document.getElementById('driver-top');
+  dt.innerHTML=rideCardHTML()+
+    '<div class="action-card">'+
+      '<div class="action-row">'+
+        '<button class="btn btn-wa" id="d-wa"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Share ride</button>'+
+        '<button class="btn btn-ghost" id="d-maps" style="flex:1"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Open in Maps</button>'+
+        (!started?'<button class="btn btn-green" id="d-start" style="flex:1">▶ Start Ride</button>':'<button class="btn btn-red" id="d-end">■ End Ride</button>')+
+      '</div>'+
+      (!started?'<div class="action-row" style="border:none;padding-top:4px"><button class="btn btn-amber" id="d-close" style="flex:1">'+(st==='closed'?'Reopen Ride':'Close Ride')+'</button></div>':'')+
     '</div>';
 
-  // Wire buttons
-  document.getElementById('d-wa').onclick = function() {
-    var url = rideUrl(false);
-    var msg = 'I\'m driving from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time)+'. Join here: '+url;
-    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
-  };
-  document.getElementById('d-copy').onclick = function() {
-    copyText(rideUrl(false));
-    this.innerHTML='Copied!';var el=this;
-    setTimeout(function(){el.innerHTML='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';},2000);
-  };
-  document.getElementById('d-maps').onclick = openMaps;
-  if (document.getElementById('d-start')) document.getElementById('d-start').onclick = startRide;
-  if (document.getElementById('d-end'))   document.getElementById('d-end').onclick   = endRide;
-  if (document.getElementById('d-close')) document.getElementById('d-close').onclick  = toggleClose;
+  wireRideCard();
+  document.getElementById('d-wa').onclick=function(){shareRideLink();};
+  document.getElementById('d-maps').onclick=openMaps;
+  var ds=document.getElementById('d-start');if(ds)ds.onclick=startRide;
+  var de=document.getElementById('d-end');if(de)de.onclick=endRide;
+  var dc=document.getElementById('d-close');if(dc)dc.onclick=toggleClose;
 }
 
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // TABS
-// ═══════════════════════════════════════════
-function switchTab(t) {
-  activeTab = t;
-  document.getElementById('tab-pax').classList.toggle('active', t==='passengers');
-  document.getElementById('tab-match').classList.toggle('active', t==='matched');
+// ════════════════════════════════════════════
+function switchTab(t){
+  activeTab=t;
+  document.getElementById('tab-pax').classList.toggle('active',t==='passengers');
+  document.getElementById('tab-match').classList.toggle('active',t==='matched');
   renderTab();
 }
-function renderTab() {
-  if (activeTab === 'passengers') renderPaxTab();
-  else renderMatchedTab();
-}
+function renderTab(){if(activeTab==='passengers')renderPaxTab();else renderMatchedTab();}
 
-// ── PASSENGERS TAB ──
-function renderPaxTab() {
-  var tc   = document.getElementById('tab-content');
-  var conf = passengers.filter(function(p){ return p.status !== 'cancelled'; });
-  document.getElementById('tab-pax-count').textContent = '(' + conf.length + ')';
+// ── PASSENGERS TAB — cards same style as searchride ──
+function renderPaxTab(){
+  var tc=document.getElementById('tab-content');
+  var conf=passengers.filter(function(p){return p.status!=='cancelled';});
+  document.getElementById('pax-count-lbl').textContent='('+conf.length+')';
 
-  if (!conf.length) {
-    tc.innerHTML = '<div style="text-align:center;padding:28px 20px;font-size:13px;color:var(--text-muted)">No passengers yet.<br>Share your ride link to get bookings.</div>' +
-      '<button class="btn btn-ghost btn-full" id="d-add-pax" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3);margin-top:0">+ Add passenger manually</button>';
-    document.getElementById('d-add-pax').onclick = showAddPaxForm;
+  if(!conf.length){
+    tc.innerHTML='<div style="text-align:center;padding:28px 20px;font-size:13px;color:var(--text-muted)">No passengers yet.<br>Share your ride link to get bookings.</div>'+
+      '<button class="btn btn-ghost btn-full" id="d-add" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button>';
+    document.getElementById('d-add').onclick=showAddForm;
     return;
   }
 
-  var html = '';
-  conf.forEach(function(p, i) {
-    var av   = avCol(i);
-    var name = p.passenger_name_web || p.passenger_name || 'Passenger';
-    var ph   = p.passenger_phone_web || p.passenger_wa_id || '';
-    var pu   = p.pickup_label || '—';
-    var dro  = p.dropoff_label || '—';
-    var pt   = p.pickup_time ? fmtTime(p.pickup_time) : '—';
-    var done = p.status === 'picked_up';
+  var html='';
+  conf.forEach(function(p,i){
+    var av=avCol(i+1);
+    var name=p.passenger_name_web||p.passenger_name||'Passenger';
+    var phone=p.passenger_phone_web||p.passenger_wa_id||'';
+    var pu=p.pickup_label||'—', dro=p.dropoff_label||'—';
+    var pt=p.pickup_time?fmtTime(p.pickup_time):'—';
+    var done=p.status==='picked_up';
+    var exp=expandedId===('pax-'+p.id);
 
-    html += '<div class="pax-card '+(done?'picked-up':'')+'">' +
-      '<div class="pax-header">' +
-        '<div class="av" style="width:32px;height:32px;font-size:11px;background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>' +
-        '<div class="pax-info">' +
-          '<div class="pax-name">'+name+'</div>' +
-          '<div class="pax-phone">'+ph+(pt!=='—'?' · '+pt+' pickup':'')+'</div>' +
-        '</div>' +
-        (p.is_shift_start ? '<span class="chip blue" style="font-size:9px">Work shift</span>' : '') +
-      '</div>' +
-      '<div class="pax-route">📍 '+pu+' → '+dro+'</div>' +
-      '<div class="pax-actions">' +
-        (ph ? '<button class="btn btn-wa btn-sm" data-phone="'+ph.replace(/\D/g,'')+'" data-action="outside" style="flex:1">💬 I\'m outside</button>' : '') +
-        (!done ? '<button class="btn btn-ghost btn-sm" data-pid="'+p.id+'" data-action="pickup" style="color:var(--green);border-color:rgba(34,197,94,.3);background:var(--green-dim)">✓ Picked up</button>' : '<span style="font-size:10px;color:var(--green);padding:0 6px">✓ Done</span>') +
-        '<button class="btn btn-red btn-sm" data-pid="'+p.id+'" data-action="remove">Remove</button>' +
-      '</div>' +
+    // same badge style as searchride
+    var badges='<span class="badge b-confirmed">confirmed</span>';
+    if(p.is_shift_start)badges+='<span class="badge b-recurring">shift</span>';
+    if(done)badges+='<span class="badge b-matched">picked up</span>';
+
+    // Contact buttons — same c-btn style as searchride
+    var waHtml=phone
+      ?'<button class="c-btn wa-btn" data-phone="'+phone.replace(/\D/g,'')+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+      :'<button class="c-btn" style="opacity:0.3" aria-label="No phone"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+
+    // Expand shows pickup/dropoff + action buttons (same pattern as original message in searchride)
+    var expHtml=exp
+      ?'<div class="card-detail open">'+
+        '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Passenger details</div>'+
+        '<div class="msg-box"><p>'+
+          '📍 Pickup: '+pu+'<br>'+
+          '🏁 Dropoff: '+dro+'<br>'+
+          '🕐 Pickup time: '+pt+
+          (p.is_shift_start?'<br>⚡ Shift start time':'')+
+          (phone?'<br>📱 '+phone:'')+
+        '</p><div class="msg-fade"></div></div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+          (phone?'<button class="btn btn-wa btn-sm" data-action="outside" data-phone="'+phone.replace(/\D/g,'')+'" style="flex:1">💬 I\'m outside</button>':'')+
+          (!done?'<button class="btn btn-ghost btn-sm" data-action="pickup" data-pid="'+p.id+'" style="color:var(--green);border-color:rgba(34,197,94,.3);background:var(--green-dim)">✓ Picked up</button>':'')+
+          '<button class="btn btn-red btn-sm" data-action="remove" data-pid="'+p.id+'">Remove</button>'+
+        '</div>'+
+      '</div>'
+      :'';
+
+    html+='<div class="ride-card'+(exp?' expanded':'')+(done?' card-urgent':'')+'" data-pax-id="'+p.id+'">'+
+      '<div class="card-top">'+
+        '<div class="card-row1">'+
+          '<div class="pax-info">'+
+            '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
+            '<div><div class="pax-name">'+name+'</div><div class="time-ago">'+(pt!=='—'?pt+' pickup':'joined')+'</div></div>'+
+          '</div>'+
+          '<div class="badges">'+badges+'</div>'+
+        '</div>'+
+        '<div class="route-strip">'+
+          '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>'+
+          '<div class="route-labels">'+
+            '<div><div class="route-place">'+pu+'</div><div class="route-sub">Pickup</div></div>'+
+            '<div><div class="route-place">'+dro+'</div><div class="route-sub">Dropoff</div></div>'+
+          '</div>'+
+          '<div class="route-meta"><div class="ride-time">'+pt+'</div><div class="ride-date">tap for more</div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card-footer">'+
+        '<div class="footer-info">'+
+          '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+pt+'</div>'+
+          (p.is_shift_start?'<div class="f-chip">⚡ Shift</div>':'')+
+        '</div>'+
+        '<div class="contact-btns">'+waHtml+'</div>'+
+      '</div>'+
+      expHtml+
     '</div>';
   });
-  html += '<button class="btn btn-ghost btn-full" id="d-add-pax" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button>';
-  tc.innerHTML = html;
 
-  // Wire actions
-  tc.querySelectorAll('[data-action="outside"]').forEach(function(btn) {
-    btn.onclick = function() { window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"), '_blank'); };
-  });
-  tc.querySelectorAll('[data-action="pickup"]').forEach(function(btn) {
-    btn.onclick = async function() {
-      await db.from('passenger_requests').update({status:'picked_up'}).eq('id', this.dataset.pid);
-      var r = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
-      passengers = r.data || [];
+  html+='<button class="btn btn-ghost btn-full" id="d-add" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3);margin-top:4px">+ Add passenger manually</button>';
+  tc.innerHTML=html;
+
+  // Wire pax card events
+  tc.querySelectorAll('[data-pax-id]').forEach(function(card){
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.c-btn')||e.target.closest('[data-action]'))return;
+      var pid='pax-'+card.dataset.paxId;
+      expandedId=(expandedId===pid)?null:pid;
       renderPaxTab();
-    };
+    });
+    var waBtn=card.querySelector('.wa-btn');
+    if(waBtn)waBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"),'_blank');
+    });
   });
-  tc.querySelectorAll('[data-action="remove"]').forEach(function(btn) {
-    btn.onclick = async function() {
-      if (!confirm('Remove this passenger?')) return;
-      await db.from('passenger_requests').update({status:'cancelled'}).eq('id', this.dataset.pid);
-      var r = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
-      passengers = r.data || [];
-      renderPaxTab();
-    };
+  tc.querySelectorAll('[data-action="pickup"]').forEach(function(btn){
+    btn.addEventListener('click',async function(e){
+      e.stopPropagation();
+      await db.from('passenger_requests').update({status:'picked_up'}).eq('id',this.dataset.pid);
+      var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
+      passengers=r.data||[];renderPaxTab();
+    });
   });
-  var addBtn = document.getElementById('d-add-pax');
-  if (addBtn) addBtn.onclick = showAddPaxForm;
+  tc.querySelectorAll('[data-action="remove"]').forEach(function(btn){
+    btn.addEventListener('click',async function(e){
+      e.stopPropagation();
+      if(!confirm('Remove this passenger?'))return;
+      await db.from('passenger_requests').update({status:'cancelled'}).eq('id',this.dataset.pid);
+      var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
+      passengers=r.data||[];renderPaxTab();
+    });
+  });
+  var addBtn=document.getElementById('d-add');
+  if(addBtn)addBtn.onclick=showAddForm;
 }
 
-// ── MANUAL ADD FORM ──
-function showAddPaxForm() {
-  var tc = document.getElementById('tab-content');
-  tc.innerHTML =
-    '<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px">Add passenger manually</div>' +
-    '<div class="card"><div class="card-body" style="display:flex;flex-direction:column;gap:12px">' +
-      '<div class="field"><label>Name *</label><div class="input-wrap"><input class="field-input" id="ap-name" placeholder="Passenger name"></div></div>' +
-      '<div class="field"><label>WhatsApp number *</label><div class="input-wrap"><input class="field-input" id="ap-phone" type="tel" placeholder="+1 416 555 0000"></div></div>' +
-      '<div class="field"><label>Pickup location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-pu" placeholder="Pickup location" autocomplete="off"><div class="suggestions" id="ap-pu-sug"></div></div><div class="confirmed-tag" id="ap-pu-tag"><div class="confirmed-dot"></div><span id="ap-pu-txt"></span></div></div>' +
-      '<div class="field"><label>Dropoff location *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-do" placeholder="Dropoff location" autocomplete="off"><div class="suggestions" id="ap-do-sug"></div></div><div class="confirmed-tag" id="ap-do-tag"><div class="confirmed-dot"></div><span id="ap-do-txt"></span></div></div>' +
-      '<div class="field"><label>Pickup time</label><div class="input-wrap"><input class="field-input" id="ap-time" type="time"></div></div>' +
-      '<div class="err-box" id="ap-err"></div>' +
-      '<button class="btn btn-primary btn-full" id="ap-submit">Add passenger</button>' +
-      '<button class="btn btn-ghost btn-full" id="ap-back" style="margin-top:4px">← Back</button>' +
+// ── MATCHED TAB — exact same card style as searchride ──
+async function renderMatchedTab(){
+  var tc=document.getElementById('tab-content');
+  tc.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--text-muted)">Finding matched passengers…</div>';
+  if(!ride.pickup_lat||!ride.pickup_lng){
+    tc.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">No location data for this ride — matched passengers unavailable.</div>';return;
+  }
+  try{
+    var {data,error}=await db.rpc('find_matched_passengers',{
+      p_driver_id:RIDE_ID,p_from_lat:ride.pickup_lat,p_from_lng:ride.pickup_lng,
+      p_to_lat:ride.dropoff_lat,p_to_lng:ride.dropoff_lng,p_ride_date:ride.dates,p_radius_km:15
+    });
+    if(error)throw error;
+    var matches=data||[];
+    if(!matches.length){tc.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No matched passengers found near your route for this date.</div>';return;}
+
+    var shareUrl=rideUrl(false);
+    var html='';
+    var matchExpandedId=null; // local for this tab
+
+    matches.forEach(function(m,i){
+      var av=avCol(i);
+      var name=m.sender_name||'Passenger';
+      var phone=m.sender_number?String(m.sender_number):'';
+      var dist=m.dist_km?m.dist_km+' km away':'';
+      var rTime=fmtTime(m.pick_up_time);
+      var rDate=fmtDate(m.pick_up_date);
+      var waNum=phone.replace(/\D/g,'');
+      var waMsg='Hi '+name+', I am driving from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time)+'. Do you still need a ride? Join here: '+shareUrl;
+      var waBtnHtml=waNum
+        ?'<button class="c-btn wa-btn" data-num="'+waNum+'" data-msg="'+encodeURIComponent(waMsg)+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+        :'<button class="c-btn" style="opacity:0.3"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+
+      var shareBtnHtml='<button class="c-btn share-btn" data-url="'+shareUrl+'" data-msg="'+encodeURIComponent(waMsg)+'" aria-label="Share"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>';
+
+      // Badges same as searchride
+      var badges='';
+      if((m.important_ride||'').toLowerCase()==='urgent')badges+='<span class="badge b-urgent"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>urgent</span>';
+      if((m.important_ride||'').toLowerCase()==='airport')badges+='<span class="badge b-airport">airport</span>';
+      badges+='<span class="badge b-pending">pending</span>';
+      if(dist)badges+='<span class="badge" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(79,142,247,.25)">'+dist+'</span>';
+
+      // Expanded shows original message — exactly like searchride
+      var expId='match-'+i;
+      var expHtml=''; // will be injected dynamically
+
+      html+='<div class="ride-card" data-match-idx="'+i+'">'+
+        '<div class="card-top">'+
+          '<div class="card-row1">'+
+            '<div class="pax-info">'+
+              '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
+              '<div><div class="pax-name">'+name+'</div><div class="time-ago">'+timeAgo(m['D&T of msg'] || m.d_t_of_msg || '')+'</div></div>'+
+            '</div>'+
+            '<div class="badges">'+badges+'</div>'+
+          '</div>'+
+          '<div class="route-strip">'+
+            '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>'+
+            '<div class="route-labels">'+
+              '<div><div class="route-place">'+(m.pickup_label||'—')+'</div><div class="route-sub">Pickup</div></div>'+
+              '<div><div class="route-place">'+(m.dropoff_label||'—')+'</div><div class="route-sub">Dropoff</div></div>'+
+            '</div>'+
+            '<div class="route-meta"><div class="ride-time">'+rTime+'</div><div class="ride-date">'+rDate+'</div></div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="card-footer">'+
+          '<div class="footer-info">'+
+            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>'+
+            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
+          '</div>'+
+          '<div class="contact-btns">'+waBtnHtml+shareBtnHtml+'</div>'+
+        '</div>'+
+        '<div class="card-detail" id="match-detail-'+i+'">'+
+          '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div>'+
+          '<div class="msg-box"><p>'+(m.original_message||m.text_body||'No message available')+'</p><div class="msg-fade"></div></div>'+
+        '</div>'+
+      '</div>';
+    });
+
+    tc.innerHTML=html;
+
+    // Wire match card events
+    tc.querySelectorAll('[data-match-idx]').forEach(function(card){
+      card.addEventListener('click',function(e){
+        if(e.target.closest('.c-btn'))return;
+        var idx=card.dataset.matchIdx;
+        var det=document.getElementById('match-detail-'+idx);
+        if(!det)return;
+        var open=det.classList.contains('open');
+        tc.querySelectorAll('.card-detail').forEach(function(d){d.classList.remove('open');});
+        tc.querySelectorAll('.ride-card').forEach(function(c){c.classList.remove('expanded');});
+        if(!open){det.classList.add('open');card.classList.add('expanded');}
+      });
+      card.querySelectorAll('.wa-btn').forEach(function(btn){
+        btn.addEventListener('click',function(e){
+          e.stopPropagation();
+          window.open('https://wa.me/'+this.dataset.num+'?text='+this.dataset.msg,'_blank');
+        });
+      });
+      card.querySelectorAll('.share-btn').forEach(function(btn){
+        btn.addEventListener('click',function(e){
+          e.stopPropagation();
+          var url=this.dataset.url;
+          var msg=decodeURIComponent(this.dataset.msg);
+          if(navigator.share){navigator.share({title:'Pathfynder Ride',text:msg,url:url}).catch(function(){});}
+          else{if(navigator.clipboard)navigator.clipboard.writeText(url);else{var el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);}alert('Link copied!');}
+        });
+      });
+    });
+  }catch(e){tc.innerHTML='<div style="padding:16px;font-size:12px;color:var(--red)">Error: '+e.message+'</div>';}
+}
+
+// ════════════════════════════════════════════
+// ADD PASSENGER FORM
+// ════════════════════════════════════════════
+function showAddForm(){
+  var tc=document.getElementById('tab-content');
+  tc.innerHTML='<div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">Add passenger manually</div>'+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"><div style="padding:14px;display:flex;flex-direction:column;gap:12px">'+
+      '<div class="field"><label>Name *</label><div class="input-wrap"><input class="field-input" id="ap-name" placeholder="Passenger name"></div></div>'+
+      '<div class="field"><label>WhatsApp *</label><div class="input-wrap"><input class="field-input" id="ap-phone" type="tel" placeholder="+1 416 555 0000"></div></div>'+
+      '<div class="field"><label>Pickup *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-pu" placeholder="Pickup location" autocomplete="off"><div class="suggestions" id="ap-pu-sug"></div></div><div class="confirmed-tag" id="ap-pu-tag"><div class="confirmed-dot"></div><span id="ap-pu-txt"></span></div></div>'+
+      '<div class="field"><label>Dropoff *</label><div class="input-wrap" style="position:relative"><input class="field-input" id="ap-do" placeholder="Dropoff location" autocomplete="off"><div class="suggestions" id="ap-do-sug"></div></div><div class="confirmed-tag" id="ap-do-tag"><div class="confirmed-dot"></div><span id="ap-do-txt"></span></div></div>'+
+      '<div class="field"><label>Pickup time</label><div class="input-wrap"><input class="field-input" id="ap-time" type="time"></div></div>'+
+      '<div class="err-box" id="ap-err"></div>'+
+      '<button class="btn btn-primary btn-full" id="ap-submit">Add passenger</button>'+
+      '<button class="btn btn-ghost btn-full-sm" id="ap-back" style="margin-top:2px">← Back</button>'+
     '</div></div>';
-
-  setupLocField('ap-pu','ap-pu-sug','ap-pu-tag','ap-pu-txt','ap-pu');
-  setupLocField('ap-do','ap-do-sug','ap-do-tag','ap-do-txt','ap-do');
-
-  document.getElementById('ap-back').onclick = function() { activeTab='passengers'; renderTab(); };
-  document.getElementById('ap-submit').onclick = async function() {
+  setupLoc('ap-pu','ap-pu-sug','ap-pu-tag','ap-pu-txt','ap-pu');
+  setupLoc('ap-do','ap-do-sug','ap-do-tag','ap-do-txt','ap-do');
+  document.getElementById('ap-back').onclick=function(){activeTab='passengers';renderPaxTab();};
+  document.getElementById('ap-submit').onclick=async function(){
     var name=document.getElementById('ap-name').value.trim();
     var ph=document.getElementById('ap-phone').value.trim();
     var pu=document.getElementById('ap-pu').value.trim();
@@ -945,196 +799,91 @@ function showAddPaxForm() {
     var t=document.getElementById('ap-time').value;
     var err=document.getElementById('ap-err');
     if(!name||!ph||!pu||!dro){err.textContent='All fields required.';err.classList.add('show');return;}
-    err.classList.remove('show');
-    this.disabled=true;this.textContent='Adding…';
-    var puG=geoCache['ap-pu']||null, doG=geoCache['ap-do']||null;
+    err.classList.remove('show');this.disabled=true;this.textContent='Adding…';
     await db.from('passenger_requests').insert({
-      ride_id:RIDE_ID,passenger_name_web:name,passenger_phone_web:ph,
-      passenger_wa_id:ph,passenger_name:name,
+      ride_id:RIDE_ID,passenger_name_web:name,passenger_phone_web:ph,passenger_wa_id:ph,passenger_name:name,
       pickup_label:pu,dropoff_label:dro,
-      pickup_lat:puG?puG.lat:null,pickup_lng:puG?puG.lng:null,
-      dropoff_lat:doG?doG.lat:null,dropoff_lng:doG?doG.lng:null,
+      pickup_lat:geoCache['ap-pu']?geoCache['ap-pu'].lat:null,pickup_lng:geoCache['ap-pu']?geoCache['ap-pu'].lng:null,
+      dropoff_lat:geoCache['ap-do']?geoCache['ap-do'].lat:null,dropoff_lng:geoCache['ap-do']?geoCache['ap-do'].lng:null,
       pickup_time:t||null,status:'confirmed',platform:'web',date:ride.dates
     });
     var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
-    passengers=r.data||[];
-    activeTab='passengers';
-    renderDriverTop(document.getElementById('main-view'));
-    renderPaxTab();
+    passengers=r.data||[];activeTab='passengers';renderDriverTop();renderPaxTab();
   };
 }
 
-// ── MATCHED TAB ──
-async function renderMatchedTab() {
-  var tc = document.getElementById('tab-content');
-  tc.innerHTML = '<div style="padding:20px;text-align:center;font-size:12px;color:var(--text-muted)">Finding matched passengers…</div>';
-
-  if (!ride.pickup_lat || !ride.pickup_lng) {
-    tc.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">No location data on this ride — matched passengers unavailable.</div>';
-    return;
-  }
-
-  try {
-    var { data, error } = await db.rpc('find_matched_passengers', {
-      p_driver_id: RIDE_ID,
-      p_from_lat:  ride.pickup_lat,
-      p_from_lng:  ride.pickup_lng,
-      p_to_lat:    ride.dropoff_lat,
-      p_to_lng:    ride.dropoff_lng,
-      p_ride_date: ride.dates,
-      p_radius_km: 15
-    });
-    if (error) throw error;
-
-    var matches = data || [];
-    if (!matches.length) {
-      tc.innerHTML = '<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No matched passengers found near your route for this date.</div>';
-      return;
-    }
-
-    var shareUrl = rideUrl(false);
-    var html = '';
-    matches.forEach(function(m, i) {
-      var av   = avCol(i);
-      var name = m.sender_name || 'Passenger';
-      var ph   = m.sender_number ? String(m.sender_number) : '';
-      var dist = m.dist_km ? m.dist_km + ' km away' : '';
-      var msg  = 'Hi '+name+', I am driving from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time)+'. Do you still need a ride? Join here: '+shareUrl;
-      html +=
-        '<div class="match-card">' +
-          '<div class="match-header">' +
-            '<div class="av" style="width:28px;height:28px;font-size:10px;background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>' +
-            '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--text)">'+name+'</div></div>' +
-            (dist ? '<span class="dist-badge">'+dist+'</span>' : '') +
-          '</div>' +
-          '<div class="match-route">'+( m.pickup_label||'—')+' → '+(m.dropoff_label||'—')+' · '+fmtTime(m.pick_up_time)+'</div>' +
-          '<div class="match-actions">' +
-            (ph ? '<button class="btn btn-wa btn-sm" style="flex:1" onclick="window.open(\'https://wa.me/'+ph.replace(/\D/g,'')+'?text='+encodeURIComponent(msg)+'\',\'_blank\')">Contact</button>' : '') +
-            '<button class="btn btn-primary btn-sm" style="flex:1" onclick="shareWith(\''+name.replace(/'/g,"\\'")+'\',\''+ph.replace(/\D/g,'')+'\')">Share link</button>' +
-          '</div>' +
-        '</div>';
-    });
-    tc.innerHTML = html;
-  } catch(e) {
-    tc.innerHTML = '<div style="padding:16px;font-size:12px;color:var(--red)">Error: '+e.message+'</div>';
-  }
-}
-
-function shareWith(name, ph) {
-  var url = rideUrl(false);
-  var msg = 'Hi '+name+', do you still need a ride? I\'m driving from '+(ride.pickup_label||'')+' to '+(ride.dropoff_label||'')+' on '+fmtDate(ride.dates)+' at '+fmtTime(ride.departure_time)+'. Join here: '+url;
-  if (ph) window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(msg),'_blank');
-  else { copyText(url); alert('Link copied!'); }
-}
-
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // MAPS
-// ═══════════════════════════════════════════
-function openMaps() {
-  if (!navigator.geolocation) { alert('Location access not available.'); return; }
-  navigator.geolocation.getCurrentPosition(function(pos) {
-    var dLat = pos.coords.latitude, dLng = pos.coords.longitude;
-    var stops = passengers
-      .filter(function(p){ return p.status !== 'cancelled' && p.pickup_lat && p.pickup_lng; })
-      .map(function(p){ return {lat:p.pickup_lat, lng:p.pickup_lng, label:p.pickup_label}; });
-
-    stops.sort(function(a,b){
-      return haversine(dLat,dLng,a.lat,a.lng) - haversine(dLat,dLng,b.lat,b.lng);
-    });
-
-    if (ride.dropoff_lat && ride.dropoff_lng) stops.push({lat:ride.dropoff_lat, lng:ride.dropoff_lng});
-
-    if (!stops.length) { alert('No passengers with location data yet.'); return; }
-
-    var dest  = stops[stops.length-1];
-    var wpts  = stops.slice(0,-1);
-
-    if (isIOS()) {
-      var url = 'http://maps.apple.com/?saddr=Current+Location&daddr='+dest.lat+','+dest.lng;
-      if (wpts.length) url = 'http://maps.apple.com/?saddr=Current+Location&daddr='+wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:'+dest.lat+','+dest.lng;
-      window.open(url, '_blank');
-    } else {
-      var url = 'https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination='+dest.lat+','+dest.lng+'&travelmode=driving';
-      if (wpts.length) url += '&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
-      window.open(url, '_blank');
+// ════════════════════════════════════════════
+function openMaps(){
+  if(!navigator.geolocation){alert('Location not available.');return;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var dLat=pos.coords.latitude,dLng=pos.coords.longitude;
+    var stops=passengers.filter(function(p){return p.status!=='cancelled'&&p.pickup_lat&&p.pickup_lng;})
+      .map(function(p){return{lat:p.pickup_lat,lng:p.pickup_lng};});
+    stops.sort(function(a,b){return haversine(dLat,dLng,a.lat,a.lng)-haversine(dLat,dLng,b.lat,b.lng);});
+    if(ride.dropoff_lat&&ride.dropoff_lng)stops.push({lat:ride.dropoff_lat,lng:ride.dropoff_lng});
+    if(!stops.length){alert('No passengers with location data yet.');return;}
+    var dest=stops[stops.length-1];
+    var wpts=stops.slice(0,-1);
+    if(isIOS()){
+      var url='http://maps.apple.com/?saddr=Current+Location&daddr=';
+      if(wpts.length)url+=wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:';
+      url+=dest.lat+','+dest.lng;
+      window.open(url,'_blank');
+    }else{
+      var url='https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination='+dest.lat+','+dest.lng+'&travelmode=driving';
+      if(wpts.length)url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
+      window.open(url,'_blank');
     }
-  }, function(){ alert('Could not get your location. Please allow location access and try again.'); });
+  },function(){alert('Could not get your location. Please allow location access.');});
 }
 
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // RIDE STATUS ACTIONS
-// ═══════════════════════════════════════════
-async function startRide() {
-  var btn = document.getElementById('d-start');
-  if (btn) { btn.disabled=true; btn.textContent='Starting…'; }
-  await db.from('driver_routines').update({ride_status:'started'}).eq('id',RIDE_ID);
-  ride.ride_status = 'started';
-  renderDriverTop(document.getElementById('main-view'));
-  renderTab();
-}
-async function endRide() {
-  if (!confirm('End this ride?')) return;
-  await db.from('driver_routines').update({ride_status:'ended'}).eq('id',RIDE_ID);
-  ride.ride_status = 'ended';
-  var pill=document.getElementById('status-pill');pill.textContent='Ended';pill.className='status-pill status-ended';
-  renderDriverTop(document.getElementById('main-view'));
-  renderTab();
-}
-async function toggleClose() {
-  var newSt = ride.ride_status === 'closed' ? 'open' : 'closed';
-  await db.from('driver_routines').update({ride_status:newSt}).eq('id',RIDE_ID);
-  ride.ride_status = newSt;
-  renderDriverTop(document.getElementById('main-view'));
-  renderTab();
-}
+// ════════════════════════════════════════════
+async function startRide(){var b=document.getElementById('d-start');if(b){b.disabled=true;b.textContent='Starting…';}await db.from('driver_routines').update({ride_status:'started'}).eq('id',RIDE_ID);ride.ride_status='started';document.getElementById('status-pill').textContent='Started';document.getElementById('status-pill').className='status-pill sp-started';renderDriverTop();renderTab();}
+async function endRide(){if(!confirm('End this ride?'))return;await db.from('driver_routines').update({ride_status:'ended'}).eq('id',RIDE_ID);ride.ride_status='ended';document.getElementById('status-pill').textContent='Ended';document.getElementById('status-pill').className='status-pill sp-ended';renderDriverTop();renderTab();}
+async function toggleClose(){var s=ride.ride_status==='closed'?'open':'closed';await db.from('driver_routines').update({ride_status:s}).eq('id',RIDE_ID);ride.ride_status=s;document.getElementById('status-pill').textContent=s.charAt(0).toUpperCase()+s.slice(1);document.getElementById('status-pill').className='status-pill sp-'+s;renderDriverTop();renderTab();}
 
-// ═══════════════════════════════════════════
-// MAPBOX LOCATION FIELD
-// ═══════════════════════════════════════════
-function setupLocField(inputId, sugId, tagId, tagTxtId, cacheKey) {
-  var input = document.getElementById(inputId);
-  var sug   = document.getElementById(sugId);
-  if (!input || !sug) return;
-
-  input.addEventListener('input', function() {
-    geoCache[cacheKey] = null;
-    input.classList.remove('confirmed');
-    var tag = document.getElementById(tagId); if(tag) tag.classList.remove('show');
+// ════════════════════════════════════════════
+// MAPBOX — same as index.html session token pattern
+// ════════════════════════════════════════════
+function setupLoc(inputId,sugId,tagId,tagTxtId,cacheKey){
+  var input=document.getElementById(inputId),sug=document.getElementById(sugId);
+  if(!input||!sug)return;
+  input.addEventListener('input',function(){
+    geoCache[cacheKey]=null;input.classList.remove('confirmed');
+    var tag=document.getElementById(tagId);if(tag)tag.classList.remove('show');
     clearTimeout(geoTimers[cacheKey]);
-    var q = input.value.trim();
-    if (q.length < 3) { sug.classList.remove('show'); sug.innerHTML=''; return; }
-    sug.innerHTML = '<div class="suggestion-item loading-item">Searching…</div>';
+    var q=input.value.trim();
+    if(q.length<3){sug.classList.remove('show');sug.innerHTML='';return;}
+    sug.innerHTML='<div class="suggestion-item loading-item">Searching…</div>';
     sug.classList.add('show');
-    var sid = window._SB_SID || (window._SB_SID = 'pf-ride-'+Date.now());
-    geoTimers[cacheKey] = setTimeout(function() {
-      fetch('https://api.mapbox.com/search/searchbox/v1/suggest?q='+encodeURIComponent(q)
-        +'&access_token='+MAPBOX_TOKEN+'&session_token='+sid
-        +'&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
+    if(!window._SB_SID)window._SB_SID='pf-ride-'+Date.now();
+    var sid=window._SB_SID;
+    geoTimers[cacheKey]=setTimeout(function(){
+      fetch('https://api.mapbox.com/search/searchbox/v1/suggest?q='+encodeURIComponent(q)+'&access_token='+MAPBOX_TOKEN+'&session_token='+sid+'&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
         .then(function(r){return r.json();})
         .then(function(d){
           sug.innerHTML='';
           var items=(d&&d.suggestions)||[];
           if(!items.length){sug.innerHTML='<div class="suggestion-item loading-item">No results</div>';return;}
           items.forEach(function(item){
-            var name=item.name||'';
-            var ctx=item.place_formatted||item.full_address||'';
+            var name=item.name||'',ctx=item.place_formatted||item.full_address||'';
             if(ctx.toLowerCase().startsWith(name.toLowerCase()+', '))ctx=ctx.slice(name.length+2);
-            var el=document.createElement('div');
-            el.className='suggestion-item';
+            var el=document.createElement('div');el.className='suggestion-item';
             el.innerHTML='<div class="sug-main">'+name+'</div>'+(ctx?'<div class="sug-ctx">'+ctx+'</div>':'');
             el.addEventListener('click',function(){
-              input.value=name+(ctx?', '+ctx:'');
-              sug.classList.remove('show');sug.innerHTML='';
-              fetch('https://api.mapbox.com/search/searchbox/v1/retrieve/'+item.mapbox_id
-                +'?access_token='+MAPBOX_TOKEN+'&session_token='+sid)
+              input.value=name+(ctx?', '+ctx:'');sug.classList.remove('show');sug.innerHTML='';
+              fetch('https://api.mapbox.com/search/searchbox/v1/retrieve/'+item.mapbox_id+'?access_token='+MAPBOX_TOKEN+'&session_token='+sid)
                 .then(function(r){return r.json();})
                 .then(function(rd){
-                  var f=rd.features&&rd.features[0];
-                  var c=f&&f.geometry&&f.geometry.coordinates;
+                  var f=rd.features&&rd.features[0],c=f&&f.geometry&&f.geometry.coordinates;
                   if(!c)return;
                   geoCache[cacheKey]={lat:c[1],lng:c[0],label:name+(ctx?', '+ctx:'')};
                   input.classList.add('confirmed');
-                  var tg2=document.getElementById(tagId);if(tg2)tg2.classList.add('show');
+                  var t2=document.getElementById(tagId);if(t2)t2.classList.add('show');
                   var tt=document.getElementById(tagTxtId);if(tt)tt.textContent=name;
                 });
             });
@@ -1145,30 +894,17 @@ function setupLocField(inputId, sugId, tagId, tagTxtId, cacheKey) {
         .catch(function(){sug.innerHTML='<div class="suggestion-item loading-item">Connection error</div>';});
     },400);
   });
-  document.addEventListener('click',function(e){
-    if(!input.contains(e.target)&&!sug.contains(e.target))sug.classList.remove('show');
-  });
+  document.addEventListener('click',function(e){if(!input.contains(e.target)&&!sug.contains(e.target))sug.classList.remove('show');});
 }
 
-// ═══════════════════════════════════════════
+// ════════════════════════════════════════════
 // SPECIAL SCREENS
-// ═══════════════════════════════════════════
-function otwHTML() {
-  return '<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">'+(ride.driver_name||'Driver')+' has started the ride — be ready at your pickup</div></div>';
-}
-function expiredHTML() {
-  return '<div class="card"><div class="card-body"><div class="status-screen"><div class="status-icon">🏁</div><div class="status-title">This ride has ended</div><div class="status-sub">'+(ride.pickup_label||'')+' → '+(ride.dropoff_label||'')+'<br>'+fmtDate(ride.dates)+' · '+fmtTime(ride.departure_time)+'</div></div></div></div>';
-}
-function showError(msg) {
-  document.getElementById('loading-view').style.display = 'none';
-  document.getElementById('main-view').style.display = '';
-  document.getElementById('main-view').innerHTML =
-    '<div class="card"><div class="card-body"><div class="status-screen"><div class="status-icon">🔍</div><div class="status-title">Ride not found</div><div class="status-sub">'+msg+'</div></div></div></div>';
-}
+// ════════════════════════════════════════════
+function otwHTML(){return '<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">'+(ride.driver_name||'Driver')+' has started the ride — be ready at your pickup</div></div>';}
+function expiredHTML(){return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden"><div style="padding:32px 20px;text-align:center"><div style="font-size:44px;margin-bottom:14px">🏁</div><div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px">This ride has ended</div><div style="font-size:13px;color:var(--text-dim)">'+(ride.pickup_label||'')+' → '+(ride.dropoff_label||'')+'<br>'+fmtDate(ride.dates)+' · '+fmtTime(ride.departure_time)+'</div></div></div>';}
+function showErr(msg){document.getElementById('loading-view').style.display='none';document.getElementById('main-view').style.display='';document.getElementById('main-view').innerHTML='<div class="content"><div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px 20px;text-align:center"><div style="font-size:44px;margin-bottom:14px">🔍</div><div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">Ride not found</div><div style="font-size:13px;color:var(--text-dim)">'+msg+'</div></div></div>';}
 
-// ═══════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════
+// Boot
 load();
 </script>
 </body>
