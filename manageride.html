@@ -755,51 +755,71 @@ function showAddForm(){
   };
 }
 
-/* ── MAPS — fixed to actually work ── */
+/* ── MAPS ── */
 function openMaps(){
-  var conf=passengers.filter(function(p){return p.status!=='cancelled'&&p.pickup_lat&&p.pickup_lng;});
+  // Collect confirmed passengers that have coords
+  var conf=passengers.filter(function(p){
+    return p.status!=='cancelled'&&p.pickup_lat&&p.pickup_lng;
+  });
 
-  // Build stops without needing geolocation first — we sort and open
-  // then show directions from current location
-  var dest=ride.dropoff_lat&&ride.dropoff_lng?{lat:ride.dropoff_lat,lng:ride.dropoff_lng}:null;
+  // Always need at least the ride dropoff
+  if(!ride.dropoff_lat||!ride.dropoff_lng){
+    alert('This ride does not have location data yet.');
+    return;
+  }
 
-  if(!conf.length&&!dest){alert('No passenger locations or dropoff data yet.');return;}
-
-  // Try to get current location, fall back to just opening with ride stops
   function buildAndOpen(dLat,dLng){
-    var stops=conf.map(function(p){return{lat:p.pickup_lat,lng:p.pickup_lng};});
-    if(dLat&&dLng){
-      stops.sort(function(a,b){return haversine(dLat,dLng,a.lat,a.lng)-haversine(dLat,dLng,b.lat,b.lng);});
+    // Passenger pickup stops — sort closest to driver first if we have GPS
+    var paxStops=conf.map(function(p){
+      return{lat:p.pickup_lat,lng:p.pickup_lng};
+    });
+    if(dLat!=null&&dLng!=null&&paxStops.length>1){
+      paxStops.sort(function(a,b){
+        return haversine(dLat,dLng,a.lat,a.lng)-haversine(dLat,dLng,b.lat,b.lng);
+      });
     }
-    if(dest)stops.push(dest);
-    if(!stops.length){alert('No stops to navigate to.');return;}
-
-    var finalDest=stops[stops.length-1];
-    var wpts=stops.slice(0,-1);
+    // Final destination = ride dropoff
+    var dest={lat:ride.dropoff_lat,lng:ride.dropoff_lng};
+    // All waypoints = passenger pickups (the dropoff is the destination)
+    var wpts=paxStops;
 
     if(isIOS()){
-      // Apple Maps — supports waypoints via 'daddr' chaining
-      var url='http://maps.apple.com/?saddr='+(dLat&&dLng?dLat+','+dLng:'Current+Location')+'&daddr=';
-      if(wpts.length)url+=wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:';
-      url+=finalDest.lat+','+finalDest.lng;
+      // Apple Maps
+      // saddr = driver current location (or pickup if no GPS)
+      var saddr=dLat!=null?(dLat+','+dLng):(ride.pickup_lat+','+ride.pickup_lng);
+      var url='http://maps.apple.com/?saddr='+saddr;
+      if(wpts.length){
+        url+='&daddr='+wpts.map(function(w){return w.lat+','+w.lng;}).join('+to:')+'+to:'+dest.lat+','+dest.lng;
+      } else {
+        url+='&daddr='+dest.lat+','+dest.lng;
+      }
+      url+='&dirflg=d';
       window.open(url,'_blank');
     } else {
-      // Google Maps
-      var origin=dLat&&dLng?(dLat+','+dLng):'Current+Location';
+      // Google Maps — origin must be real coords, not string
+      var origin=dLat!=null?(dLat+','+dLng):(ride.pickup_lat+','+ride.pickup_lng);
       var url='https://www.google.com/maps/dir/?api=1'+
         '&origin='+origin+
-        '&destination='+finalDest.lat+','+finalDest.lng+
+        '&destination='+dest.lat+','+dest.lng+
         '&travelmode=driving';
-      if(wpts.length)url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
+      if(wpts.length){
+        url+='&waypoints='+wpts.map(function(w){return w.lat+','+w.lng;}).join('|');
+      }
       window.open(url,'_blank');
     }
   }
 
+  // Try to get GPS first; fall back to ride pickup coords
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
-      function(pos){buildAndOpen(pos.coords.latitude,pos.coords.longitude);},
-      function(){buildAndOpen(null,null);}, // fallback: open without current location
-      {timeout:5000}
+      function(pos){
+        buildAndOpen(pos.coords.latitude,pos.coords.longitude);
+      },
+      function(){
+        // Permission denied or error — use ride pickup as starting point
+        buildAndOpen(null,null);
+      },
+      {timeout:6000,enableHighAccuracy:false}
     );
   } else {
     buildAndOpen(null,null);
