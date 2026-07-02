@@ -268,11 +268,24 @@ function render(){
     return;
   }
 
+  // Check if passenger already joined this ride (localStorage)
+  var alreadyJoined=false;
+  try{var sv=getSaved();if(sv&&sv.joined_ride===RIDE_ID)alreadyJoined=true;}catch(e){}
+
   if(isDriver){
     renderDriverView(mv);
   } else if(st==='started'){
     mv.innerHTML='<div class="otw-banner"><div class="otw-title">🚗 Your driver is on the way</div><div class="otw-sub">'+(ride.driver_name||'Driver')+' has started the ride</div></div>'+
       '<div style="padding:12px">'+rideCardHTML()+'</div>';
+  } else if(alreadyJoined) {
+    mv.innerHTML='<div style="padding:12px;display:flex;flex-direction:column;gap:10px">'+rideCardHTML()+
+      '<div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:20px;text-align:center">'+
+        '<div style="font-size:32px;margin-bottom:8px">✅</div>'+
+        '<div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--green);margin-bottom:4px">You\'re already on this ride</div>'+
+        '<div style="font-size:12px;color:var(--text-dim)">Driver will contact you on WhatsApp before departure</div>'+
+      '</div>'+
+    '</div>';
+    wirePublicCard();
   } else {
     mv.innerHTML='<div style="padding:12px;display:flex;flex-direction:column;gap:10px">'+rideCardHTML()+publicBelowHTML()+'</div>';
     wirePublicCard();
@@ -448,8 +461,14 @@ function renderPaxTab(){
     var pu=p.pickup_label||'—', dro=p.dropoff_label||'—';
     var pt=p.pickup_time?fmtTime(p.pickup_time):'—';
     var done=p.status==='picked_up';
+    var distStr='';
+    if(ride.pickup_lat&&ride.pickup_lng&&p.pickup_lat&&p.pickup_lng){
+      var km=haversine(ride.pickup_lat,ride.pickup_lng,p.pickup_lat,p.pickup_lng);
+      distStr=km<1?'<1 km':km.toFixed(1)+' km';
+    }
 
     var badges='<span class="badge b-confirmed">confirmed</span>';
+    if(distStr)badges+='<span class="badge" style="background:var(--accent-dim);border:1px solid rgba(79,142,247,.25);color:var(--accent);font-weight:700">'+distStr+'</span>';
     if(p.is_shift_start)badges+='<span class="badge b-shift">shift</span>';
     if(done)badges+='<span class="badge b-matched">picked up ✓</span>';
 
@@ -590,7 +609,7 @@ async function renderMatchedTab(){
           '<div class="card-row1">'+
             '<div class="pax-info">'+
               '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
-              '<div><div class="pax-name">'+name+'</div><div class="time-ago">tap to see message</div></div>'+
+              '<div><div class="pax-name">'+name+'</div><div class="time-ago">'+timeAgo(m.created_at||'')+'</div></div>'+
             '</div>'+
             '<div class="badges">'+badges+'</div>'+
           '</div>'+
@@ -604,11 +623,10 @@ async function renderMatchedTab(){
           '</div>'+
         '</div>'+
         '<div class="card-footer">'+
-          '<div class="footer-info">'+
-            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>'+
-            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
+          '<div class="footer-info" style="gap:7px;padding:7px 13px">'+
+            (waNum?'<button class="btn btn-wa btn-sm match-wa-btn" data-num="'+waNum+'" data-msg="'+encodeURIComponent(contactMsg)+'" style="flex:1">Contact</button>':'')+
+            (origMsg?'<button class="btn btn-ghost btn-sm show-msg-btn" data-idx="'+i+'" style="flex:1;height:32px;font-size:11px">View message</button>':'')+
           '</div>'+
-          '<div class="contact-btns">'+waBtnHtml+'</div>'+
         '</div>'+
         expHtml+
       '</div>';
@@ -697,7 +715,7 @@ async function submitJoin(shiftOn){
     if(TG_ID)row.telegram_chat_id=TG_ID;
     var {error}=await db.from('passenger_requests').insert(row);
     if(error)throw error;
-    setSaved({name:name,phone:phone});
+    setSaved({name:name,phone:phone,joined_ride:RIDE_ID});
     var r2=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
     passengers=r2.data||[];
     showConfirmed(name,pu,doLoc,time,shiftOn);
