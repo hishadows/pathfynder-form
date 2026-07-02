@@ -595,7 +595,7 @@ async function renderMatchedTab(){
         :'';
 
 
-      html+='<div class="ride-card'+(isExp?' expanded':'')+'" data-match-id="'+expId+'">'+
+      html+='<div class="ride-card\" data-match-id="'+expId+'">'+
         '<div class="card-top">'+
           '<div class="card-row1">'+
             '<div class="pax-info">'+
@@ -713,7 +713,7 @@ async function submitJoin(shiftOn){
 
 function showConfirmed(name,pu,doLoc,time,shiftOn){
   var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
-  var mv=document.getElementById('main-view');
+  var mv=document.getElementById('main-view');  
   mv.innerHTML=
     '<div style="padding:12px;display:flex;flex-direction:column;gap:10px">'+
     rideCardHTML()+
