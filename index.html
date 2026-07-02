@@ -533,6 +533,15 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     <div class="success-icon">✓</div>
     <div class="success-title" id="successTitle">Request received!</div>
     <div class="success-sub" id="successSub">We'll notify you on Telegram as soon as we find a match.</div>
+    <div id="rideLinkSection" style="display:none;width:100%;margin-top:16px;text-align:left">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Your shareable ride link</div>
+      <div id="rideLinkUrl" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-dim);word-break:break-all;margin-bottom:10px;font-family:monospace"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="copyRideLink()" id="copyBtn" style="flex:1;height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body)">Copy link</button>
+        <button onclick="shareRideWA()" style="flex:1;height:38px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);border-radius:8px;color:#25D366;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body)">Share on WhatsApp</button>
+        <button onclick="openRidePage()" style="flex:1;height:38px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body)">Manage ride</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -780,7 +789,9 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
     if (!res.ok) {
       throw new Error('n8n webhook returned HTTP ' + res.status);
     }
-
+    return res.json().catch(function(){ return {}; });
+  })
+  .then(function(body) {
     if (tg && tg.HapticFeedback) {
       tg.HapticFeedback.notificationOccurred('success');
     }
@@ -790,7 +801,18 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
 
     if (role === 'driver') {
       document.getElementById('successTitle').textContent = 'Route registered!';
-      document.getElementById('successSub').textContent = "Your route is live. We'll message you if there's a match.";
+      document.getElementById('successSub').textContent = "Your route is live. We'll notify you on Telegram with matches.";
+
+      // Show ride link if n8n returned id + share_token
+      var rideId    = body && (body.id || body.ride_id);
+      var rideToken = body && (body.share_token || body.token);
+      if (rideId) {
+        var shareUrl = 'https://pathfynder-form.vercel.app/manageride.html?id=' + rideId;
+        var mgmtUrl  = rideToken ? shareUrl + '&token=' + rideToken : shareUrl;
+        window._lastRide = { shareUrl: shareUrl, mgmtUrl: mgmtUrl };
+        document.getElementById('rideLinkUrl').textContent = shareUrl;
+        document.getElementById('rideLinkSection').style.display = '';
+      }
     } else {
       document.getElementById('successTitle').textContent = 'Request received!';
       document.getElementById('successSub').textContent = "Your request is saved. We'll message you if there's a matching driver.";
@@ -807,6 +829,28 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
     setLoading(false);
   });
 });
+
+var _lastRide = null;
+
+function copyRideLink() {
+  var url = window._lastRide ? window._lastRide.shareUrl : document.getElementById('rideLinkUrl').textContent;
+  if (navigator.clipboard) { navigator.clipboard.writeText(url); }
+  else { var el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el); }
+  var btn = document.getElementById('copyBtn');
+  btn.textContent = 'Copied!';
+  setTimeout(function(){ btn.textContent = 'Copy link'; }, 2000);
+}
+
+function shareRideWA() {
+  if (!window._lastRide) return;
+  var msg = 'I\'m sharing a ride — join here: ' + window._lastRide.shareUrl;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function openRidePage() {
+  if (!window._lastRide) return;
+  window.location.href = window._lastRide.mgmtUrl;
+}
 
 function setLoading(on) {
   var btn = document.getElementById('submitBtn');
