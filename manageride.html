@@ -83,9 +83,9 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .card-detail.open{display:block}
 .det-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:flex;align-items:center;gap:4px}
 .det-label svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.msg-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:8px;max-height:160px;overflow-y:auto;position:relative}
+.msg-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:8px;max-height:80px;overflow:hidden;position:relative}
 .msg-box p{font-size:12px;color:var(--text-dim);line-height:1.55;white-space:pre-wrap;word-break:break-word}
-.msg-fade{display:none}
+.msg-fade{position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(transparent,var(--bg));pointer-events:none}
 
 /* ── SEATS BAR ── */
 .seats-bar-wrap{background:var(--surface2);border-radius:8px;padding:10px 13px;margin-top:6px}
@@ -227,7 +227,7 @@ function fmtDate(d){if(!d)return '—';if(d===todayStr())return 'Today';if(d===t
 function fmtTime(t){if(!t||t==='—')return '—';var h=parseInt(t.slice(0,2),10),m=parseInt(t.slice(3,5),10);var ap=h>=12?'PM':'AM',h12=h%12||12;return h12+':'+(m<10?'0':'')+m+' '+ap;}
 function seatsLeft(){return Math.max(0,(ride.available_seats||4)-passengers.filter(function(p){return p.status!=='cancelled';}).length);}
 function rideExpired(){var t=new Date();t.setHours(0,0,0,0);var r=new Date((ride.dates||'2000-01-01')+'T00:00:00');r.setHours(0,0,0,0);return r<t;}
-function rideUrl(withToken){var u=location.origin+location.pathname.replace(/[^\/]*$/,'')+'manageride.html?id='+ride.id;if(withToken&&ride.share_token)u+='&token='+ride.share_token;return u;}
+function rideUrl(withToken){var u=location.origin+location.pathname.replace(/[^/]*$/,'')+'manageride.html?id='+ride.id;if(withToken&&ride.share_token)u+='&token='+ride.share_token;return u;}
 function haversine(la1,ln1,la2,ln2){var R=6371,dL=(la2-la1)*Math.PI/180,dG=(ln2-ln1)*Math.PI/180,a=Math.pow(Math.sin(dL/2),2)+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.pow(Math.sin(dG/2),2);return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
 function getSaved(){try{return JSON.parse(localStorage.getItem('pf_passenger_v1')||'null');}catch(e){return null;}}
 function setSaved(p){try{localStorage.setItem('pf_passenger_v1',JSON.stringify(p));}catch(e){}}
@@ -386,7 +386,10 @@ function renderDriverView(mv){
   var started=st==='started';
   var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
 
-  var paxBanner=''; // removed — seats shown on ride card already
+  // Passengers joined highlight banner
+  var paxBanner=confs>0
+    ?'<div class="pax-joined-banner"><div class="paj-num">'+confs+'</div><div class="paj-text">passenger'+(confs!==1?'s':'')+' joined<br>'+seatsLeft()+' seat'+(seatsLeft()!==1?'s':'')+' remaining</div></div>'
+    :'';
 
   mv.innerHTML=
     // Top section: ride card + passengers banner + action strip
@@ -431,18 +434,13 @@ function renderPaxTab(){
   if(lbl)lbl.textContent='('+conf.length+')';
 
   if(!conf.length){
-    tc.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No passengers yet.<br>Share your ride link to get bookings.</div><div style="padding:0 12px 16px"><button class="btn btn-ghost btn-full" id="d-add-btn" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button></div>';
+    tc.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">No passengers yet.<br>Share your ride link to get bookings.</div>'+
+      '<div style="padding:0 12px 16px"><button class="btn btn-ghost btn-full" id="d-add-btn" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button></div>';
     document.getElementById('d-add-btn').onclick=showAddForm;
     return;
   }
 
-  // Picked up count banner
-  var pickedCount=conf.filter(function(p){return p.status==='picked_up';}).length;
-  var pickedBanner=pickedCount>0
-    ?'<div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 13px;font-size:12px;color:var(--green);font-weight:600;margin-bottom:6px">✓ '+pickedCount+' passenger'+(pickedCount!==1?'s':'')+' picked up</div>'
-    :'';
-
-  var html='<div class="card-list">'+pickedBanner;
+  var html='<div class="card-list">';
   conf.forEach(function(p,i){
     var av=avCol(i+1);
     var name=p.passenger_name_web||p.passenger_name||'Passenger';
@@ -451,38 +449,35 @@ function renderPaxTab(){
     var pt=p.pickup_time?fmtTime(p.pickup_time):'—';
     var done=p.status==='picked_up';
 
-    // Distance from driver pickup to passenger pickup
-    var distStr='';
-    if(ride.pickup_lat&&ride.pickup_lng&&p.pickup_lat&&p.pickup_lng){
-      var d=haversine(ride.pickup_lat,ride.pickup_lng,p.pickup_lat,p.pickup_lng);
-      distStr=d<1?'< 1 km':d.toFixed(1)+' km';
-    }
+    var badges='<span class="badge b-confirmed">confirmed</span>';
+    if(p.is_shift_start)badges+='<span class="badge b-shift">shift</span>';
+    if(done)badges+='<span class="badge b-matched">picked up ✓</span>';
 
-    var badges='';
-    if(p.is_shift_start)badges+='<span class="badge b-shift">⚡ shift</span>';
-    if(done)badges+='<span class="badge b-matched">✓ picked up</span>';
+    var waBtn=phone
+      ?'<button class="c-btn wa-btn-pax" data-phone="'+phone.replace(/\D/g,'')+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+      :'<button class="c-btn" style="opacity:.3"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
 
-    // Buttons always visible — no tap-to-expand needed
-    // I'm outside = amber/orange, Picked up = green, Remove = left side small
-    var actionRow='<div style="display:flex;gap:6px;padding:8px 13px;border-top:1px solid var(--border);align-items:center">'+
-      '<button class="btn btn-red btn-sm remove-btn" data-pid="'+p.id+'" style="flex-shrink:0">✕</button>'+
-      (phone
-        ?'<button class="btn btn-sm outside-btn" data-phone="'+phone.replace(/\D/g,'')+'" style="flex:1;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:var(--amber)">💬 I\'m outside</button>'
-        :'')+
-      (!done
-        ?'<button class="btn btn-sm pickup-btn" data-pid="'+p.id+'" style="flex:1;background:var(--green-dim);border:1px solid rgba(34,197,94,.3);color:var(--green)">✓ Picked up</button>'
-        :'<span style="flex:1;text-align:center;font-size:11px;color:var(--green);font-weight:600">✓ On board</span>')+
-    '</div>';
+    // Expand: shows actions + details (like original message in searchride)
+    var expId='pax-'+p.id;
+    var isExp=expandedMatchId===expId;
+    var expHtml=isExp
+      ?'<div class="card-detail open">'+
+        '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Passenger details</div>'+
+        '<div class="msg-box"><p>📍 Pickup: '+pu+'\n🏁 Dropoff: '+dro+'\n🕐 Time: '+pt+(p.is_shift_start?'\n⚡ Shift start time':'')+(phone?'\n📱 '+phone:'')+'</p><div class="msg-fade"></div></div>'+
+        '<div style="display:flex;gap:7px;flex-wrap:wrap">'+
+          (phone?'<button class="btn btn-wa btn-sm outside-btn" data-phone="'+phone.replace(/\D/g,'')+'" style="flex:1">💬 I\'m outside</button>':'')+
+          (!done?'<button class="btn btn-ghost btn-sm pickup-btn" data-pid="'+p.id+'" style="color:var(--green);border-color:rgba(34,197,94,.3);background:var(--green-dim)">✓ Picked up</button>':'')+
+          '<button class="btn btn-red btn-sm remove-btn" data-pid="'+p.id+'">Remove</button>'+
+        '</div>'+
+      '</div>'
+      :'';
 
-    html+='<div class="ride-card'+(done?' card-urgent':'')+'">'+
+    html+='<div class="ride-card'+(isExp?' expanded':'')+(done?' card-urgent':'')+'" data-pax-id="'+p.id+'">'+
       '<div class="card-top">'+
         '<div class="card-row1">'+
           '<div class="pax-info">'+
             '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
-            '<div>'+
-              '<div class="pax-name">'+name+'</div>'+
-              '<div class="time-ago">'+(phone||'no contact')+(distStr?' · '+distStr+' from pickup':'')+'</div>'+
-            '</div>'+
+            '<div><div class="pax-name">'+name+'</div><div class="time-ago">tap for details</div></div>'+
           '</div>'+
           '<div class="badges">'+badges+'</div>'+
         '</div>'+
@@ -495,36 +490,34 @@ function renderPaxTab(){
           '<div class="route-meta"><div class="ride-time">'+pt+'</div><div class="ride-date">'+fmtDate(p.date||ride.dates)+'</div></div>'+
         '</div>'+
       '</div>'+
-      actionRow+
+      '<div class="card-footer">'+
+        '<div class="footer-info">'+
+          '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+pt+'</div>'+
+          (p.is_shift_start?'<div class="f-chip">⚡ Shift start</div>':'')+
+        '</div>'+
+        '<div class="contact-btns">'+waBtn+'</div>'+
+      '</div>'+
+      expHtml+
     '</div>';
   });
   html+='</div><div style="padding:0 12px 16px"><button class="btn btn-ghost btn-full" id="d-add-btn" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button></div>';
   tc.innerHTML=html;
 
-  // Wire buttons — no card-tap expand needed anymore
-  tc.querySelectorAll('.outside-btn').forEach(function(btn){
-    btn.addEventListener('click',function(e){
-      e.stopPropagation();
-      window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"),'_blank');
+  tc.querySelectorAll('[data-pax-id]').forEach(function(card){
+    card.addEventListener('click',function(e){
+      if(e.target.closest('.c-btn')||e.target.closest('.btn'))return;
+      var eid='pax-'+card.dataset.paxId;
+      expandedMatchId=(expandedMatchId===eid)?null:eid;
+      renderPaxTab();
     });
-  });
-  tc.querySelectorAll('.pickup-btn').forEach(function(btn){
-    btn.addEventListener('click',async function(e){
-      e.stopPropagation();
-      this.disabled=true;this.textContent='Saving…';
-      await db.from('passenger_requests').update({status:'picked_up'}).eq('id',this.dataset.pid);
-      var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
-      passengers=r.data||[];renderPaxTab();
-    });
-  });
-  tc.querySelectorAll('.remove-btn').forEach(function(btn){
-    btn.addEventListener('click',async function(e){
-      e.stopPropagation();
-      if(!confirm('Remove this passenger?'))return;
-      await db.from('passenger_requests').update({status:'cancelled'}).eq('id',this.dataset.pid);
-      var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);
-      passengers=r.data||[];renderPaxTab();
-    });
+    var waBtn=card.querySelector('.wa-btn-pax');
+    if(waBtn)waBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"),'_blank');});
+    var outBtn=card.querySelector('.outside-btn');
+    if(outBtn)outBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.phone+'?text='+encodeURIComponent("I'm outside"),'_blank');});
+    var puBtn=card.querySelector('.pickup-btn');
+    if(puBtn)puBtn.addEventListener('click',async function(e){e.stopPropagation();await db.from('passenger_requests').update({status:'picked_up'}).eq('id',this.dataset.pid);var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);passengers=r.data||[];renderPaxTab();});
+    var rmBtn=card.querySelector('.remove-btn');
+    if(rmBtn)rmBtn.addEventListener('click',async function(e){e.stopPropagation();if(!confirm('Remove this passenger?'))return;await db.from('passenger_requests').update({status:'cancelled'}).eq('id',this.dataset.pid);var r=await db.from('passenger_requests').select('*').eq('ride_id',RIDE_ID);passengers=r.data||[];renderPaxTab();});
   });
   var addBtn=document.getElementById('d-add-btn');
   if(addBtn)addBtn.onclick=showAddForm;
@@ -583,22 +576,21 @@ async function renderMatchedTab(){
         :'<button class="c-btn" style="opacity:.3"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
 
 
+      // Original message — always rendered in DOM, toggled open/closed via CSS
       var expId='match-'+i;
-      var origMsg=m.original_message||'';
-      // Message section — hidden by default, toggled by button
-      var msgSection=origMsg
-        ?'<div class="card-detail" id="msgbox-'+i+'">'+
-          '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div>'+
-          '<div class="msg-box"><p>'+origMsg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p></div>'+
-        '</div>'
-        :'';
+      var isExp=expandedMatchId===expId;
+      var origMsg=m.original_message||'(no message)';
+      var expHtml='<div class="card-detail'+(isExp?' open':'')+'">'+
+        '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div>'+
+        '<div class="msg-box"><p>'+origMsg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p><div class="msg-fade"></div></div>'+
+      '</div>';
 
-      html+='<div class="ride-card" data-match-id="'+expId+'">'+
+      html+='<div class="ride-card'+(isExp?' expanded':'')+'" data-match-id="'+expId+'">'+
         '<div class="card-top">'+
           '<div class="card-row1">'+
             '<div class="pax-info">'+
               '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
-              '<div><div class="pax-name">'+name+'</div><div class="time-ago">'+(distLabel||'distance unknown')+'</div></div>'+
+              '<div><div class="pax-name">'+name+'</div><div class="time-ago">tap to see message</div></div>'+
             '</div>'+
             '<div class="badges">'+badges+'</div>'+
           '</div>'+
@@ -613,39 +605,37 @@ async function renderMatchedTab(){
         '</div>'+
         '<div class="card-footer">'+
           '<div class="footer-info">'+
+            '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+rDate+'</div>'+
             '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
-            (origMsg?'<button class="btn btn-ghost btn-sm show-msg-btn" data-idx="'+i+'" style="font-size:10px;height:26px;padding:0 8px">💬 Message</button>':'')+
           '</div>'+
           '<div class="contact-btns">'+waBtnHtml+'</div>'+
         '</div>'+
-        msgSection+
+        expHtml+
       '</div>';
     });
     html+='</div>';
     tc.innerHTML=html;
 
-    // Wire show-msg buttons (no card tap — prevents scroll-to-top)
-    tc.querySelectorAll('.show-msg-btn').forEach(function(btn){
-      btn.addEventListener('click',function(e){
-        e.stopPropagation();
-        var idx=this.dataset.idx;
-        var box=document.getElementById('msgbox-'+idx);
-        if(!box)return;
-        var open=box.classList.contains('open');
-        // close all
+    // Wire match card clicks — toggle inline without re-rendering (prevents scroll to top)
+    tc.querySelectorAll('[data-match-id]').forEach(function(card){
+      card.addEventListener('click',function(e){
+        if(e.target.closest('.c-btn'))return;
+        var mid=card.dataset.matchId;
+        var detail=card.querySelector('.card-detail');
+        if(!detail)return;
+        var opening=!detail.classList.contains('open');
+        // Close all others first
         tc.querySelectorAll('.card-detail').forEach(function(d){d.classList.remove('open');});
-        tc.querySelectorAll('.show-msg-btn').forEach(function(b){b.textContent='💬 Message';});
-        if(!open){
-          box.classList.add('open');
-          this.textContent='✕ Hide';
+        tc.querySelectorAll('.ride-card').forEach(function(rc){rc.classList.remove('expanded');});
+        if(opening){
+          detail.classList.add('open');
+          card.classList.add('expanded');
         }
+        expandedMatchId=opening?mid:null;
       });
-    });
-    tc.querySelectorAll('.match-wa-btn').forEach(function(btn){
-      btn.addEventListener('click',function(e){
-        e.stopPropagation();
-        window.open('https://wa.me/'+this.dataset.num+'?text='+this.dataset.msg,'_blank');
-      });
+      var waBtn=card.querySelector('.match-wa-btn');
+      if(waBtn)waBtn.addEventListener('click',function(e){e.stopPropagation();window.open('https://wa.me/'+this.dataset.num+'?text='+this.dataset.msg,'_blank');});
+
     });
   }catch(e){
     tc.innerHTML='<div style="padding:16px;font-size:12px;color:var(--red)">Error loading matches: '+e.message+'</div>';
