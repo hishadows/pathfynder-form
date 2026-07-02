@@ -101,7 +101,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
 .paj-text{font-size:12px;color:var(--green);font-weight:500;line-height:1.4}
 
 /* ── NOTES BOX (always open) ── */
-.notes-box{background:var(--amber-dim);border:1px solid rgba(245,158,11,.25);border-radius:9px;padding:8px 12px;font-size:12px;color:var(--amber);line-height:1.55;margin-top:8px;display:flex;align-items:flex-start;gap:7px}
+.notes-box{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--text-dim);line-height:1.55;margin-top:6px}
 .notes-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
 
 /* ── DRIVER ACTION ROW ── */
@@ -313,7 +313,7 @@ function rideCardHTML(){
 
   // Notes — always visible if present
   var notesSection=ride.notes
-    ?'<div class="notes-box">📌 '+ride.notes+'</div>'
+    ?'<div class="notes-box"><div class="notes-label">Notes from driver</div>'+ride.notes+'</div>'
     :'';
 
   return '<div class="ride-card" id="main-ride-card">'+
@@ -386,10 +386,7 @@ function renderDriverView(mv){
   var started=st==='started';
   var confs=passengers.filter(function(p){return p.status!=='cancelled';}).length;
 
-  // Passengers joined highlight banner
-  var paxBanner=confs>0
-    ?'<div class="pax-joined-banner"><div class="paj-num">'+confs+'</div><div class="paj-text">passenger'+(confs!==1?'s':'')+' joined<br>'+seatsLeft()+' seat'+(seatsLeft()!==1?'s':'')+' remaining</div></div>'
-    :'';
+  var paxBanner='';
 
   mv.innerHTML=
     // Top section: ride card + passengers banner + action strip
@@ -440,10 +437,10 @@ function renderPaxTab(){
     return;
   }
 
-  // Picked-up count shown at top
+  // Picked-up count banner
   var pickedCount=conf.filter(function(p){return p.status==='picked_up';}).length;
   var pickedBanner=pickedCount>0
-    ?'<div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 13px;font-size:12px;color:var(--green);font-weight:600">✓ '+pickedCount+' passenger'+(pickedCount!==1?'s':'')+' picked up</div>'
+    ?'<div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 13px;font-size:12px;color:var(--green);font-weight:600;margin-bottom:4px">✓ '+pickedCount+' passenger'+(pickedCount!==1?'s':'')+' picked up</div>'
     :'';
 
   var html='<div class="card-list">'+pickedBanner;
@@ -456,26 +453,26 @@ function renderPaxTab(){
     var pt=p.pickup_time?fmtTime(p.pickup_time):'—';
     var done=p.status==='picked_up';
 
-    // Distance from driver pickup to this passenger pickup
+    // Distance from driver pickup to passenger pickup
     var distStr='';
     if(ride.pickup_lat&&ride.pickup_lng&&p.pickup_lat&&p.pickup_lng){
-      var d=haversine(ride.pickup_lat,ride.pickup_lng,p.pickup_lat,p.pickup_lng);
-      distStr=d<1?'< 1 km':d.toFixed(1)+' km';
+      var km=haversine(ride.pickup_lat,ride.pickup_lng,p.pickup_lat,p.pickup_lng);
+      distStr=km<1?'< 1 km':km.toFixed(1)+' km';
     }
 
     var badges='';
     if(p.is_shift_start)badges+='<span class="badge b-shift">⚡ shift</span>';
-    if(done)badges+='<span class="badge b-matched">✓ picked up</span>';
+    if(done)badges='<span class="badge b-matched">✓ picked up</span>'+badges;
     else badges='<span class="badge b-confirmed">confirmed</span>'+badges;
 
-    // Always-visible action row — no tap to expand
+    // Actions always visible — no expand needed
     var actionRow=
       '<div style="display:flex;gap:6px;padding:8px 13px 10px;border-top:1px solid var(--border)">'+
-        (phone?'<button class="btn btn-sm outside-btn" data-phone="'+phoneClean+'" style="flex:1;background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">💬 I\'m outside</button>':'')+
+        '<button class="btn btn-red btn-sm remove-btn" data-pid="'+p.id+'" style="flex-shrink:0">✕</button>'+
+        (phoneClean?'<button class="btn btn-sm outside-btn" data-phone="'+phoneClean+'" style="flex:1;background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">💬 I\'m outside</button>':'')+
         (!done
           ?'<button class="btn btn-sm pickup-btn" data-pid="'+p.id+'" style="flex:1;background:var(--green-dim);border:1px solid rgba(34,197,94,.3);color:var(--green)">✓ Picked up</button>'
           :'<span style="flex:1;text-align:center;font-size:11px;color:var(--green);font-weight:600;padding:6px 0">✓ On board</span>')+
-        '<button class="btn btn-red btn-sm remove-btn" data-pid="'+p.id+'" style="flex-shrink:0">✕</button>'+
       '</div>';
 
     html+='<div class="ride-card'+(done?' card-urgent':'')+'">'+
@@ -485,7 +482,7 @@ function renderPaxTab(){
             '<div class="av" style="background:'+av.bg+';color:'+av.c+'">'+initials(name)+'</div>'+
             '<div>'+
               '<div class="pax-name">'+name+'</div>'+
-              '<div class="time-ago">'+(phone||'no contact')+(distStr?' · <b>'+distStr+'</b> from pickup':'')+'</div>'+
+              '<div class="time-ago">'+(distStr?distStr+' from pickup':'no location data')+'</div>'+
             '</div>'+
           '</div>'+
           '<div class="badges">'+badges+'</div>'+
@@ -505,7 +502,6 @@ function renderPaxTab(){
   html+='</div><div style="padding:0 12px 16px"><button class="btn btn-ghost btn-full" id="d-add-btn" style="border-style:dashed;color:var(--accent);border-color:rgba(79,142,247,.3)">+ Add passenger manually</button></div>';
   tc.innerHTML=html;
 
-  // Wire buttons — no card-tap needed
   tc.querySelectorAll('.outside-btn').forEach(function(btn){
     btn.addEventListener('click',function(e){
       e.stopPropagation();
@@ -589,19 +585,15 @@ async function renderMatchedTab(){
 
       // Original message — always rendered in DOM, toggled open/closed via CSS
       var expId='match-'+i;
-      var isExp=expandedMatchId===expId;
       var origMsg=m.original_message||'';
+      var expHtml='';
       var msgSection=origMsg
         ?'<div class="card-detail" id="msgbox-'+i+'">'+
           '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div>'+
           '<div class="msg-box"><p>'+origMsg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p></div>'+
         '</div>'
         :'';
-      var origMsg=m.original_message||'(no message)';
-      var expHtml='<div class="card-detail'+(isExp?' open':'')+'">'+
-        '<div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div>'+
-        '<div class="msg-box"><p>'+origMsg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p><div class="msg-fade"></div></div>'+
-      '</div>';
+
 
       html+='<div class="ride-card'+(isExp?' expanded':'')+'" data-match-id="'+expId+'">'+
         '<div class="card-top">'+
@@ -624,28 +616,26 @@ async function renderMatchedTab(){
         '<div class="card-footer">'+
           '<div class="footer-info">'+
             '<div class="f-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+rTime+'</div>'+
-            (origMsg?'<button class="btn btn-ghost btn-sm show-msg-btn" data-idx="'+i+'" style="font-size:10px;height:26px;padding:0 8px">💬 Message</button>':'')+
+            (origMsg?'<button class="btn btn-ghost btn-sm show-msg-btn" data-idx="'+i+'" style="height:26px;font-size:10px;padding:0 8px">View message</button>':'')+
           '</div>'+
           '<div class="contact-btns">'+waBtnHtml+'</div>'+
         '</div>'+
-        expHtml+
-      msgSection+
+        expHtml+msgSection+
       '</div>';
     });
     html+='</div>';
     tc.innerHTML=html;
 
-    // Message button toggles inline — no card tap (prevents scroll to top)
+    // Message button toggles msg inline — no card tap (card tap was scrolling to top)
     tc.querySelectorAll('.show-msg-btn').forEach(function(btn){
       btn.addEventListener('click',function(e){
         e.stopPropagation();
-        var idx=this.dataset.idx;
-        var box=document.getElementById('msgbox-'+idx);
+        var box=document.getElementById('msgbox-'+this.dataset.idx);
         if(!box)return;
         var opening=!box.classList.contains('open');
         tc.querySelectorAll('.card-detail').forEach(function(d){d.classList.remove('open');});
-        tc.querySelectorAll('.show-msg-btn').forEach(function(b){b.textContent='💬 Message';});
-        if(opening){box.classList.add('open');this.textContent='✕ Hide';}
+        tc.querySelectorAll('.show-msg-btn').forEach(function(b){b.textContent='View message';});
+        if(opening){box.classList.add('open');this.textContent='Hide';}
       });
     });
     tc.querySelectorAll('.match-wa-btn').forEach(function(btn){
