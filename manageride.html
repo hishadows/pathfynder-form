@@ -821,7 +821,7 @@ function renderPublic(mv) {
 
   // Join button area
   var joinArea = '';
-  if (alreadyJoined) {
+  if (alreadyJoined && st !== 'started') {
     joinArea = '<div class="already-joined">' +
       '<div class="aj-icon">✅</div>' +
       '<div class="aj-title">You\'re already on this ride</div>' +
@@ -845,32 +845,12 @@ function renderPublic(mv) {
           '<div class="otw-heading">Your driver is on the way</div>' +
           '<div class="otw-driver-name">' + (ride.driver_name||'Driver') + ' is heading to pick you up</div>' +
         '</div>' +
-        '<div class="otw-progress">' +
-          '<div class="otw-step">' +
-            '<div class="otw-step-dot done">✓</div>' +
-            '<div class="otw-step-label">Booked</div>' +
-          '</div>' +
-          '<div class="otw-step-line done"></div>' +
-          '<div class="otw-step">' +
-            '<div class="otw-step-dot active">🚗</div>' +
-            '<div class="otw-step-label">On the way</div>' +
-          '</div>' +
-          '<div class="otw-step-line"></div>' +
-          '<div class="otw-step">' +
-            '<div class="otw-step-dot pending">👤</div>' +
-            '<div class="otw-step-label">Pickup</div>' +
-          '</div>' +
-          '<div class="otw-step-line"></div>' +
-          '<div class="otw-step">' +
-            '<div class="otw-step-dot pending">🏁</div>' +
-            '<div class="otw-step-label">Dropoff</div>' +
-          '</div>' +
-        '</div>' +
         '<div class="otw-details">' +
-          '<div class="otw-detail-row"><span class="otw-detail-label">Route</span><span class="otw-detail-val">' + (ride.pickup_label||'—') + ' → ' + (ride.dropoff_label||'—') + '</span></div>' +
-          '<div class="otw-detail-row"><span class="otw-detail-label">Departure</span><span class="otw-detail-val">' + fmtTime(ride.departure_time) + ' · ' + fmtDate(ride.dates) + '</span></div>' +
-          (paxPu ? '<div class="otw-detail-row"><span class="otw-detail-label">Your pickup</span><span class="otw-detail-val">' + paxPu + '</span></div>' : '') +
-        '</div>' +
+  '<div class="otw-detail-row"><span class="otw-detail-label">Pickup</span><span class="otw-detail-val">' + (ride.pickup_label||'—') + '</span></div>' +
+  '<div class="otw-detail-row"><span class="otw-detail-label">Dropoff</span><span class="otw-detail-val">' + (ride.dropoff_label||'—') + '</span></div>' +
+  '<div class="otw-detail-row"><span class="otw-detail-label">Date</span><span class="otw-detail-val">' + fmtDate(ride.dates) + '</span></div>' +
+  '<div class="otw-detail-row"><span class="otw-detail-label">Time</span><span class="otw-detail-val">' + fmtTime(ride.departure_time) + '</span></div>' +
+'</div>' +
         (driverPhone ? '<button class="otw-wa-btn" id="otw-wa-btn" data-phone="' + driverPhone + '">Message driver on WhatsApp</button>' : '') +
       '</div>';
   } else if (full) {
