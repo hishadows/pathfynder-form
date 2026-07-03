@@ -813,8 +813,8 @@ function renderPublic(mv) {
     : '';
 
   // Already joined check
-  var saved = getSaved();
-  var alreadyJoined = saved && saved.joined_ride === RIDE_ID;
+ var saved = getSaved();
+var alreadyJoined = saved && String(saved.joined_ride) === String(RIDE_ID);
   var savedPu  = saved && saved.last_pickup  || '';
   var savedDro = saved && saved.last_dropoff || '';
   var savedPt  = saved && saved.last_pickup_time || '';
