@@ -192,6 +192,96 @@ html, body { min-height: 100%; background: var(--bg); color: var(--text); font-f
 .otw-title { font-size: 14px; font-weight: 600; color: var(--green); margin-bottom: 3px; }
 .otw-sub   { font-size: 12px; color: var(--text-dim); }
 
+/* Uber-style on-the-way card */
+.otw-card {
+  background: var(--surface);
+  border: 1px solid rgba(34,197,94,.3);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.otw-hero {
+  background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.05));
+  padding: 24px 20px 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.otw-car-anim {
+  font-size: 42px;
+  margin-bottom: 10px;
+  display: block;
+  animation: carBounce 2s ease-in-out infinite;
+}
+@keyframes carBounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.otw-heading {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+.otw-driver-name {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.otw-progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.otw-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+}
+.otw-step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+.otw-step-dot.done { background: var(--green); color: #fff; }
+.otw-step-dot.active { background: var(--accent); color: #fff; box-shadow: 0 0 0 4px var(--accent-dim); }
+.otw-step-dot.pending { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+.otw-step-label { font-size: 9px; color: var(--text-muted); text-align: center; font-weight: 500; }
+.otw-step-line { flex: 1; height: 2px; background: var(--border); margin-bottom: 14px; }
+.otw-step-line.done { background: var(--green); }
+.otw-details {
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.otw-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.otw-detail-label { color: var(--text-muted); }
+.otw-detail-val   { color: var(--text); font-weight: 500; }
+.otw-wa-btn {
+  margin: 0 20px 16px;
+  height: 42px;
+  background: rgba(37,211,102,.1);
+  border: 1px solid rgba(37,211,102,.25);
+  border-radius: 10px;
+  color: #25D366;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-family: var(--font-body);
+  width: calc(100% - 40px);
+}
+.otw-wa-btn:active { opacity: .8; }
+
 /* ── ACTION STRIP (driver) ── */
 .action-strip { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
 .action-row { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
@@ -397,7 +487,10 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.5); }
         <circle cx="12" cy="9" r="2.5" fill="#fff" stroke="none"/>
       </svg>
     </div>
-    <div class="brand">Path<span>fynder</span></div>
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div class="brand">Path<span>fynder</span></div>
+      <div id="page-title" style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:-1px"></div>
+    </div>
     <div id="status-pill" class="status-pill"></div>
   </div>
 
@@ -590,6 +683,9 @@ function render() {
   pill.textContent = st.charAt(0).toUpperCase() + st.slice(1);
   pill.className = 'status-pill sp-' + st;
   pill.style.display = '';
+  // Set page title
+  var ptEl = document.getElementById('page-title');
+  if (ptEl) ptEl.textContent = isDriver ? 'Manage Ride' : 'Ride Available';
 
   if (rideExpired() && st === 'open') {
     mv.innerHTML = '<div class="content">' + expiredHTML() + '</div>';
@@ -695,7 +791,7 @@ function wireHeroFooter() {
   if (sh) {
     sh.addEventListener('click', function() {
       var url = rideUrl(false);
-      var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time);
+      var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time) + ': ' + url;
       doShare(url, msg);
     });
   }
@@ -719,6 +815,9 @@ function renderPublic(mv) {
   // Already joined check
   var saved = getSaved();
   var alreadyJoined = saved && saved.joined_ride === RIDE_ID;
+  var savedPu  = saved && saved.last_pickup  || '';
+  var savedDro = saved && saved.last_dropoff || '';
+  var savedPt  = saved && saved.last_pickup_time || '';
 
   // Join button area
   var joinArea = '';
@@ -727,12 +826,53 @@ function renderPublic(mv) {
       '<div class="aj-icon">✅</div>' +
       '<div class="aj-title">You\'re already on this ride</div>' +
       '<div class="aj-sub">Driver will contact you on WhatsApp before departure</div>' +
+      '<div class="aj-sub">Driver will contact you on WhatsApp before departure</div>' +
+      (savedPu ? '<div style="margin-top:10px;text-align:left;display:flex;flex-direction:column;gap:6px">' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--green)">Pickup</span><span style="color:var(--text-dim)">' + savedPu + '</span></div>' +
+        (savedDro ? '<div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--green)">Dropoff</span><span style="color:var(--text-dim)">' + savedDro + '</span></div>' : '') +
+        (savedPt ? '<div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--green)">Time</span><span style="color:var(--green);font-weight:600">' + savedPt + '</span></div>' : '') +
+      '</div>' : '') +
     '</div>';
-  } else if (st === 'started') {
-    joinArea = '<div class="otw-banner">' +
-      '<div class="otw-title">🚗 Your driver is on the way</div>' +
-      '<div class="otw-sub">' + (ride.driver_name||'Driver') + ' has started the ride</div>' +
-    '</div>';
+    var driverPhone = (ride.driver_phone||'').replace(/\D/g,'');
+    // Check what we know about this passenger from localStorage
+    var sv = getSaved();
+    var paxPu  = (sv && sv.last_pickup)  || '';
+    var paxPt  = (sv && sv.last_pickup_time) || fmtTime(ride.departure_time);
+    joinArea =
+      '<div class="otw-card">' +
+        '<div class="otw-hero">' +
+          '<span class="otw-car-anim">🚗</span>' +
+          '<div class="otw-heading">Your driver is on the way</div>' +
+          '<div class="otw-driver-name">' + (ride.driver_name||'Driver') + ' is heading to pick you up</div>' +
+        '</div>' +
+        '<div class="otw-progress">' +
+          '<div class="otw-step">' +
+            '<div class="otw-step-dot done">✓</div>' +
+            '<div class="otw-step-label">Booked</div>' +
+          '</div>' +
+          '<div class="otw-step-line done"></div>' +
+          '<div class="otw-step">' +
+            '<div class="otw-step-dot active">🚗</div>' +
+            '<div class="otw-step-label">On the way</div>' +
+          '</div>' +
+          '<div class="otw-step-line"></div>' +
+          '<div class="otw-step">' +
+            '<div class="otw-step-dot pending">👤</div>' +
+            '<div class="otw-step-label">Pickup</div>' +
+          '</div>' +
+          '<div class="otw-step-line"></div>' +
+          '<div class="otw-step">' +
+            '<div class="otw-step-dot pending">🏁</div>' +
+            '<div class="otw-step-label">Dropoff</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="otw-details">' +
+          '<div class="otw-detail-row"><span class="otw-detail-label">Route</span><span class="otw-detail-val">' + (ride.pickup_label||'—') + ' → ' + (ride.dropoff_label||'—') + '</span></div>' +
+          '<div class="otw-detail-row"><span class="otw-detail-label">Departure</span><span class="otw-detail-val">' + fmtTime(ride.departure_time) + ' · ' + fmtDate(ride.dates) + '</span></div>' +
+          (paxPu ? '<div class="otw-detail-row"><span class="otw-detail-label">Your pickup</span><span class="otw-detail-val">' + paxPu + '</span></div>' : '') +
+        '</div>' +
+        (driverPhone ? '<button class="otw-wa-btn" id="otw-wa-btn" data-phone="' + driverPhone + '">Message driver on WhatsApp</button>' : '') +
+      '</div>';
   } else if (full) {
     joinArea = '<button class="btn btn-full" disabled style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">Ride Full</button>';
   } else if (closed) {
@@ -748,6 +888,8 @@ function renderPublic(mv) {
   '</div>';
 
   wireHeroFooter();
+  var otwWa = document.getElementById('otw-wa-btn');
+  if (otwWa) otwWa.addEventListener('click', function() { window.open('https://wa.me/' + this.dataset.phone, '_blank'); });
 
   var joinBtn = document.getElementById('btn-join');
   if (joinBtn) joinBtn.addEventListener('click', showJoinForm);
@@ -847,7 +989,7 @@ async function submitJoin(shiftOn) {
     var res = await db.from('passenger_requests').insert(row);
     if (res.error) throw res.error;
 
-    setSaved({ name: name, phone: phone, joined_ride: RIDE_ID });
+    setSaved({ name: name, phone: phone, joined_ride: RIDE_ID, last_pickup: pu, last_dropoff: dro, last_pickup_time: fmtTime((time||'00:00')+':00') });
 
     var r2 = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
     passengers = r2.data || [];
@@ -914,7 +1056,7 @@ function renderDriver(mv) {
   var dShare = document.getElementById('d-share');
   if (dShare) dShare.addEventListener('click', function() {
     var url = rideUrl(false);
-    var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time);
+    var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time) + ': ' + url;
     doShare(url, msg);
   });
   var dMaps = document.getElementById('d-maps');
@@ -939,8 +1081,8 @@ function buildActionStrip(st, started) {
   } else {
     var closeLabel = st === 'closed' ? 'Reopen Ride' : 'Close Ride';
     row2 = '<div class="action-row">' +
-      '<button class="act-btn act-btn-start" id="d-start">&#9654; Start Ride</button>' +
       '<button class="act-btn act-btn-close" id="d-close">' + closeLabel + '</button>' +
+      '<button class="act-btn act-btn-start" id="d-start">&#9654; Start Ride</button>' +
     '</div>';
   }
 
@@ -1187,7 +1329,14 @@ async function renderMatchedTab() {
       var badges = '';
       if (imp === 'urgent')  badges += '<span class="badge b-urgent">urgent</span>';
       if (imp === 'airport') badges += '<span class="badge b-airport">airport</span>';
-      if (dist)              badges += '<span class="badge b-km">' + dist + '</span>';
+      // Pickup distance from driver pickup
+      if (dist) badges += '<span class="badge b-km">📍 ' + dist + ' pickup</span>';
+      // Dropoff distance from driver dropoff
+      if (ride.dropoff_lat && ride.dropoff_lng && m.dropoff_lat && m.dropoff_lng) {
+        var dKm = haversine(ride.dropoff_lat, ride.dropoff_lng, m.dropoff_lat, m.dropoff_lng);
+        var dDist = fmtKm(dKm);
+        if (dDist) badges += '<span class="badge" style="background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,.25)">🏁 ' + dDist + ' dropoff</span>';
+      }
 
       html +=
         '<div class="match-card" id="match-' + i + '">' +
@@ -1212,16 +1361,16 @@ async function renderMatchedTab() {
             '</div>' +
           '</div>' +
           // Original message — hidden, toggled inline by button click
+          '<div class="match-footer">' +
+            (origMsg ? '<button class="match-btn match-btn-msg" data-idx="' + i + '">View message</button>' : '<div></div>') +
+            (phC ? '<button class="match-btn match-btn-contact" data-num="' + phC + '" data-msg="' + encodeURIComponent(contactMsg) + '">Contact</button>' : '') +
+          '</div>' +
           (origMsg
             ? '<div class="msg-box" id="msgbox-' + i + '">' +
                 '<div class="det-label">Original message</div>' +
                 '<p>' + origMsg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>' +
               '</div>'
             : '') +
-          '<div class="match-footer">' +
-            (origMsg ? '<button class="match-btn match-btn-msg" data-idx="' + i + '">View message</button>' : '<div></div>') +
-            (phC ? '<button class="match-btn match-btn-contact" data-num="' + phC + '" data-msg="' + encodeURIComponent(contactMsg) + '">Contact</button>' : '') +
-          '</div>' +
         '</div>';
     });
 
