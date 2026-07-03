@@ -36,6 +36,27 @@
   --font-body: 'Inter', sans-serif;
 }
 
+[data-theme="light"] {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface2: #f0f2f5;
+  --border: #e2e5eb;
+  --accent: #4f8ef7;
+  --accent-dim: rgba(79,142,247,0.10);
+  --accent-hover: #3d7ce0;
+  --green: #16a34a;
+  --green-dim: rgba(22,163,74,0.10);
+  --amber: #d97706;
+  --amber-dim: rgba(217,119,6,0.10);
+  --red: #dc2626;
+  --red-dim: rgba(220,38,38,0.10);
+  --purple: #9333ea;
+  --purple-dim: rgba(147,51,234,0.10);
+  --text: #14171f;
+  --text-dim: #5b6472;
+  --text-muted: #9aa1ac;
+}
+
 /* ── BASE ── */
 html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); }
 #app { max-width: 520px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
@@ -492,6 +513,7 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.5); }
       <div id="page-title" style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:-1px"></div>
     </div>
     <div id="status-pill" class="status-pill"></div>
+    <button id="theme-toggle" style="margin-left:8px;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Toggle theme">🌙</button>
   </div>
 
   <!-- LOADING SKELETONS -->
@@ -1578,6 +1600,29 @@ function showErr(msg) {
     '<div class="status-sub">' + msg + '</div>' +
   '</div></div></div>';
 }
+
+// ════════════════════════════════════════════════════════════
+// THEME TOGGLE
+// ════════════════════════════════════════════════════════════
+(function() {
+  var saved = localStorage.getItem('pf_theme') || 'dark';
+  if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  var btn = document.getElementById('theme-toggle');
+  if (btn) {
+    btn.textContent = saved === 'light' ? '☀️' : '🌙';
+    btn.addEventListener('click', function() {
+      var cur = document.documentElement.getAttribute('data-theme');
+      var next = cur === 'light' ? 'dark' : 'light';
+      if (next === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      localStorage.setItem('pf_theme', next);
+      btn.textContent = next === 'light' ? '☀️' : '🌙';
+    });
+  }
+})();
 
 // ════════════════════════════════════════════════════════════
 // BOOT
