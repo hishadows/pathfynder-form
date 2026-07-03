@@ -791,7 +791,7 @@ function wireHeroFooter() {
   if (sh) {
     sh.addEventListener('click', function() {
       var url = rideUrl(false);
-      var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time) + ': ' + url;
+      var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time);
       doShare(url, msg);
     });
   }
@@ -1036,7 +1036,7 @@ function renderDriver(mv) {
   var dShare = document.getElementById('d-share');
   if (dShare) dShare.addEventListener('click', function() {
     var url = rideUrl(false);
-    var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time) + ': ' + url;
+    var msg = 'Join my ride from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time);
     doShare(url, msg);
   });
   var dMaps = document.getElementById('d-maps');
