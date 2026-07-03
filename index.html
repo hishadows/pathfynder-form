@@ -520,6 +520,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
         <button type="button" class="seat-btn" data-seat="5">5</button>
       </div>
     </div>
+    <div class="field" id="notesField" style="display:none">
+      <label for="notesInput">Notes <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+      <div class="input-wrap">
+        <textarea id="notesInput" placeholder="e.g. AC on, no pets, $10 per seat" rows="3" style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;resize:none;transition:border-color 0.15s"></textarea>
+      </div>
+    </div>
 
     <div class="error-banner" id="errorBanner"></div>
 
@@ -595,6 +601,7 @@ function setRole(r) {
   document.getElementById('btnDriver').classList.toggle('active', r === 'driver');
 
   document.getElementById('seatsField').style.display = r === 'driver' ? '' : 'none';
+  document.getElementById('notesField').style.display = r === 'driver' ? '' : 'none';
   document.getElementById('timeLabel').textContent = r === 'driver' ? 'Departure time' : 'Time';
 
   document.getElementById('submitBtn').querySelector('.btn-text').textContent =
@@ -774,6 +781,7 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
     dates: dateVal,
 
     available_seats: selectedSeat,
+    notes: role === 'driver' ? (document.getElementById('notesInput').value.trim() || null) : null,
     status: 'pending',
     is_active: true
   };
