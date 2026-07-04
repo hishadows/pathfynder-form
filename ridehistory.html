@@ -375,6 +375,23 @@
       color: var(--border);
       pointer-events: none;
     }
+    .p-route {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    .p-route-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .p-route-dot.pickup  { border: 1.5px solid var(--accent); background: transparent; }
+    .p-route-dot.dropoff { background: var(--accent); }
 
     /* ── Empty / Loading / Error states ─────────── */
     .state-box {
@@ -481,7 +498,7 @@
     // CONFIG — swap these in from env / other pages
     // ─────────────────────────────────────────
     const SUPABASE_URL      = 'https://omussxfyrztjahbdrrpi.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';                                                    // ← same key as other pages
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak'; // ← same key as other pages
 
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -752,14 +769,14 @@
             <div class="p-avatar">${escHtml(initial)}</div>
             <div class="p-info">
               <div class="p-name">${escHtml(name)}</div>
-              <div class="p-sub">
-                ${phone ? escHtml(phone) : 'No phone on file'}
-              </div>
+              <div class="p-sub">${phone ? escHtml(phone) : 'No phone on file'}</div>
+              <div class="p-route"><span class="p-route-dot pickup"></span>${escHtml(p.pickup_label || '—')}</div>
+              <div class="p-route"><span class="p-route-dot dropoff"></span>${escHtml(p.dropoff_label || '—')}</div>
             </div>
-            <div class="p-status ${statusCls}">${statusLabel}</div>
-            <a href="${contactHref}" class="p-contact ${contactClass}" title="${contactTitle}">
-              📞
-            </a>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+              <div class="p-status ${statusCls}">${statusLabel}</div>
+              <a href="${contactHref}" class="p-contact ${contactClass}" title="${contactTitle}">📞</a>
+            </div>
           </div>`;
       }).join('');
 
