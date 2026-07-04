@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ride History – Pathfynder</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #111318;
+      --surface:   #1C1F2B;
+      --surface2:  #252836;
+      --border:    #2A2D3E;
+      --accent:    #4F8EF7;
+      --accent-dim:#1e3a6e;
+      --success:   #22C55E;
+      --success-bg:#052e16;
+      --danger:    #EF4444;
+      --danger-bg: #2d1010;
+      --warning:   #F59E0B;
+      --warning-bg:#2d1f05;
+      --muted:     #9CA3AF;
+      --text:      #F1F3F9;
+      --text2:     #C9CDD8;
+      --radius:    12px;
+      --radius-sm: 8px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      flex: 1;
+    }
+    .header-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 1px;
+    }
+
+    /* ── Stats strip ─────────────────────────────── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-cell {
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Filter tabs ─────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-tab {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── List ────────────────────────────────────── */
+    .ride-list {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ── Ride card ───────────────────────────────── */
+    .ride-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .ride-card.expanded {
+      border-color: var(--accent);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px 10px;
+    }
+    .card-date {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .status-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .status-badge.completed  { background: var(--success-bg); color: var(--success); }
+    .status-badge.cancelled  { background: var(--danger-bg);  color: var(--danger);  }
+    .status-badge.closed     { background: var(--surface2);   color: var(--muted);   }
+    .status-badge.in_progress{ background: var(--accent-dim); color: var(--accent);  }
+
+    /* Route line — signature element */
+    .route-block {
+      padding: 0 14px 12px;
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .route-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      padding-top: 3px;
+    }
+    .route-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: transparent;
+      flex-shrink: 0;
+    }
+    .route-dot.dest {
+      background: var(--accent);
+    }
+    .route-stem {
+      width: 2px;
+      flex: 1;
+      min-height: 20px;
+      background: linear-gradient(to bottom, var(--accent), var(--border));
+      margin: 3px 0;
+      border-radius: 1px;
+    }
+    .route-stops {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .route-stop {
+      display: flex;
+      flex-direction: column;
+    }
+    .route-stop-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 1px;
+    }
+    .route-stop-addr {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+      padding-bottom: 12px;
+    }
+    .route-stop:last-child .route-stop-addr { padding-bottom: 0; }
+
+    /* Meta row */
+    .card-meta {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+    .meta-item {
+      flex: 1;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-right: 1px solid var(--border);
+    }
+    .meta-item:last-child { border-right: none; }
+    .meta-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .meta-key {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Toggle button */
+    .card-toggle {
+      width: 100%;
+      padding: 10px 14px;
+      background: transparent;
+      border: none;
+      border-top: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.1s;
+    }
+    .card-toggle:active { background: var(--surface2); }
+    .toggle-chevron {
+      transition: transform 0.2s ease;
+      line-height: 1;
+    }
+    .ride-card.expanded .toggle-chevron { transform: rotate(180deg); }
+
+    /* ── Passenger drawer ────────────────────────── */
+    .passenger-drawer {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+    .ride-card.expanded .passenger-drawer { display: flex; }
+
+    .drawer-heading {
+      padding: 10px 14px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .passenger-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+    }
+    .passenger-row:first-of-type { border-top: none; }
+
+    .p-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+
+    .p-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .p-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .p-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .p-status {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+      white-space: nowrap;
+      text-transform: capitalize;
+    }
+    .p-status.accepted   { background: var(--success-bg); color: var(--success); }
+    .p-status.pending    { background: var(--warning-bg); color: var(--warning); }
+    .p-status.cancelled  { background: var(--danger-bg);  color: var(--danger);  }
+
+    .p-contact {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: background 0.1s;
+    }
+    .p-contact:active { background: var(--accent-dim); }
+    .p-contact.no-phone {
+      color: var(--border);
+      pointer-events: none;
+    }
+
+    /* ── Empty / Loading / Error states ─────────── */
+    .state-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+    .state-icon { font-size: 40px; }
+    .state-title { font-size: 16px; font-weight: 600; }
+    .state-sub { font-size: 13px; color: var(--muted); max-width: 240px; }
+
+    .skeleton-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .skel {
+      background: var(--surface2);
+      border-radius: 6px;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.4; }
+    }
+
+    /* group label between date groups */
+    .date-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 4px 2px 2px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div style="flex:1">
+      <div class="header-title">Ride History</div>
+      <div class="header-subtitle" id="driver-name">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="stat-cell">
+      <div class="stat-value" id="stat-rides">—</div>
+      <div class="stat-label">Rides</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-value" id="stat-passengers">—</div>
+      <div class="stat-label">Passengers</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-value" id="stat-earned">—</div>
+      <div class="stat-label">Avg Fare</div>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="filter-bar">
+    <button class="filter-tab active" data-filter="all">All</button>
+    <button class="filter-tab" data-filter="completed">Completed</button>
+    <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+    <button class="filter-tab" data-filter="closed">Closed</button>
+  </div>
+
+  <!-- Ride list -->
+  <div class="ride-list" id="ride-list">
+    <!-- skeleton -->
+    <div class="skeleton-card">
+      <div class="skel" style="height:12px;width:40%"></div>
+      <div class="skel" style="height:16px;width:80%"></div>
+      <div class="skel" style="height:16px;width:60%"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skel" style="height:12px;width:35%"></div>
+      <div class="skel" style="height:16px;width:75%"></div>
+      <div class="skel" style="height:16px;width:55%"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skel" style="height:12px;width:50%"></div>
+      <div class="skel" style="height:16px;width:70%"></div>
+      <div class="skel" style="height:16px;width:65%"></div>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────
+    // CONFIG — swap these in from env / other pages
+    // ─────────────────────────────────────────
+    const SUPABASE_URL      = 'https://omussxfyrztjahbdrrpi.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ← same key as other pages
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ─────────────────────────────────────────
+    // Telegram & URL param
+    // ─────────────────────────────────────────
+    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
+
+    const params   = new URLSearchParams(window.location.search);
+    const CHAT_ID  = params.get('chat_id');
+
+    // ─────────────────────────────────────────
+    // State
+    // ─────────────────────────────────────────
+    let allRides   = [];   // [{ride, passengers:[]}]
+    let activeFilter = 'all';
+
+    // ─────────────────────────────────────────
+    // Init
+    // ─────────────────────────────────────────
+    async function init() {
+      if (!CHAT_ID) {
+        showError('No driver ID provided.');
+        return;
+      }
+      await Promise.all([loadDriverName(), loadRides()]);
+    }
+
+    async function loadDriverName() {
+      const { data } = await db
+        .from('telegram_users')
+        .select('first_name, last_name')
+        .eq('chat_id', CHAT_ID)
+        .single();
+
+      if (data) {
+        const name = [data.first_name, data.last_name].filter(Boolean).join(' ');
+        document.getElementById('driver-name').textContent = name || 'Driver';
+      }
+    }
+
+    async function loadRides() {
+      // Step 1: fetch driver's past rides
+      const { data: rides, error } = await db
+        .from('rides')
+        .select('*')
+        .eq('driver_chat_id', CHAT_ID)
+        .in('status', ['completed', 'cancelled', 'closed', 'in_progress'])
+        .order('departure_time', { ascending: false });
+
+      if (error) { showError('Could not load rides.'); return; }
+      if (!rides || rides.length === 0) { showEmpty(); return; }
+
+      // Step 2: fetch all matches for those rides in one query
+      const rideIds = rides.map(r => r.id);
+      const { data: matches } = await db
+        .from('ride_matches')
+        .select(`
+          id,
+          ride_id,
+          passenger_chat_id,
+          seats_requested,
+          status,
+          created_at,
+          telegram_users!ride_matches_passenger_chat_id_fkey (
+            first_name,
+            last_name,
+            phone_number
+          )
+        `)
+        .in('ride_id', rideIds);
+
+      // Group matches by ride_id
+      const matchMap = {};
+      (matches || []).forEach(m => {
+        if (!matchMap[m.ride_id]) matchMap[m.ride_id] = [];
+        matchMap[m.ride_id].push(m);
+      });
+
+      // Merge
+      allRides = rides.map(r => ({
+        ride: r,
+        passengers: matchMap[r.id] || []
+      }));
+
+      renderStats();
+      renderList();
+    }
+
+    // ─────────────────────────────────────────
+    // Stats
+    // ─────────────────────────────────────────
+    function renderStats() {
+      const completed = allRides.filter(r => r.ride.status === 'completed');
+      const totalPassengers = allRides.reduce((sum, r) =>
+        sum + r.passengers.filter(p => p.status === 'accepted').length, 0);
+
+      const fares = allRides
+        .map(r => parseFloat(r.ride.fare_per_seat))
+        .filter(f => !isNaN(f));
+      const avgFare = fares.length
+        ? Math.round(fares.reduce((a, b) => a + b, 0) / fares.length)
+        : null;
+
+      document.getElementById('stat-rides').textContent      = allRides.length;
+      document.getElementById('stat-passengers').textContent  = totalPassengers;
+      document.getElementById('stat-earned').textContent     = avgFare != null ? `$${avgFare}` : '—';
+    }
+
+    // ─────────────────────────────────────────
+    // Filter tabs
+    // ─────────────────────────────────────────
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeFilter = tab.dataset.filter;
+        renderList();
+      });
+    });
+
+    // ─────────────────────────────────────────
+    // Render ride list
+    // ─────────────────────────────────────────
+    function renderList() {
+      const list = document.getElementById('ride-list');
+      list.innerHTML = '';
+
+      const filtered = activeFilter === 'all'
+        ? allRides
+        : allRides.filter(r => r.ride.status === activeFilter);
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="state-box">
+            <div class="state-icon">🛣️</div>
+            <div class="state-title">No ${activeFilter === 'all' ? '' : activeFilter + ' '}rides yet</div>
+            <div class="state-sub">Completed rides will appear here.</div>
+          </div>`;
+        return;
+      }
+
+      // Group by calendar date
+      const groups = {};
+      filtered.forEach(entry => {
+        const d = entry.ride.departure_time
+          ? new Date(entry.ride.departure_time)
+          : new Date(entry.ride.created_at);
+        const key = formatDateGroup(d);
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(entry);
+      });
+
+      Object.entries(groups).forEach(([label, entries]) => {
+        const gl = document.createElement('div');
+        gl.className = 'date-group-label';
+        gl.textContent = label;
+        list.appendChild(gl);
+
+        entries.forEach(entry => {
+          list.appendChild(buildCard(entry));
+        });
+      });
+    }
+
+    // ─────────────────────────────────────────
+    // Build a ride card DOM element
+    // ─────────────────────────────────────────
+    function buildCard({ ride, passengers }) {
+      const card = document.createElement('div');
+      card.className = 'ride-card';
+
+      const depTime   = ride.departure_time ? new Date(ride.departure_time) : null;
+      const timeStr   = depTime ? formatTime(depTime) : '—';
+      const dateStr   = depTime ? formatDate(depTime) : '—';
+
+      const accepted  = passengers.filter(p => p.status === 'accepted');
+      const seatsUsed = accepted.reduce((s, p) => s + (p.seats_requested || 1), 0);
+      const totalSeats = ride.available_seats || '?';
+      const fare      = ride.fare_per_seat != null ? `$${ride.fare_per_seat}` : '—';
+
+      const statusClass = ride.status || 'closed';
+      const statusLabel = {
+        completed: 'Completed',
+        cancelled: 'Cancelled',
+        closed:    'Closed',
+        in_progress: 'In Progress'
+      }[ride.status] || ride.status;
+
+      const origin = ride.origin_address || ride.origin || 'Origin';
+      const dest   = ride.destination_address || ride.destination || 'Destination';
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-date">${dateStr} · ${timeStr}</div>
+          <div class="status-badge ${statusClass}">${statusLabel}</div>
+        </div>
+
+        <div class="route-block">
+          <div class="route-line">
+            <div class="route-dot"></div>
+            <div class="route-stem"></div>
+            <div class="route-dot dest"></div>
+          </div>
+          <div class="route-stops">
+            <div class="route-stop">
+              <div class="route-stop-label">From</div>
+              <div class="route-stop-addr">${escHtml(origin)}</div>
+            </div>
+            <div class="route-stop">
+              <div class="route-stop-label">To</div>
+              <div class="route-stop-addr">${escHtml(dest)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-meta">
+          <div class="meta-item">
+            <div class="meta-val">${timeStr}</div>
+            <div class="meta-key">Departure</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-val">${seatsUsed}/${totalSeats}</div>
+            <div class="meta-key">Seats Filled</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-val">${fare}</div>
+            <div class="meta-key">Per Seat</div>
+          </div>
+        </div>
+
+        <button class="card-toggle" data-expanded="false">
+          <span>${passengers.length} Passenger${passengers.length !== 1 ? 's' : ''}</span>
+          <span class="toggle-chevron">▾</span>
+        </button>
+
+        <div class="passenger-drawer">
+          ${buildPassengerDrawer(passengers)}
+        </div>
+      `;
+
+      const toggle  = card.querySelector('.card-toggle');
+      const drawer  = card.querySelector('.passenger-drawer');
+      toggle.addEventListener('click', () => {
+        const isOpen = card.classList.toggle('expanded');
+        toggle.dataset.expanded = isOpen;
+      });
+
+      // Hide toggle if no passengers
+      if (passengers.length === 0) {
+        toggle.textContent = 'No passengers';
+        toggle.style.pointerEvents = 'none';
+        toggle.style.color = 'var(--muted)';
+      }
+
+      return card;
+    }
+
+    // ─────────────────────────────────────────
+    // Build passenger rows HTML
+    // ─────────────────────────────────────────
+    function buildPassengerDrawer(passengers) {
+      if (passengers.length === 0) {
+        return `<div style="padding:14px;text-align:center;color:var(--muted);font-size:12px;">No passengers for this ride</div>`;
+      }
+
+      const heading = `<div class="drawer-heading">Passengers</div>`;
+      const rows = passengers.map(p => {
+        const user  = p.telegram_users || {};
+        const name  = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown';
+        const phone = user.phone_number || null;
+        const seats = p.seats_requested || 1;
+        const initial = name.charAt(0) || '?';
+
+        const statusCls = p.status || 'pending';
+        const statusLabel = p.status === 'accepted' ? 'Accepted'
+          : p.status === 'cancelled' ? 'Cancelled'
+          : 'Pending';
+
+        const contactHref = phone ? `tel:${phone}` : '#';
+        const contactClass = phone ? '' : 'no-phone';
+        const contactTitle = phone ? `Call ${phone}` : 'No phone on file';
+
+        return `
+          <div class="passenger-row">
+            <div class="p-avatar">${escHtml(initial)}</div>
+            <div class="p-info">
+              <div class="p-name">${escHtml(name)}</div>
+              <div class="p-sub">
+                ${seats} seat${seats !== 1 ? 's' : ''}
+                ${phone ? ' · ' + escHtml(phone) : ''}
+              </div>
+            </div>
+            <div class="p-status ${statusCls}">${statusLabel}</div>
+            <a href="${contactHref}" class="p-contact ${contactClass}" title="${contactTitle}">
+              📞
+            </a>
+          </div>`;
+      }).join('');
+
+      return heading + rows;
+    }
+
+    // ─────────────────────────────────────────
+    // Empty / Error states
+    // ─────────────────────────────────────────
+    function showEmpty() {
+      document.getElementById('ride-list').innerHTML = `
+        <div class="state-box">
+          <div class="state-icon">🛣️</div>
+          <div class="state-title">No rides yet</div>
+          <div class="state-sub">Once you complete rides, they'll show up here.</div>
+        </div>`;
+      ['stat-rides','stat-passengers','stat-earned'].forEach(id => {
+        document.getElementById(id).textContent = '0';
+      });
+    }
+
+    function showError(msg) {
+      document.getElementById('ride-list').innerHTML = `
+        <div class="state-box">
+          <div class="state-icon">⚠️</div>
+          <div class="state-title">Something went wrong</div>
+          <div class="state-sub">${escHtml(msg)}</div>
+        </div>`;
+    }
+
+    // ─────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function formatTime(d) {
+      return d.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    function formatDateGroup(d) {
+      const now   = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tgt   = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const diff  = Math.round((today - tgt) / 86400000);
+
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      if (diff < 7)  return d.toLocaleDateString('en-CA', { weekday: 'long' });
+      if (diff < 365) return d.toLocaleDateString('en-CA', { month: 'long', day: 'numeric' });
+      return d.toLocaleDateString('en-CA', { year: 'numeric', month: 'long' });
+    }
+
+    // ─────────────────────────────────────────
+    // Boot
+    // ─────────────────────────────────────────
+    init();
+  </script>
+</body>
+</html>
