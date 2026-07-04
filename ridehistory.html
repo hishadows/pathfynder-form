@@ -166,7 +166,8 @@
     }
     .status-badge.completed  { background: var(--success-bg); color: var(--success); }
     .status-badge.cancelled  { background: var(--danger-bg);  color: var(--danger);  }
-    .status-badge.closed     { background: var(--surface2);   color: var(--muted);   }
+    .status-badge.started    { background: var(--accent-dim); color: var(--accent);  }
+    .status-badge.active     { background: var(--accent-dim); color: var(--accent);  }
     .status-badge.in_progress{ background: var(--accent-dim); color: var(--accent);  }
 
     /* Route line — signature element */
@@ -348,9 +349,11 @@
       white-space: nowrap;
       text-transform: capitalize;
     }
-    .p-status.accepted   { background: var(--success-bg); color: var(--success); }
+    .p-status.picked_up  { background: var(--success-bg); color: var(--success); }
+    .p-status.accepted   { background: var(--accent-dim); color: var(--accent);  }
     .p-status.pending    { background: var(--warning-bg); color: var(--warning); }
     .p-status.cancelled  { background: var(--danger-bg);  color: var(--danger);  }
+    .p-status.rejected   { background: var(--danger-bg);  color: var(--danger);  }
 
     .p-contact {
       display: flex;
@@ -441,16 +444,16 @@
     </div>
     <div class="stat-cell">
       <div class="stat-value" id="stat-earned">—</div>
-      <div class="stat-label">Avg Fare</div>
+      <div class="stat-label">Picked Up</div>
     </div>
   </div>
 
   <!-- Filter tabs -->
   <div class="filter-bar">
     <button class="filter-tab active" data-filter="all">All</button>
+    <button class="filter-tab" data-filter="started">Started</button>
     <button class="filter-tab" data-filter="completed">Completed</button>
     <button class="filter-tab" data-filter="cancelled">Cancelled</button>
-    <button class="filter-tab" data-filter="closed">Closed</button>
   </div>
 
   <!-- Ride list -->
@@ -478,7 +481,7 @@
     // CONFIG — swap these in from env / other pages
     // ─────────────────────────────────────────
     const SUPABASE_URL      = 'https://omussxfyrztjahbdrrpi.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak'; // ← same key as other pages
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ← same key as other pages
 
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -510,59 +513,46 @@
 
     async function loadDriverName() {
       const { data } = await db
-        .from('telegram_users')
-        .select('first_name, last_name')
-        .eq('chat_id', CHAT_ID)
+        .from('driver_routines')
+        .select('driver_name')
+        .eq('telegram_chat_id', CHAT_ID)
+        .limit(1)
         .single();
 
-      if (data) {
-        const name = [data.first_name, data.last_name].filter(Boolean).join(' ');
-        document.getElementById('driver-name').textContent = name || 'Driver';
+      if (data?.driver_name) {
+        document.getElementById('driver-name').textContent = data.driver_name;
       }
     }
 
     async function loadRides() {
-      // Step 1: fetch driver's past rides
+      // Step 1: fetch driver's routines
       const { data: rides, error } = await db
-        .from('rides')
+        .from('driver_routines')
         .select('*')
-        .eq('driver_chat_id', CHAT_ID)
-        .in('status', ['completed', 'cancelled', 'closed', 'in_progress'])
-        .order('departure_time', { ascending: false });
+        .eq('telegram_chat_id', CHAT_ID)
+        .order('departure_datetime', { ascending: false });
 
       if (error) { showError('Could not load rides.'); return; }
       if (!rides || rides.length === 0) { showEmpty(); return; }
 
-      // Step 2: fetch all matches for those rides in one query
+      // Step 2: fetch all passenger_requests for those ride IDs in one query
       const rideIds = rides.map(r => r.id);
-      const { data: matches } = await db
-        .from('ride_matches')
-        .select(`
-          id,
-          ride_id,
-          passenger_chat_id,
-          seats_requested,
-          status,
-          created_at,
-          telegram_users!ride_matches_passenger_chat_id_fkey (
-            first_name,
-            last_name,
-            phone_number
-          )
-        `)
+      const { data: passengers } = await db
+        .from('passenger_requests')
+        .select('id, ride_id, passenger_name, passenger_name_web, passenger_wa_id, passenger_phone_web, status, created_at, pickup_label, dropoff_label')
         .in('ride_id', rideIds);
 
-      // Group matches by ride_id
-      const matchMap = {};
-      (matches || []).forEach(m => {
-        if (!matchMap[m.ride_id]) matchMap[m.ride_id] = [];
-        matchMap[m.ride_id].push(m);
+      // Group passengers by ride_id
+      const passengerMap = {};
+      (passengers || []).forEach(p => {
+        if (!passengerMap[p.ride_id]) passengerMap[p.ride_id] = [];
+        passengerMap[p.ride_id].push(p);
       });
 
       // Merge
       allRides = rides.map(r => ({
         ride: r,
-        passengers: matchMap[r.id] || []
+        passengers: passengerMap[r.id] || []
       }));
 
       renderStats();
@@ -573,20 +563,13 @@
     // Stats
     // ─────────────────────────────────────────
     function renderStats() {
-      const completed = allRides.filter(r => r.ride.status === 'completed');
-      const totalPassengers = allRides.reduce((sum, r) =>
-        sum + r.passengers.filter(p => p.status === 'accepted').length, 0);
-
-      const fares = allRides
-        .map(r => parseFloat(r.ride.fare_per_seat))
-        .filter(f => !isNaN(f));
-      const avgFare = fares.length
-        ? Math.round(fares.reduce((a, b) => a + b, 0) / fares.length)
-        : null;
+      const totalPassengers = allRides.reduce((sum, r) => sum + r.passengers.length, 0);
+      const pickedUp = allRides.reduce((sum, r) =>
+        sum + r.passengers.filter(p => p.status === 'picked_up').length, 0);
 
       document.getElementById('stat-rides').textContent      = allRides.length;
       document.getElementById('stat-passengers').textContent  = totalPassengers;
-      document.getElementById('stat-earned').textContent     = avgFare != null ? `$${avgFare}` : '—';
+      document.getElementById('stat-earned').textContent     = pickedUp;
     }
 
     // ─────────────────────────────────────────
@@ -610,7 +593,7 @@
 
       const filtered = activeFilter === 'all'
         ? allRides
-        : allRides.filter(r => r.ride.status === activeFilter);
+        : allRides.filter(r => r.ride.ride_status === activeFilter);
 
       if (filtered.length === 0) {
         list.innerHTML = `
@@ -625,8 +608,8 @@
       // Group by calendar date
       const groups = {};
       filtered.forEach(entry => {
-        const d = entry.ride.departure_time
-          ? new Date(entry.ride.departure_time)
+        const d = entry.ride.departure_datetime
+          ? new Date(entry.ride.departure_datetime)
           : new Date(entry.ride.created_at);
         const key = formatDateGroup(d);
         if (!groups[key]) groups[key] = [];
@@ -652,25 +635,24 @@
       const card = document.createElement('div');
       card.className = 'ride-card';
 
-      const depTime   = ride.departure_time ? new Date(ride.departure_time) : null;
+      const depTime   = ride.departure_datetime ? new Date(ride.departure_datetime) : null;
       const timeStr   = depTime ? formatTime(depTime) : '—';
       const dateStr   = depTime ? formatDate(depTime) : '—';
 
-      const accepted  = passengers.filter(p => p.status === 'accepted');
-      const seatsUsed = accepted.reduce((s, p) => s + (p.seats_requested || 1), 0);
+      const pickedUp  = passengers.filter(p => p.status === 'picked_up').length;
       const totalSeats = ride.available_seats || '?';
-      const fare      = ride.fare_per_seat != null ? `$${ride.fare_per_seat}` : '—';
 
-      const statusClass = ride.status || 'closed';
+      const statusClass = ride.ride_status || 'started';
       const statusLabel = {
-        completed: 'Completed',
-        cancelled: 'Cancelled',
-        closed:    'Closed',
+        started:     'Started',
+        completed:   'Completed',
+        cancelled:   'Cancelled',
+        active:      'Active',
         in_progress: 'In Progress'
-      }[ride.status] || ride.status;
+      }[ride.ride_status] || ride.ride_status || '—';
 
-      const origin = ride.origin_address || ride.origin || 'Origin';
-      const dest   = ride.destination_address || ride.destination || 'Destination';
+      const origin = ride.pickup_label  || 'Origin';
+      const dest   = ride.dropoff_label || 'Destination';
 
       card.innerHTML = `
         <div class="card-header">
@@ -702,12 +684,12 @@
             <div class="meta-key">Departure</div>
           </div>
           <div class="meta-item">
-            <div class="meta-val">${seatsUsed}/${totalSeats}</div>
-            <div class="meta-key">Seats Filled</div>
+            <div class="meta-val">${passengers.length}/${totalSeats}</div>
+            <div class="meta-key">Booked/Seats</div>
           </div>
           <div class="meta-item">
-            <div class="meta-val">${fare}</div>
-            <div class="meta-key">Per Seat</div>
+            <div class="meta-val">${pickedUp}</div>
+            <div class="meta-key">Picked Up</div>
           </div>
         </div>
 
@@ -748,16 +730,18 @@
 
       const heading = `<div class="drawer-heading">Passengers</div>`;
       const rows = passengers.map(p => {
-        const user  = p.telegram_users || {};
-        const name  = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Unknown';
-        const phone = user.phone_number || null;
-        const seats = p.seats_requested || 1;
-        const initial = name.charAt(0) || '?';
+        const name  = p.passenger_name_web || p.passenger_name || 'Unknown';
+        const phone = p.passenger_phone_web || p.passenger_wa_id || null;
+        const initial = name.charAt(0).toUpperCase() || '?';
 
         const statusCls = p.status || 'pending';
-        const statusLabel = p.status === 'accepted' ? 'Accepted'
-          : p.status === 'cancelled' ? 'Cancelled'
-          : 'Pending';
+        const statusLabel = {
+          picked_up:  'Picked Up',
+          accepted:   'Accepted',
+          cancelled:  'Cancelled',
+          pending:    'Pending',
+          rejected:   'Rejected'
+        }[p.status] || p.status || 'Pending';
 
         const contactHref = phone ? `tel:${phone}` : '#';
         const contactClass = phone ? '' : 'no-phone';
@@ -769,8 +753,7 @@
             <div class="p-info">
               <div class="p-name">${escHtml(name)}</div>
               <div class="p-sub">
-                ${seats} seat${seats !== 1 ? 's' : ''}
-                ${phone ? ' · ' + escHtml(phone) : ''}
+                ${phone ? escHtml(phone) : 'No phone on file'}
               </div>
             </div>
             <div class="p-status ${statusCls}">${statusLabel}</div>
