@@ -494,6 +494,19 @@ input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.5); }
 .sec { padding: 0 12px 16px; display: flex; flex-direction: column; gap: 8px; }
 .sec-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; padding: 4px 0 2px; }
 
+/* ── DIST CHIP (inline next to Pickup / Dropoff label) ── */
+.dist-chip {
+  display: inline-flex; align-items: center;
+  font-size: 9px; font-weight: 700;
+  padding: 1px 7px; border-radius: 10px;
+  background: var(--accent-dim); color: var(--accent);
+  border: 1px solid rgba(79,142,247,.28);
+  margin-left: 5px; vertical-align: middle;
+  letter-spacing: .01em;
+}
+.dist-chip-drop { background: var(--purple-dim); color: var(--purple); border-color: rgba(168,85,247,.28); }
+.b-inferred { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,.28); }
+
 @media (max-width: 520px) { .content { padding: 10px; } }
 </style>
 </head>
@@ -1331,13 +1344,12 @@ async function renderMatchedTab() {
       var badges = '';
       if (imp === 'urgent')  badges += '<span class="badge b-urgent">urgent</span>';
       if (imp === 'airport') badges += '<span class="badge b-airport">airport</span>';
-      // Pickup distance from driver pickup
-      if (dist) badges += '<span class="badge b-km">📍 ' + dist + ' pickup</span>';
-      // Dropoff distance from driver dropoff
+      if (m.source_inferred) badges += '<span class="badge b-inferred">inferred</span>';
+      // Compute dropoff distance for inline label
+      var dropDist = '';
       if (ride.dropoff_lat && ride.dropoff_lng && m.dropoff_lat && m.dropoff_lng) {
         var dKm = haversine(ride.dropoff_lat, ride.dropoff_lng, m.dropoff_lat, m.dropoff_lng);
-        var dDist = fmtKm(dKm);
-        if (dDist) badges += '<span class="badge" style="background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,.25)">🏁 ' + dDist + ' dropoff</span>';
+        dropDist = fmtKm(dKm);
       }
 
       html +=
@@ -1356,8 +1368,8 @@ async function renderMatchedTab() {
             '<div class="route-strip">' +
               '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>' +
               '<div class="route-labels">' +
-                '<div><div class="route-place">' + (m.pickup_label||'—') + '</div><div class="route-sub">Pickup</div></div>' +
-                '<div><div class="route-place">' + (m.dropoff_label||'—') + '</div><div class="route-sub">Dropoff</div></div>' +
+                '<div><div class="route-place">' + (m.pickup_label||'—') + '</div><div class="route-sub">Pickup' + (dist ? '<span class="dist-chip">' + dist + '</span>' : '') + '</div></div>' +
+                '<div><div class="route-place">' + (m.dropoff_label||'—') + '</div><div class="route-sub">Dropoff' + (dropDist ? '<span class="dist-chip dist-chip-drop">' + dropDist + '</span>' : '') + '</div></div>' +
               '</div>' +
               '<div class="route-meta"><div class="ride-time" style="font-size:15px">' + rTime + '</div><div class="ride-date">' + rDate + '</div></div>' +
             '</div>' +
