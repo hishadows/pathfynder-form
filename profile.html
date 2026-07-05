@@ -55,6 +55,7 @@
   .required-badge { font-size: 10px; font-weight: 600; color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(79,142,247,0.25); padding: 2px 7px; border-radius: 20px; letter-spacing: 0.3px; }
   .optional-badge { font-size: 10px; font-weight: 600; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 20px; }
 
+  /* Standard input wrap */
   .input-wrap { position: relative; }
   .input-prefix {
     position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
@@ -70,6 +71,43 @@
   .input-wrap input::placeholder { color: var(--text-muted); }
   .input-wrap input.valid { border-color: var(--green); }
   .input-wrap input.invalid { border-color: var(--red); }
+
+  /* Phone input: country code select + number field */
+  .phone-wrap {
+    display: flex; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; transition: border-color 0.15s;
+  }
+  .phone-wrap:focus-within { border-color: var(--accent); }
+  .phone-wrap.valid { border-color: var(--green); }
+  .phone-wrap.invalid { border-color: var(--red); }
+
+  .cc-select {
+    background: var(--surface); border: none; border-right: 1px solid var(--border);
+    color: var(--text); font-family: var(--font-body); font-size: 13px;
+    padding: 11px 8px 11px 12px; cursor: pointer; outline: none; flex-shrink: 0;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234e5a6e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center;
+    padding-right: 22px; width: auto;
+  }
+  .cc-select option { background: var(--surface2); color: var(--text); }
+
+  .phone-number-input {
+    flex: 1; background: transparent; border: none;
+    padding: 11px 14px; color: var(--text);
+    font-family: var(--font-body); font-size: 14px; outline: none; min-width: 0;
+  }
+  .phone-number-input::placeholder { color: var(--text-muted); }
+
+  /* WhatsApp preview link */
+  .wa-preview {
+    display: none; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--green); margin-top: 2px;
+  }
+  .wa-preview.show { display: flex; }
+  .wa-preview a { color: var(--green); text-decoration: none; }
+  .wa-preview a:hover { text-decoration: underline; }
+  .wa-preview svg { flex-shrink: 0; }
 
   .field-hint { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
   .field-hint a { color: var(--accent); text-decoration: none; }
@@ -119,6 +157,7 @@
   .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green-dim); border: 2px solid var(--green-border); display: flex; align-items: center; justify-content: center; font-size: 28px; }
   .success-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
   .success-sub { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 300px; }
+  .success-redirect { font-size: 12px; color: var(--text-muted); }
   .tg-btn {
     margin-top: 8px; padding: 13px 28px; background: #229ED9; border: none; border-radius: var(--radius);
     color: #fff; font-family: var(--font-body); font-size: 15px; font-weight: 600;
@@ -168,7 +207,6 @@
   <div id="formWrapper" style="display:none">
     <div class="card-header">
       <div class="card-title" id="cardTitle">Set Up Your Profile</div>
-
     </div>
 
     <div class="info-banner">
@@ -178,13 +216,59 @@
 
     <form class="form-body" id="profileForm">
 
+      <!-- ── WhatsApp (REQUIRED, first) ─────────────────────── -->
+      <div class="section-label">WhatsApp</div>
+
+      <div class="field">
+        <div class="field-top">
+          <label for="waNumber">WhatsApp Number</label>
+          <span class="required-badge">REQUIRED</span>
+        </div>
+
+        <div class="phone-wrap" id="phoneWrap">
+          <select id="ccSelect" class="cc-select" aria-label="Country code">
+            <option value="1"   data-placeholder="416 123 4567"  selected>CA +1</option>
+            <option value="1"   data-placeholder="212 555 0100"         >US +1</option>
+            <option value="91"  data-placeholder="98765 43210"          >IN +91</option>
+            <option value="44"  data-placeholder="7911 123456"          >GB +44</option>
+            <option value="61"  data-placeholder="412 345 678"          >AU +61</option>
+            <option value="92"  data-placeholder="300 1234567"          >PK +92</option>
+            <option value="971" data-placeholder="50 123 4567"          >AE +971</option>
+            <option value="880" data-placeholder="1812 345678"          >BD +880</option>
+            <option value="94"  data-placeholder="71 234 5678"          >LK +94</option>
+            <option value="977" data-placeholder="98 1234567"           >NP +977</option>
+            <option value="63"  data-placeholder="917 123 4567"         >PH +63</option>
+            <option value="49"  data-placeholder="1512 3456789"         >DE +49</option>
+            <option value="33"  data-placeholder="6 12 34 56 78"        >FR +33</option>
+            <option value="55"  data-placeholder="11 91234 5678"        >BR +55</option>
+            <option value="52"  data-placeholder="55 1234 5678"         >MX +52</option>
+            <option value="27"  data-placeholder="82 345 6789"          >ZA +27</option>
+            <option value="234" data-placeholder="803 123 4567"         >NG +234</option>
+            <option value="254" data-placeholder="712 345678"           >KE +254</option>
+          </select>
+          <input type="tel" id="waNumber" class="phone-number-input" placeholder="416 123 4567" autocomplete="tel-national" inputmode="numeric">
+        </div>
+
+        <div class="val-msg" id="waNumberMsg"></div>
+
+        <!-- Live WhatsApp preview -->
+        <div class="wa-preview" id="waPreview">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span>Tap to verify: </span><a id="waPreviewLink" href="#" target="_blank">wa.me/…</a>
+        </div>
+
+        <div class="field-hint">Select your country, then enter your number without the country code.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ── Telegram (OPTIONAL, second) ───────────────────── -->
       <div class="section-label">Telegram</div>
 
-      <!-- Telegram Username -->
       <div class="field">
         <div class="field-top">
           <label for="tgUsername">Telegram Username</label>
-          <span class="required-badge">REQUIRED</span>
+          <span class="optional-badge">OPTIONAL</span>
         </div>
         <div class="input-wrap has-prefix">
           <span class="input-prefix">@</span>
@@ -192,23 +276,6 @@
         </div>
         <div class="val-msg" id="tgUsernameMsg"></div>
         <div class="field-hint">Don't have one? Telegram → Settings → Username</div>
-      </div>
-
-      <div class="divider"></div>
-      <div class="section-label">WhatsApp</div>
-
-      <!-- WhatsApp number -->
-      <div class="field">
-        <div class="field-top">
-          <label for="waNumber">WhatsApp Number</label>
-          <span class="optional-badge">OPTIONAL</span>
-        </div>
-        <div class="input-wrap has-prefix">
-          <span class="input-prefix">+</span>
-          <input type="tel" id="waNumber" placeholder="1 416 123 4567 or 91 98765 43210" autocomplete="tel" style="padding-left:24px">
-        </div>
-        <div class="val-msg" id="waNumberMsg"></div>
-        <div class="field-hint">Enter your country code + number. e.g. Canada: 1 · India: 91</div>
       </div>
 
       <div class="error-banner" id="errorBanner"></div>
@@ -226,6 +293,7 @@
     <div class="success-icon">✓</div>
     <div class="success-title">Profile saved!</div>
     <div class="success-sub">You're all set. When we find you a match, they'll be able to contact you directly.</div>
+    <div class="success-redirect" id="successRedirect">Returning to bot in 3 seconds…</div>
     <a class="tg-btn" href="https://t.me/PathfynderBot">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.012 9.481c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.875.74z"/></svg>
       Back to Pathfynder Bot
@@ -235,7 +303,7 @@
 </div>
 
 <script>
-var SUPABASE_URL = 'https://omussxfyrztjahbdrrpi.supabase.co';   // supabase URL and Public Key
+var SUPABASE_URL = 'https://omussxfyrztjahbdrrpi.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tdXNzeGZ5cnp0amFoYmRycnBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MjI1NjAsImV4cCI6MjA5NTk5ODU2MH0.ySigym7uOaFIQm01nErPfn4kE6j4MOVKoNntt_Mosak';
 
 var params   = new URLSearchParams(location.search);
@@ -245,20 +313,41 @@ var userId   = params.get('user_id')  || '';
 
 // Show user pill
 if (userName) {
-  document.getElementById('userNameDisplay').textContent    = userName;
-  document.getElementById('userInitial').textContent        = userName[0].toUpperCase();
-  document.getElementById('userPill').style.display         = 'flex';
+  document.getElementById('userNameDisplay').textContent = userName;
+  document.getElementById('userInitial').textContent     = userName[0].toUpperCase();
+  document.getElementById('userPill').style.display      = 'flex';
 }
 if (!chatId) {
   document.getElementById('warnBox').classList.add('show');
 }
 
-// ── Load existing profile ──────────────────────────────────────────────────
+// ── Country code helpers ───────────────────────────────────────────────────
+var ccSelect = document.getElementById('ccSelect');
+var waInput  = document.getElementById('waNumber');
+
+// Update placeholder when country changes
+ccSelect.addEventListener('change', function() {
+  var opt = ccSelect.options[ccSelect.selectedIndex];
+  waInput.placeholder = opt.getAttribute('data-placeholder') || 'Phone number';
+  waInput.value = '';
+  resetPhoneState();
+  updateWaPreview();
+});
+
+function getCountryCode() {
+  return ccSelect.options[ccSelect.selectedIndex].value;
+}
+
+// Build the final number to save: countryCode + digits only (no +, no spaces)
+function buildFinalNumber() {
+  var cc     = getCountryCode();
+  var digits = waInput.value.replace(/\D/g, '');
+  return cc + digits;
+}
+
+// ── Load existing profile ─────────────────────────────────────────────────
 function loadProfile() {
-  if (!chatId) {
-    showForm();
-    return;
-  }
+  if (!chatId) { showForm(); return; }
   fetch(SUPABASE_URL + '/rest/v1/telegram_users?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&limit=1', {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
   })
@@ -270,16 +359,35 @@ function loadProfile() {
         document.getElementById('tgUsername').value = row.telegram_username.replace(/^@/, '');
       }
       if (row.whatsapp_number) {
-        document.getElementById('waNumber').value = row.whatsapp_number;
+        // Try to match stored number (digits only, no +) back to a country code option
+        var stored = row.whatsapp_number.replace(/\D/g, '');
+        var matched = false;
+        // Try longest codes first (3 digit, 2 digit, 1 digit)
+        var opts = Array.from(ccSelect.options);
+        [3, 2, 1].forEach(function(len) {
+          if (matched) return;
+          var prefix = stored.slice(0, len);
+          opts.forEach(function(opt, i) {
+            if (matched) return;
+            if (opt.value === prefix) {
+              ccSelect.selectedIndex = i;
+              waInput.placeholder = opt.getAttribute('data-placeholder') || 'Phone number';
+              waInput.value = stored.slice(len); // remainder after country code
+              matched = true;
+            }
+          });
+        });
+        if (!matched) {
+          waInput.value = stored;
+        }
+        updateWaPreview();
       }
       document.getElementById('cardTitle').textContent = 'Update Your Profile';
       document.getElementById('submitBtn').querySelector('.btn-text').textContent = 'Update Profile';
     }
     showForm();
   })
-  .catch(function() {
-    showForm();
-  });
+  .catch(function() { showForm(); });
 }
 
 function showForm() {
@@ -289,34 +397,103 @@ function showForm() {
 
 loadProfile();
 
-// ── Validation ─────────────────────────────────────────────────────────────
+// ── Auto-strip non-digits as user types ───────────────────────────────────
+waInput.addEventListener('input', function() {
+  // Allow digits, spaces, dashes, parens while typing — strip everything else
+  var val = waInput.value.replace(/[^\d\s\-\(\)]/g, '');
+  if (val !== waInput.value) waInput.value = val;
+  validateWa(false);
+  updateWaPreview();
+});
+waInput.addEventListener('blur', function() {
+  validateWa(true);
+  updateWaPreview();
+});
+
+// ── Live WhatsApp preview ─────────────────────────────────────────────────
+function updateWaPreview() {
+  var digits  = waInput.value.replace(/\D/g, '');
+  var preview = document.getElementById('waPreview');
+  var link    = document.getElementById('waPreviewLink');
+  if (digits.length >= 5) {
+    var full = buildFinalNumber();
+    link.href        = 'https://wa.me/' + full;
+    link.textContent = 'wa.me/' + full;
+    preview.classList.add('show');
+  } else {
+    preview.classList.remove('show');
+  }
+}
+
+// ── Validation ────────────────────────────────────────────────────────────
 var tgInput = document.getElementById('tgUsername');
-var waInput = document.getElementById('waNumber');
+var phoneWrap = document.getElementById('phoneWrap');
 
 tgInput.addEventListener('input', function() { validateTg(false); });
 tgInput.addEventListener('blur',  function() { validateTg(true); });
-waInput.addEventListener('input', function() { validateWa(false); });
-waInput.addEventListener('blur',  function() { validateWa(true); });
+
+function resetPhoneState() {
+  phoneWrap.classList.remove('valid', 'invalid');
+  var msg = document.getElementById('waNumberMsg');
+  msg.className = 'val-msg';
+}
+
+function validateWa(showMsg) {
+  var digits = waInput.value.replace(/\D/g, '');
+  var msg    = document.getElementById('waNumberMsg');
+
+  if (!digits) {
+    phoneWrap.classList.remove('valid', 'invalid');
+    msg.className = 'val-msg';
+    if (showMsg) {
+      phoneWrap.classList.add('invalid');
+      msg.className = 'val-msg error show';
+      msg.textContent = 'WhatsApp number is required';
+    }
+    return false;
+  }
+
+  // After stripping country code, local part should be 5–12 digits
+  if (digits.length < 5 || digits.length > 12) {
+    phoneWrap.classList.remove('valid');
+    phoneWrap.classList.add('invalid');
+    if (showMsg) {
+      msg.className = 'val-msg error show';
+      msg.textContent = digits.length < 5
+        ? 'Number seems too short — check you entered it fully'
+        : 'Number seems too long — enter just the local number, not the country code';
+    } else { msg.className = 'val-msg'; }
+    return false;
+  }
+
+  phoneWrap.classList.remove('invalid');
+  phoneWrap.classList.add('valid');
+  if (showMsg) {
+    msg.className = 'val-msg success show';
+    msg.textContent = 'Number looks good ✓';
+  } else { msg.className = 'val-msg'; }
+  return true;
+}
 
 function validateTg(showMsg) {
   var val = tgInput.value.trim().replace(/^@/, '');
   var msg = document.getElementById('tgUsernameMsg');
+  // Optional — empty is fine
   if (!val) {
     tgInput.className = '';
     msg.className = 'val-msg';
-    return false;
+    return true;
   }
-  // Telegram usernames: 5-32 chars, alphanumeric + underscore
   var valid = /^[a-zA-Z0-9_]{5,32}$/.test(val);
   if (valid) {
     tgInput.className = 'valid';
-    if (showMsg) { msg.className = 'val-msg success'; msg.textContent = '@' + val + ' looks good'; }
+    if (showMsg) { msg.className = 'val-msg success show'; msg.textContent = '@' + val + ' looks good'; }
     else { msg.className = 'val-msg'; }
     return true;
   } else {
     tgInput.className = val.length > 0 ? 'invalid' : '';
     if (showMsg && val.length > 0) {
-      msg.className = 'val-msg error';
+      msg.className = 'val-msg error show';
       if (val.length < 5) msg.textContent = 'Username must be at least 5 characters';
       else msg.textContent = 'Only letters, numbers and underscores allowed';
     } else { msg.className = 'val-msg'; }
@@ -324,67 +501,39 @@ function validateTg(showMsg) {
   }
 }
 
-function validateWa(showMsg) {
-  var val = waInput.value.trim();
-  var msg = document.getElementById('waNumberMsg');
-  if (!val) {
-    waInput.className = '';
-    msg.className = 'val-msg';
-    return true; // optional field, empty is fine
-  }
-  // Strip spaces and dashes for validation
-  var stripped = ('+' + val).replace(/[\s\-\(\)]/g, '');
-  // Must start with + and have 7-15 digits after
-  var valid = /^\+[1-9]\d{6,14}$/.test(stripped);
-  if (valid) {
-    waInput.className = 'valid';
-    if (showMsg) { msg.className = 'val-msg success'; msg.textContent = 'Number looks good'; }
-    else { msg.className = 'val-msg'; }
-    return true;
-  } else {
-    waInput.className = 'invalid';
-    if (showMsg) {
-      msg.className = 'val-msg error';
-      if (!stripped.startsWith('+')) msg.textContent = 'Include your country code, e.g. +92 300 1234567';
-      else msg.textContent = 'Enter a valid international phone number';
-    } else { msg.className = 'val-msg'; }
-    return false;
-  }
-}
-
-// ── Submit ─────────────────────────────────────────────────────────────────
+// ── Submit ────────────────────────────────────────────────────────────────
 document.getElementById('profileForm').addEventListener('submit', function(e) {
   e.preventDefault();
   hideError();
 
-  var tgOk = validateTg(true);
   var waOk = validateWa(true);
+  var tgOk = validateTg(true);
 
-  if (!tgOk) {
-    showError('Please enter a valid Telegram username — this is required so your match can contact you.');
-    return;
-  }
   if (!waOk) {
-    showError('Please enter a valid WhatsApp number with your country code, or leave it empty.');
+    showError('Please enter a valid WhatsApp number so your match can reach you.');
+    return;
+  }
+  if (!tgOk) {
+    showError('Your Telegram username doesn\'t look right — fix it or leave it empty.');
     return;
   }
 
-  var tgVal = tgInput.value.trim().replace(/^@/, '');
-  var waRaw = waInput.value.trim();
-  var waVal = waRaw ? ( waRaw.replace(/\s/g, '')) : null;
+  var tgVal  = tgInput.value.trim().replace(/^@/, '') || null;
+  // Save as digits only: countryCode + localNumber, no + sign
+  var waVal  = buildFinalNumber();
 
   var payload = {
-    telegram_chat_id:   chatId   || null,
-    telegram_user_id:   userId   || null,
-    name:               userName || null,
-    telegram_username:  tgVal,
-    whatsapp_number:    waVal,
-    updated_at:         new Date().toISOString()
+    telegram_chat_id:  chatId   || null,
+    telegram_user_id:  userId   || null,
+    name:              userName || null,
+    telegram_username: tgVal,
+    whatsapp_number:   waVal,
+    updated_at:        new Date().toISOString()
   };
 
   setLoading(true);
 
-  fetch(SUPABASE_URL + '/rest/v1/telegram_users?on_conflict=telegram_chat_id', {  
+  fetch(SUPABASE_URL + '/rest/v1/telegram_users?on_conflict=telegram_chat_id', {
     method: 'POST',
     headers: {
       'Content-Type':  'application/json',
@@ -402,15 +551,25 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
     }
     document.getElementById('formWrapper').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
-    // Fire n8n webhook (fire-and-forget, don't block redirect on it)
-    fetch('https://pathy.dpdns.org/webhook/telegram-profile-save', {                                                                            // N8N webhook URL CALL : POST
+
+    // Fire n8n webhook (fire-and-forget)
+    fetch('https://pathy.dpdns.org/webhook/telegram-profile-save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).catch(function() {});
-    // Redirect to bot after 1 seconds
-    setTimeout(function() {
-      window.location.href = 'https://t.me/PathfynderBot';
+
+    // Countdown redirect — 3 seconds so user can read the success screen
+    var secs = 3;
+    var countEl = document.getElementById('successRedirect');
+    var interval = setInterval(function() {
+      secs--;
+      if (secs <= 0) {
+        clearInterval(interval);
+        window.location.href = 'https://t.me/PathfynderBot';
+      } else {
+        countEl.textContent = 'Returning to bot in ' + secs + ' second' + (secs === 1 ? '' : 's') + '…';
+      }
     }, 1000);
   })
   .catch(function(err) {
