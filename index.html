@@ -352,6 +352,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .fare-input-wrap input:focus { border-color: var(--accent); }
 .fare-input-wrap input::placeholder { color: var(--text-muted); }
+.fare-input-wrap input::-webkit-outer-spin-button,
+.fare-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .fare-quick {
   display: flex;
@@ -593,7 +595,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
       <div class="fare-row">
         <div class="fare-input-wrap">
           <span class="fare-prefix">$</span>
-          <input type="number" id="fareInput" placeholder="0" min="0" step="1">
+          <input type="number" id="fareInput" placeholder="0" min="0" step="1" inputmode="numeric" pattern="[0-9]*" style="-moz-appearance:textfield">
         </div>
         <div class="fare-quick">
           <button type="button" class="fare-quick-btn" data-fare="10">$10</button>
