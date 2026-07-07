@@ -1040,7 +1040,7 @@ async function submitJoin(shiftOn) {
     var res = await db.from('passenger_requests').insert(row);
     if (res.error) throw res.error;
 
-    setSaved({ name: name, phone: phone: numRaw.replace(/\D/g, ''), joined_ride: RIDE_ID, last_pickup: pu, last_dropoff: dro, last_pickup_time: fmtTime((time||'00:00')+':00') });
+    setSaved({ name: name, phone: numRaw.replace(/\D/g, ''), joined_ride: RIDE_ID, last_pickup: pu, last_dropoff: dro, last_pickup_time: fmtTime((time||'00:00')+':00') });
 
     var r2 = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
     passengers = r2.data || [];
