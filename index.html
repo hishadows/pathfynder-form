@@ -313,6 +313,74 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   color: var(--accent);
 }
 
+.fare-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fare-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.fare-prefix {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 15px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fare-input-wrap input {
+  width: 100%;
+  padding: 11px 14px 11px 26px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.fare-input-wrap input:focus { border-color: var(--accent); }
+.fare-input-wrap input::placeholder { color: var(--text-muted); }
+
+.fare-quick {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.fare-quick-btn {
+  padding: 6px 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.fare-quick-btn:hover,
+.fare-quick-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .submit-btn {
   width: 100%;
   padding: 14px;
@@ -458,11 +526,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 <div class="card">
   <div class="role-toggle">
-    <button class="role-btn active" id="btnPassenger" type="button">
-      <span class="role-icon">🙋</span>I need a ride
-    </button>
     <button class="role-btn" id="btnDriver" type="button">
       <span class="role-icon">🚗</span>I'm offering a ride
+    </button>
+    <button class="role-btn" id="btnPassenger" type="button">
+      <span class="role-icon">🙋</span>I need a ride
     </button>
   </div>
 
@@ -520,10 +588,24 @@ input[type="time"]::-webkit-calendar-picker-indicator {
         <button type="button" class="seat-btn" data-seat="5">5</button>
       </div>
     </div>
+    <div class="field" id="fareField" style="display:none">
+      <label for="fareInput">Price per seat</label>
+      <div class="fare-row">
+        <div class="fare-input-wrap">
+          <span class="fare-prefix">$</span>
+          <input type="number" id="fareInput" placeholder="0" min="0" step="1">
+        </div>
+        <div class="fare-quick">
+          <button type="button" class="fare-quick-btn" data-fare="10">$10</button>
+          <button type="button" class="fare-quick-btn" data-fare="50">$50</button>
+        </div>
+      </div>
+    </div>
+
     <div class="field" id="notesField" style="display:none">
       <label for="notesInput">Notes <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
       <div class="input-wrap">
-        <textarea id="notesInput" placeholder="e.g. Small bag only, no pets, $10 per seat" rows="3" style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;resize:none;transition:border-color 0.15s"></textarea>
+        <textarea id="notesInput" placeholder="e.g. Small bag only, no pets" rows="3" style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;resize:none;transition:border-color 0.15s"></textarea>
       </div>
     </div>
 
@@ -567,7 +649,7 @@ var tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsa
 var chatId = tgUser && tgUser.id ? String(tgUser.id) : (params.get('chat_id') || '');
 var userName = tgUser && tgUser.first_name ? tgUser.first_name : (params.get('name') || '');
 
-var role = 'passenger';
+var role = 'driver';
 var selectedSeat = 2;
 var geoCache = { pickup: null, dropoff: null };
 var geoTimers = { pickup: null, dropoff: null };
@@ -594,6 +676,8 @@ document.getElementById('btnDriver').addEventListener('click', function() {
   setRole('driver');
 });
 
+setRole('driver');
+
 function setRole(r) {
   role = r;
 
@@ -601,6 +685,7 @@ function setRole(r) {
   document.getElementById('btnDriver').classList.toggle('active', r === 'driver');
 
   document.getElementById('seatsField').style.display = r === 'driver' ? '' : 'none';
+  document.getElementById('fareField').style.display = r === 'driver' ? '' : 'none';
   document.getElementById('notesField').style.display = r === 'driver' ? '' : 'none';
   document.getElementById('timeLabel').textContent = r === 'driver' ? 'Departure time' : 'Time';
 
@@ -619,6 +704,22 @@ seatBtns.forEach(function(btn) {
 
     btn.classList.add('active');
   });
+});
+
+var fareQuickBtns = document.querySelectorAll('.fare-quick-btn');
+fareQuickBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var val = btn.getAttribute('data-fare');
+    document.getElementById('fareInput').value = val;
+    fareQuickBtns.forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+});
+
+document.getElementById('fareInput').addEventListener('input', function() {
+  fareQuickBtns.forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-fare') === this.value);
+  }, this);
 });
 
 setupLocationField('pickup');
@@ -781,6 +882,7 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
     dates: dateVal,
 
     available_seats: selectedSeat,
+    fare: role === 'driver' ? (parseFloat(document.getElementById('fareInput').value) || null) : null,
     notes: role === 'driver' ? (document.getElementById('notesInput').value.trim() || null) : null,
     status: 'pending',
     is_active: true
