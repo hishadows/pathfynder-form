@@ -879,7 +879,7 @@ var alreadyJoined = saved && String(saved.joined_ride) === String(RIDE_ID);
     joinArea = '<div class="already-joined">' +
       '<div class="aj-icon">✅</div>' +
       '<div class="aj-title">You\'re already on this ride</div>' +
-      '<div class="aj-sub">Driver will contact you on WhatsApp before departure</div>' +
+      '<div class="aj-sub">Contact driver for any query.</div>' +
      (savedPu ? '<div style="margin-top:12px;background:rgba(0,0,0,.2);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;text-align:left">' +
   '<div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;gap:12px"><span style="color:rgba(34,197,94,.7);flex-shrink:0">Pickup</span><span style="color:#e8edf5;text-align:right">' + savedPu + '</span></div>' +
   (savedDro ? '<div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;gap:12px"><span style="color:rgba(34,197,94,.7);flex-shrink:0">Dropoff</span><span style="color:#e8edf5;text-align:right">' + savedDro + '</span></div>' : '') +
@@ -972,7 +972,7 @@ function showJoinForm() {
           '<div><div class="toggle-lbl">Is this shift start time?</div><div class="toggle-sub">Driver will plan around your shift schedule</div></div>' +
           '<div class="toggle-track" id="j-shift-track"><div class="toggle-thumb"></div></div>' +
         '</div>' +
-        '<div class="note-box"><b>Note:</b> Confirming means your seat is booked. Driver will contact you on WhatsApp before departure.</div>' +
+        '<div class="note-box"><b>Note:</b> Confirming means your seat is booked.</div>' +
         '<div class="err-box" id="j-err"></div>' +
         '<button class="btn btn-full btn-green" id="j-submit">Confirm my seat</button>' +
         '<button class="btn btn-fullsm btn-ghost" id="j-back" style="margin-top:2px">← Back</button>' +
@@ -996,7 +996,8 @@ async function submitJoin(shiftOn) {
   var ccRaw  = (document.getElementById('j-cc') ? document.getElementById('j-cc').value : '+1').replace('-us','');
   var numRaw = document.getElementById('j-phone').value.trim();
   // If user typed full number with +, use as-is; otherwise prepend country code
-  var phone  = numRaw.startsWith('+') ? numRaw : (ccRaw + numRaw.replace(/\D/g, ''));
+  var phoneRaw = numRaw.startsWith('+') ? numRaw : (ccRaw + numRaw.replace(/\D/g, ''));
+  var phone = phoneRaw.replace(/^\+/, '');  // strip leading + before saving
   var pu    = document.getElementById('j-pu').value.trim();
   var dro   = document.getElementById('j-do').value.trim();
   var time  = document.getElementById('j-time').value;
@@ -1192,9 +1193,16 @@ function renderPaxTab() {
 
     // Distance from driver pickup to this passenger pickup
     var distBadge = '';
+    var paxPickDist = '';
+    var paxDropDist = '';
     if (ride.pickup_lat && ride.pickup_lng && p.pickup_lat && p.pickup_lng) {
       var km = haversine(ride.pickup_lat, ride.pickup_lng, p.pickup_lat, p.pickup_lng);
       distBadge = '<span class="badge b-km">' + fmtKm(km) + '</span>';
+      paxPickDist = fmtKm(km);
+    }
+    if (ride.dropoff_lat && ride.dropoff_lng && p.dropoff_lat && p.dropoff_lng) {
+      var dkm = haversine(ride.dropoff_lat, ride.dropoff_lng, p.dropoff_lat, p.dropoff_lng);
+      paxDropDist = fmtKm(dkm);
     }
 
     var badges = distBadge;
@@ -1230,8 +1238,8 @@ function renderPaxTab() {
           '<div class="route-strip">' +
             '<div class="route-nodes"><div class="nd-o"></div><div class="nd-line"></div><div class="nd-d"></div></div>' +
             '<div class="route-labels">' +
-              '<div><div class="route-place">' + pu + '</div><div class="route-sub">Pickup</div></div>' +
-              '<div><div class="route-place">' + dro + '</div><div class="route-sub">Dropoff</div></div>' +
+              '<div><div class="route-place">' + pu + '</div><div class="route-sub">Pickup' + (paxPickDist ? '<span class="dist-chip">' + paxPickDist + '</span>' : '') + '</div></div>' +
+              '<div><div class="route-place">' + dro + '</div><div class="route-sub">Dropoff' + (paxDropDist ? '<span class="dist-chip dist-chip-drop">' + paxDropDist + '</span>' : '') + '</div></div>' +
             '</div>' +
             '<div class="route-meta"><div class="ride-time" style="font-size:16px">' + pt + '</div><div class="ride-date">' + fmtDate(p.date||ride.dates) + '</div></div>' +
           '</div>' +
@@ -1377,7 +1385,6 @@ async function renderMatchedTab() {
       var contactMsg = 'Hi ' + name + ', I am driving from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time) + '. Do you still need a ride? Join here: ' + shareUrl;
 
       var badges = '';
-      if (posted) badges += '<span class="badge" style="background:var(--surface2);color:var(--text-muted);border:1px solid var(--border)">' + posted + '</span>';
       if (imp === 'urgent')  badges += '<span class="badge b-urgent">urgent</span>';
       if (imp === 'airport') badges += '<span class="badge b-airport">airport</span>';
       if (m.source_inferred) badges += '<span class="badge b-inferred">inferred</span>';
