@@ -409,6 +409,17 @@ html, body { min-height: 100%; background: var(--bg); color: var(--text); font-f
 .fi:focus { border-color: var(--accent); }
 .fi::placeholder { color: var(--text-muted); }
 .fi.confirmed { border-color: var(--green); }
+.phone-row { display: flex; gap: 8px; }
+.cc-select {
+  width: 108px; flex-shrink: 0;
+  padding: 11px 8px; padding-right: 4px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: var(--font-body); font-size: 13px;
+  outline: none; -webkit-appearance: none; appearance: none;
+  cursor: pointer;
+}
+.cc-select:focus { border-color: var(--accent); }
 input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(.5); }
 
 /* ── SUGGESTIONS ── */
@@ -755,6 +766,13 @@ function heroCardHTML(showFooter) {
     ? '<div class="notes-pill"><span class="notes-icon">📌</span><span>' + ride.notes + '</span></div>'
     : '';
 
+  var fareHTML = (ride.fare != null && ride.fare > 0)
+    ? '<div style="display:flex;align-items:center;gap:7px;margin-top:8px;padding:7px 11px;background:var(--accent-dim);border:1px solid rgba(79,142,247,.2);border-radius:8px">'
+        + '<span style="font-size:14px">💵</span>'
+        + '<span style="font-size:12px;color:var(--accent);font-weight:600">$' + Number(ride.fare).toFixed(0) + ' per seat</span>'
+      + '</div>'
+    : '';
+
   // Footer: WA + Share for passenger view; nothing for driver view
   var footerHTML = '';
   if (showFooter) {
@@ -809,6 +827,7 @@ function heroCardHTML(showFooter) {
         '<div class="seats-taken">' + taken + ' of ' + total + ' seats taken</div>' +
       '</div>' +
       notesHTML +
+      fareHTML +
     '</div>' +
     footerHTML +
   '</div>';
@@ -926,7 +945,20 @@ function showJoinForm() {
       '</div>' +
       '<div class="form-card"><div class="form-inner">' +
         '<div class="field"><label>Your name *</label><div class="field-wrap"><input class="fi" id="j-name" placeholder="Full name" value="' + prefillName + '"></div></div>' +
-        '<div class="field"><label>WhatsApp number *</label><div class="field-wrap"><input class="fi" id="j-phone" type="tel" placeholder="+1 416 555 0000" value="' + prefillPhone + '"></div></div>' +
+        '<div class="field"><label>WhatsApp number *</label>' +
+        '<div class="phone-row">' +
+          '<select class="fi cc-select" id="j-cc">' +
+            '<option value="+1">\uD83C\uDDE8\uD83C\uDDE6 CA +1</option>' +
+            '<option value="+91">\uD83C\uDDEE\uD83C\uDDF3 IN +91</option>' +
+            '<option value="+1-us">\uD83C\uDDFA\uD83C\uDDF8 US +1</option>' +
+            '<option value="+92">\uD83C\uDDF5\uD83C\uDDF0 PK +92</option>' +
+            '<option value="+44">\uD83C\uDDEC\uD83C\uDDE7 GB +44</option>' +
+            '<option value="+61">\uD83C\uDDE6\uD83C\uDDFA AU +61</option>' +
+            '<option value="+971">\uD83C\uDDE6\uD83C\uDDEA AE +971</option>' +
+          '</select>' +
+          '<input class="fi" id="j-phone" type="tel" placeholder="416 555 0000" style="flex:1" inputmode="numeric" value="' + prefillPhone + '">' +
+        '</div>' +
+      '</div>' +
         '<div class="field"><label>Your pickup location *</label>' +
           '<div class="field-wrap" style="position:relative"><input class="fi" id="j-pu" placeholder="Where should driver pick you up?" autocomplete="off"><div class="suggestions" id="j-pu-sug"></div></div>' +
           '<div class="conf-tag" id="j-pu-tag"><div class="conf-dot"></div><span id="j-pu-txt"></span></div>' +
@@ -961,7 +993,10 @@ function showJoinForm() {
 
 async function submitJoin(shiftOn) {
   var name  = document.getElementById('j-name').value.trim();
-  var phone = document.getElementById('j-phone').value.trim();
+  var ccRaw  = (document.getElementById('j-cc') ? document.getElementById('j-cc').value : '+1').replace('-us','');
+  var numRaw = document.getElementById('j-phone').value.trim();
+  // If user typed full number with +, use as-is; otherwise prepend country code
+  var phone  = numRaw.startsWith('+') ? numRaw : (ccRaw + numRaw.replace(/\D/g, ''));
   var pu    = document.getElementById('j-pu').value.trim();
   var dro   = document.getElementById('j-do').value.trim();
   var time  = document.getElementById('j-time').value;
@@ -1335,13 +1370,14 @@ async function renderMatchedTab() {
       var rTime = fmtTime(m.pick_up_time);
       var rDate = fmtDate(m.pick_up_date);
       var dist  = m.dist_km != null ? fmtKm(m.dist_km) : '';
-      var posted = timeAgo(m.created_at || '');
+      var posted = timeAgo(m.msg_datetime || m.created_at || '');
       var origMsg = m.original_message || '';
       var imp   = (m.important_ride || '').toLowerCase();
 
       var contactMsg = 'Hi ' + name + ', I am driving from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time) + '. Do you still need a ride? Join here: ' + shareUrl;
 
       var badges = '';
+      if (posted) badges += '<span class="badge" style="background:var(--surface2);color:var(--text-muted);border:1px solid var(--border)">' + posted + '</span>';
       if (imp === 'urgent')  badges += '<span class="badge b-urgent">urgent</span>';
       if (imp === 'airport') badges += '<span class="badge b-airport">airport</span>';
       if (m.source_inferred) badges += '<span class="badge b-inferred">inferred</span>';
