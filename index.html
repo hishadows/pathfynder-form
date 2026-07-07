@@ -402,6 +402,22 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .submit-btn:hover { background: var(--accent-hover); }
+
+.last-ride-card {
+  display: none;
+  background: var(--surface2);
+  border: 1.5px dashed rgba(79,142,247,.35);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: -4px;
+}
+.last-ride-card:hover { border-color: var(--accent); background: var(--accent-dim); }
+.last-ride-card.show { display: block; }
+.lr-label { font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
+.lr-route { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lr-meta  { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .spinner {
@@ -537,6 +553,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   </div>
 
   <form class="form-body" id="mainForm">
+    <div class="last-ride-card" id="lastRideCard">
+      <div class="lr-label">↩ Last route — tap to reuse</div>
+      <div class="lr-route" id="lrRoute"></div>
+      <div class="lr-meta" id="lrMeta"></div>
+    </div>
+
     <div class="section-label">Route</div>
 
     <div class="field">
@@ -693,6 +715,8 @@ function setRole(r) {
 
   document.getElementById('submitBtn').querySelector('.btn-text').textContent =
     r === 'passenger' ? 'Submit request' : 'Register route';
+
+  showLastRideCard();
 }
 
 var seatBtns = document.querySelectorAll('.seat-btn');
@@ -908,6 +932,24 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
       tg.HapticFeedback.notificationOccurred('success');
     }
 
+    // Save last driver ride for prefill
+    if (role === 'driver') {
+      try {
+        localStorage.setItem('pf_last_driver_ride', JSON.stringify({
+          pickup_label: geoCache.pickup.label,
+          pickup_lat:   geoCache.pickup.lat,
+          pickup_lng:   geoCache.pickup.lng,
+          dropoff_label: geoCache.dropoff.label,
+          dropoff_lat:   geoCache.dropoff.lat,
+          dropoff_lng:   geoCache.dropoff.lng,
+          time:  timeVal,
+          seats: selectedSeat,
+          fare:  parseFloat(document.getElementById('fareInput').value) || null,
+          notes: document.getElementById('notesInput').value.trim() || null
+        }));
+      } catch(e) {}
+    }
+
     document.getElementById('mainForm').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
 
@@ -943,6 +985,81 @@ document.getElementById('mainForm').addEventListener('submit', function(e) {
 });
 
 var _lastRide = null;
+// ── LAST RIDE PREFILL ──────────────────────────────────────
+function fmtTimePrefill(t) {
+  if (!t) return '';
+  var h = parseInt(t.slice(0,2),10), m = parseInt(t.slice(3,5),10);
+  var ap = h >= 12 ? 'PM' : 'AM', h12 = h % 12 || 12;
+  return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ap;
+}
+
+function showLastRideCard() {
+  var card = document.getElementById('lastRideCard');
+  if (!card) return;
+  if (role !== 'driver') { card.classList.remove('show'); return; }
+  try {
+    var saved = JSON.parse(localStorage.getItem('pf_last_driver_ride') || 'null');
+    if (!saved || !saved.pickup_label || !saved.dropoff_label) { card.classList.remove('show'); return; }
+    var pu  = saved.pickup_label.split(',')[0];
+    var dro = saved.dropoff_label.split(',')[0];
+    document.getElementById('lrRoute').textContent = pu + '  →  ' + dro;
+    var meta = [];
+    if (saved.time)  meta.push(fmtTimePrefill(saved.time));
+    if (saved.seats) meta.push(saved.seats + ' seats');
+    if (saved.fare)  meta.push('$' + saved.fare);
+    document.getElementById('lrMeta').textContent = meta.join(' · ');
+    card.classList.add('show');
+  } catch(e) { card.classList.remove('show'); }
+}
+
+document.getElementById('lastRideCard').addEventListener('click', function() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('pf_last_driver_ride') || 'null');
+    if (!saved) return;
+
+    // Pickup
+    var pickupInput = document.getElementById('pickupInput');
+    pickupInput.value = saved.pickup_label;
+    pickupInput.classList.add('confirmed');
+    geoCache.pickup = { lat: saved.pickup_lat, lng: saved.pickup_lng, label: saved.pickup_label };
+    document.getElementById('pickupConfirmedText').textContent = saved.pickup_label.split(',')[0];
+    document.getElementById('pickupConfirmed').classList.add('show');
+
+    // Dropoff
+    var dropoffInput = document.getElementById('dropoffInput');
+    dropoffInput.value = saved.dropoff_label;
+    dropoffInput.classList.add('confirmed');
+    geoCache.dropoff = { lat: saved.dropoff_lat, lng: saved.dropoff_lng, label: saved.dropoff_label };
+    document.getElementById('dropoffConfirmedText').textContent = saved.dropoff_label.split(',')[0];
+    document.getElementById('dropoffConfirmed').classList.add('show');
+
+    // Time
+    if (saved.time) document.getElementById('timeInput').value = saved.time;
+
+    // Seats
+    if (saved.seats) {
+      selectedSeat = saved.seats;
+      seatBtns.forEach(function(b) {
+        b.classList.toggle('active', parseInt(b.getAttribute('data-seat'), 10) === saved.seats);
+      });
+    }
+
+    // Fare
+    if (saved.fare) {
+      document.getElementById('fareInput').value = saved.fare;
+      fareQuickBtns.forEach(function(b) {
+        b.classList.toggle('active', parseInt(b.getAttribute('data-fare'), 10) === saved.fare);
+      });
+    }
+
+    // Notes
+    if (saved.notes) document.getElementById('notesInput').value = saved.notes;
+
+  } catch(e) {}
+});
+
+showLastRideCard();
+
 
 function copyRideLink() {
   var url = window._lastRide ? window._lastRide.shareUrl : document.getElementById('rideLinkUrl').textContent;
