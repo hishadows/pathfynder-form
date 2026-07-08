@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pathfynder — Request a Ride</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0e1117;
+  --surface: #161b27;
+  --surface2: #1e2535;
+  --border: #2a3348;
+  --accent: #4f8ef7;
+  --accent-dim: rgba(79,142,247,0.12);
+  --accent-hover: #6ba3ff;
+  --red: #ef4444;
+  --text: #e8edf5;
+  --text-dim: #8a95a8;
+  --text-muted: #4e5a6e;
+  --radius: 12px;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 48px;
+  overflow-x: hidden;
+}
+
+.header {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 38px;
+  height: 38px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo svg { width: 20px; height: 20px; }
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.brand span { color: var(--accent); }
+
+.user-pill {
+  margin-left: auto;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px 5px 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 160px;
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+#userName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: visible;
+}
+
+.role-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+
+.role-btn {
+  padding: 16px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s;
+  position: relative;
+}
+
+.role-btn .role-icon { font-size: 22px; }
+
+.role-btn.active {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.role-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+
+.form-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: -8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  min-width: 0;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.input-wrap {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.input-wrap input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 11px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input-wrap input:focus { border-color: var(--accent); }
+.input-wrap input::placeholder { color: var(--text-muted); }
+.input-wrap input.confirmed { border-color: #22c55e; }
+
+input[type="date"],
+input[type="time"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+}
+
+.suggestions {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  z-index: 9999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.suggestions.show { display: block; }
+
+.suggestion-item {
+  padding: 11px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: var(--surface2); }
+
+.suggestion-item.loading-item {
+  cursor: default;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.sug-main { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sug-ctx  { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.confirmed-tag {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #22c55e;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.2);
+}
+
+.confirmed-tag.show { display: flex; }
+
+.confirmed-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.seats-row {
+  display: flex;
+  gap: 8px;
+}
+
+.seat-btn {
+  flex: 1;
+  padding: 9px 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+
+.seat-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.fare-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fare-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.fare-prefix {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 15px;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fare-input-wrap input {
+  width: 100%;
+  padding: 11px 14px 11px 26px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.fare-input-wrap input:focus { border-color: var(--accent); }
+.fare-input-wrap input::placeholder { color: var(--text-muted); }
+.fare-input-wrap input::-webkit-outer-spin-button,
+.fare-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.fare-quick {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.fare-quick-btn {
+  padding: 6px 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.fare-quick-btn:hover,
+.fare-quick-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.submit-btn:hover { background: var(--accent-hover); }
+
+.last-ride-card {
+  display: none;
+  background: var(--surface2);
+  border: 1.5px dashed rgba(79,142,247,.35);
+  border-radius: var(--radius);
+  padding: 11px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: -4px;
+}
+.last-ride-card:hover { border-color: var(--accent); background: var(--accent-dim); }
+.last-ride-card.show { display: block; }
+.lr-label { font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
+.lr-route { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lr-meta  { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+
+.submit-btn.loading .spinner { display: block; }
+.submit-btn.loading .btn-text { display: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-banner {
+  display: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: var(--red);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error-banner.show { display: block; }
+
+.success-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.success-screen.show { display: flex; }
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(34,197,94,0.12);
+  border: 2px solid rgba(34,197,94,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.success-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.success-sub {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+.warn-box {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #f87171;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.warn-box.show { display: block; }
+
+@media (max-width: 520px) {
+  body {
+    padding: 16px 10px 40px;
+  }
+
+  .form-body {
+    padding: 16px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .card,
+  .header,
+  .warn-box {
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+  </div>
+  <div class="brand">Path<span>fynder</span></div>
+  <div class="user-pill" id="userPill" style="display:none">
+    <div class="user-avatar" id="userInitial">?</div>
+    <span id="userName">-</span>
+  </div>
+</div>
+
+<div class="warn-box" id="warnBox">
+  This form should be opened from the Pathfynder bot on Telegram. Your Telegram identity could not be detected.
+</div>
+
+<div class="card">
+  <div class="role-toggle">
+    <button class="role-btn" id="btnDriver" type="button">
+      <span class="role-icon">🚗</span>I'm offering a ride
+    </button>
+    <button class="role-btn" id="btnPassenger" type="button">
+      <span class="role-icon">🙋</span>I need a ride
+    </button>
+  </div>
+
+  <form class="form-body" id="mainForm">
+    <div class="last-ride-card" id="lastRideCard">
+      <div class="lr-label">↩ Last route — tap to reuse</div>
+      <div class="lr-route" id="lrRoute"></div>
+      <div class="lr-meta" id="lrMeta"></div>
+    </div>
+
+    <div class="section-label">Route</div>
+
+    <div class="field">
+      <label for="pickupInput">From</label>
+      <div class="input-wrap">
+        <input type="text" id="pickupInput" placeholder="Start typing a location..." autocomplete="off">
+        <div class="suggestions" id="pickupSuggestions"></div>
+      </div>
+      <div class="confirmed-tag" id="pickupConfirmed">
+        <div class="confirmed-dot"></div>
+        <span id="pickupConfirmedText"></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="dropoffInput">To</label>
+      <div class="input-wrap">
+        <input type="text" id="dropoffInput" placeholder="Start typing a location..." autocomplete="off">
+        <div class="suggestions" id="dropoffSuggestions"></div>
+      </div>
+      <div class="confirmed-tag" id="dropoffConfirmed">
+        <div class="confirmed-dot"></div>
+        <span id="dropoffConfirmedText"></span>
+      </div>
+    </div>
+
+    <div class="section-label">Schedule</div>
+
+    <div class="row">
+      <div class="field">
+        <label for="dateInput">Date</label>
+        <div class="input-wrap">
+          <input type="date" id="dateInput" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="timeInput" id="timeLabel">Time</label>
+        <div class="input-wrap">
+          <input type="time" id="timeInput" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" id="seatsField" style="display:none">
+      <label>Available seats</label>
+      <div class="seats-row">
+        <button type="button" class="seat-btn" data-seat="1">1</button>
+        <button type="button" class="seat-btn active" data-seat="2">2</button>
+        <button type="button" class="seat-btn" data-seat="3">3</button>
+        <button type="button" class="seat-btn" data-seat="4">4</button>
+        <button type="button" class="seat-btn" data-seat="5">5</button>
+      </div>
+    </div>
+    <div class="field" id="fareField" style="display:none">
+      <label for="fareInput">Price per seat</label>
+      <div class="fare-row">
+        <div class="fare-input-wrap">
+          <span class="fare-prefix">$</span>
+          <input type="number" id="fareInput" placeholder="0" min="0" step="1" inputmode="numeric" pattern="[0-9]*" style="-moz-appearance:textfield">
+        </div>
+        <div class="fare-quick">
+          <button type="button" class="fare-quick-btn" data-fare="10">$10</button>
+          <button type="button" class="fare-quick-btn" data-fare="50">$50</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" id="notesField" style="display:none">
+      <label for="notesInput">Notes <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+      <div class="input-wrap">
+        <textarea id="notesInput" placeholder="e.g. Small bag only, no pets" rows="3" style="width:100%;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--font-body);font-size:14px;outline:none;resize:none;transition:border-color 0.15s"></textarea>
+      </div>
+    </div>
+
+    <div class="error-banner" id="errorBanner"></div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">
+      <div class="spinner"></div>
+      <span class="btn-text">Submit request</span>
+    </button>
+  </form>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">✓</div>
+    <div class="success-title" id="successTitle">Request received!</div>
+    <div class="success-sub" id="successSub">We'll notify you on Telegram as soon as we find a match.</div>
+    <div id="rideLinkSection" style="display:none;width:100%;margin-top:16px;text-align:left">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Your shareable ride link</div>
+      <div id="rideLinkUrl" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-dim);word-break:break-all;margin-bottom:10px;font-family:monospace"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="copyRideLink()" id="copyBtn" style="flex:1;height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body)">Copy link</button>
+        <button onclick="shareRideWA()" style="flex:1;height:38px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.25);border-radius:8px;color:#25D366;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body)">Share on WhatsApp</button>
+        <button onclick="openRidePage()" style="flex:1;height:38px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body)">Manage ride</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var N8N_WEBHOOK_URL = 'https://pathy.dpdns.org/webhook/telegram-ride-submit';                                                                 // N8N WEBHOOK URL
+
+var tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+var params = new URLSearchParams(location.search);
+var tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+
+var chatId = tgUser && tgUser.id ? String(tgUser.id) : (params.get('chat_id') || '');
+var userName = tgUser && tgUser.first_name ? tgUser.first_name : (params.get('name') || '');
+
+var role = 'driver';
+var selectedSeat = 2;
+var geoCache = { pickup: null, dropoff: null };
+var geoTimers = { pickup: null, dropoff: null };
+
+var today = new Date().toISOString().split('T')[0];
+document.getElementById('dateInput').min = today;
+document.getElementById('dateInput').value = today;
+
+if (userName) {
+  document.getElementById('userName').textContent = userName;
+  document.getElementById('userInitial').textContent = userName[0].toUpperCase();
+  document.getElementById('userPill').style.display = 'flex';
+}
+
+if (!chatId) {
+  document.getElementById('warnBox').classList.add('show');
+}
+
+document.getElementById('btnPassenger').addEventListener('click', function() {
+  setRole('passenger');
+});
+
+document.getElementById('btnDriver').addEventListener('click', function() {
+  setRole('driver');
+});
+
+setRole('driver');
+
+function setRole(r) {
+  role = r;
+
+  document.getElementById('btnPassenger').classList.toggle('active', r === 'passenger');
+  document.getElementById('btnDriver').classList.toggle('active', r === 'driver');
+
+  document.getElementById('seatsField').style.display = r === 'driver' ? '' : 'none';
+  document.getElementById('fareField').style.display = r === 'driver' ? '' : 'none';
+  document.getElementById('notesField').style.display = r === 'driver' ? '' : 'none';
+  document.getElementById('timeLabel').textContent = r === 'driver' ? 'Departure time' : 'Time';
+
+  document.getElementById('submitBtn').querySelector('.btn-text').textContent =
+    r === 'passenger' ? 'Submit request' : 'Register route';
+
+  showLastRideCard();
+}
+
+var seatBtns = document.querySelectorAll('.seat-btn');
+seatBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    selectedSeat = parseInt(btn.getAttribute('data-seat'), 10);
+
+    seatBtns.forEach(function(b) {
+      b.classList.remove('active');
+    });
+
+    btn.classList.add('active');
+  });
+});
+
+var fareQuickBtns = document.querySelectorAll('.fare-quick-btn');
+fareQuickBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var val = btn.getAttribute('data-fare');
+    document.getElementById('fareInput').value = val;
+    fareQuickBtns.forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  });
+});
+
+document.getElementById('fareInput').addEventListener('input', function() {
+  fareQuickBtns.forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-fare') === this.value);
+  }, this);
+});
+
+setupLocationField('pickup');
+setupLocationField('dropoff');
+
+function setupLocationField(which) {
+  var input = document.getElementById(which + 'Input');
+  var suggestions = document.getElementById(which + 'Suggestions');
+
+  input.addEventListener('input', function() {
+    geoCache[which] = null;
+
+    document.getElementById(which + 'Confirmed').classList.remove('show');
+    input.classList.remove('confirmed');
+
+    clearTimeout(geoTimers[which]);
+
+    var query = input.value.trim();
+
+    if (query.length < 3) {
+      suggestions.classList.remove('show');
+      suggestions.innerHTML = '';
+      return;
+    }
+
+    suggestions.innerHTML = '<div class="suggestion-item loading-item">Searching…</div>';
+    suggestions.classList.add('show');
+
+    geoTimers[which] = setTimeout(function() {
+      fetchSuggestions(which, query);
+    }, 500);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+      suggestions.classList.remove('show');
+    }
+  });
+}
+
+function fetchSuggestions(which, query) {
+  var suggestions = document.getElementById(which + 'Suggestions');
+  var input       = document.getElementById(which + 'Input');
+  // Create session once per page load — same token MUST be used for suggest + retrieve
+  if (!window._SB_SID) window._SB_SID = 'pf-' + Date.now();
+  var sid = window._SB_SID;
+
+  fetch('https://api.mapbox.com/search/searchbox/v1/suggest'
+    + '?q='             + encodeURIComponent(query)
+    + '&access_token='  + 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
+    + '&session_token=' + sid
+    + '&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      suggestions.innerHTML = '';
+      var items = (data && data.suggestions) || [];
+      if (!items.length) {
+        suggestions.innerHTML = '<div class="suggestion-item loading-item">No results — try a different name</div>';
+        return;
+      }
+      items.forEach(function(item) {
+        var name = item.name || '';
+        var ctx  = item.place_formatted || item.full_address || '';
+        if (ctx.toLowerCase().startsWith(name.toLowerCase() + ', ')) ctx = ctx.slice(name.length + 2);
+        var el = document.createElement('div');
+        el.className = 'suggestion-item';
+        el.innerHTML = '<div class="sug-main">' + name + '</div>'
+          + (ctx ? '<div class="sug-ctx">' + ctx + '</div>' : '');
+        el.addEventListener('click', function() {
+          input.value = name + (ctx ? ', ' + ctx : '');
+          suggestions.classList.remove('show');
+          suggestions.innerHTML = '';
+          retrieveAndSelect(which, item.mapbox_id, name, ctx, sid);
+        });
+        suggestions.appendChild(el);
+      });
+      suggestions.classList.add('show');
+    })
+    .catch(function() {
+      suggestions.innerHTML = '<div class="suggestion-item loading-item">Connection error</div>';
+    });
+}
+
+function retrieveAndSelect(which, mapboxId, name, ctx, sid) {
+  var confirmed   = document.getElementById(which + 'Confirmed');
+  var confirmedTx = document.getElementById(which + 'ConfirmedText');
+  var input       = document.getElementById(which + 'Input');
+
+  fetch('https://api.mapbox.com/search/searchbox/v1/retrieve/' + mapboxId
+    + '?access_token=pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
+    + '&session_token=' + (sid || window._SB_SID))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var feat   = data.features && data.features[0];
+      var coords = feat && feat.geometry && feat.geometry.coordinates;
+      if (!coords) return;
+      geoCache[which] = { lat: coords[1], lng: coords[0], label: name + (ctx ? ', ' + ctx : '') };
+      input.classList.add('confirmed');
+      confirmedTx.textContent = name;
+      confirmed.classList.add('show');
+    })
+    .catch(function() {});
+}
+
+document.getElementById('mainForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  hideError();
+
+  if (!N8N_WEBHOOK_URL || N8N_WEBHOOK_URL.includes('YOUR-N8N-DOMAIN')) {
+    showError('Replace N8N_WEBHOOK_URL in the code first.');
+    return;
+  }
+
+  if (!geoCache.pickup || !geoCache.dropoff) {
+    showError('Please select both pickup and dropoff locations from the dropdown.');
+    return;
+  }
+
+  var dateVal = document.getElementById('dateInput').value;
+  var timeVal = document.getElementById('timeInput').value;
+
+  if (!dateVal || !timeVal) {
+    showError('Please fill in date and time.');
+    return;
+  }
+
+  var dtLocal = dateVal + 'T' + timeVal + ':00';
+
+  var tzOffset = new Date().getTimezoneOffset();
+  var sign = tzOffset <= 0 ? '+' : '-';
+  var absOff = Math.abs(tzOffset);
+  var hh = String(Math.floor(absOff / 60)).padStart(2, '0');
+  var mm = String(absOff % 60).padStart(2, '0');
+  var dtISO = dtLocal + sign + hh + ':' + mm;
+
+  setLoading(true);
+
+  var payload = {
+    role: role,
+    platform: 'Telegram_form',
+
+    telegram_chat_id: chatId || null,
+    telegram_user_id: chatId || null,
+    name: userName || null,
+
+    pickup_lat: geoCache.pickup.lat,
+    pickup_lng: geoCache.pickup.lng,
+    pickup_label: geoCache.pickup.label,
+
+    dropoff_lat: geoCache.dropoff.lat,
+    dropoff_lng: geoCache.dropoff.lng,
+    dropoff_label: geoCache.dropoff.label,
+
+    date: dateVal,
+    time: role === 'passenger' ? timeVal + ':00+00' : timeVal + ':00',
+
+    requested_datetime: dtISO,
+    departure_time: timeVal + ':00',
+    departure_datetime: dtISO,
+    dates: dateVal,
+
+    available_seats: selectedSeat,
+    fare: role === 'driver' ? (parseFloat(document.getElementById('fareInput').value) || null) : null,
+    notes: role === 'driver' ? (document.getElementById('notesInput').value.trim() || null) : null,
+    status: 'pending',
+    is_active: true
+  };
+
+  fetch(N8N_WEBHOOK_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) {
+      throw new Error('n8n webhook returned HTTP ' + res.status);
+    }
+    return res.json().catch(function(){ return {}; });
+  })
+  .then(function(body) {
+    if (tg && tg.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    // Save last driver ride for prefill
+    if (role === 'driver') {
+      try {
+        localStorage.setItem('pf_last_driver_ride', JSON.stringify({
+          pickup_label: geoCache.pickup.label,
+          pickup_lat:   geoCache.pickup.lat,
+          pickup_lng:   geoCache.pickup.lng,
+          dropoff_label: geoCache.dropoff.label,
+          dropoff_lat:   geoCache.dropoff.lat,
+          dropoff_lng:   geoCache.dropoff.lng,
+          time:  timeVal,
+          seats: selectedSeat,
+          fare:  parseFloat(document.getElementById('fareInput').value) || null,
+          notes: document.getElementById('notesInput').value.trim() || null
+        }));
+      } catch(e) {}
+    }
+
+    document.getElementById('mainForm').style.display = 'none';
+    document.getElementById('successScreen').classList.add('show');
+
+    if (role === 'driver') {
+      document.getElementById('successTitle').textContent = 'Route registered!';
+      document.getElementById('successSub').textContent = "Your route is live. We'll notify you on Telegram with matches.";
+
+      // Show ride link if n8n returned id + share_token
+      var rideId    = body && (body.id || body.ride_id);
+      var rideToken = body && (body.share_token || body.token);
+      if (rideId) {
+        var shareUrl = 'https://pathfynder-form.vercel.app/manageride.html?id=' + rideId;
+        var mgmtUrl  = rideToken ? shareUrl + '&token=' + rideToken : shareUrl;
+        window._lastRide = { shareUrl: shareUrl, mgmtUrl: mgmtUrl };
+        document.getElementById('rideLinkUrl').textContent = shareUrl;
+        document.getElementById('rideLinkSection').style.display = '';
+      }
+    } else {
+      document.getElementById('successTitle').textContent = 'Request received!';
+      document.getElementById('successSub').textContent = "Your request is saved. We'll message you if there's a matching driver.";
+    }
+  })
+  .catch(function(err) {
+    if (tg && tg.HapticFeedback) {
+      tg.HapticFeedback.notificationOccurred('error');
+    }
+
+    showError('Something went wrong: ' + err.message);
+  })
+  .finally(function() {
+    setLoading(false);
+  });
+});
+
+var _lastRide = null;
+// ── LAST RIDE PREFILL ──────────────────────────────────────
+function fmtTimePrefill(t) {
+  if (!t) return '';
+  var h = parseInt(t.slice(0,2),10), m = parseInt(t.slice(3,5),10);
+  var ap = h >= 12 ? 'PM' : 'AM', h12 = h % 12 || 12;
+  return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ap;
+}
+
+function showLastRideCard() {
+  var card = document.getElementById('lastRideCard');
+  if (!card) return;
+  if (role !== 'driver') { card.classList.remove('show'); return; }
+  try {
+    var saved = JSON.parse(localStorage.getItem('pf_last_driver_ride') || 'null');
+    if (!saved || !saved.pickup_label || !saved.dropoff_label) { card.classList.remove('show'); return; }
+    var pu  = saved.pickup_label.split(',')[0];
+    var dro = saved.dropoff_label.split(',')[0];
+    document.getElementById('lrRoute').textContent = pu + '  →  ' + dro;
+    var meta = [];
+    if (saved.time)  meta.push(fmtTimePrefill(saved.time));
+    if (saved.seats) meta.push(saved.seats + ' seats');
+    if (saved.fare)  meta.push('$' + saved.fare);
+    document.getElementById('lrMeta').textContent = meta.join(' · ');
+    card.classList.add('show');
+  } catch(e) { card.classList.remove('show'); }
+}
+
+document.getElementById('lastRideCard').addEventListener('click', function() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('pf_last_driver_ride') || 'null');
+    if (!saved) return;
+
+    // Pickup
+    var pickupInput = document.getElementById('pickupInput');
+    pickupInput.value = saved.pickup_label;
+    pickupInput.classList.add('confirmed');
+    geoCache.pickup = { lat: saved.pickup_lat, lng: saved.pickup_lng, label: saved.pickup_label };
+    document.getElementById('pickupConfirmedText').textContent = saved.pickup_label.split(',')[0];
+    document.getElementById('pickupConfirmed').classList.add('show');
+
+    // Dropoff
+    var dropoffInput = document.getElementById('dropoffInput');
+    dropoffInput.value = saved.dropoff_label;
+    dropoffInput.classList.add('confirmed');
+    geoCache.dropoff = { lat: saved.dropoff_lat, lng: saved.dropoff_lng, label: saved.dropoff_label };
+    document.getElementById('dropoffConfirmedText').textContent = saved.dropoff_label.split(',')[0];
+    document.getElementById('dropoffConfirmed').classList.add('show');
+
+    // Time
+    if (saved.time) document.getElementById('timeInput').value = saved.time;
+
+    // Seats
+    if (saved.seats) {
+      selectedSeat = saved.seats;
+      seatBtns.forEach(function(b) {
+        b.classList.toggle('active', parseInt(b.getAttribute('data-seat'), 10) === saved.seats);
+      });
+    }
+
+    // Fare
+    if (saved.fare) {
+      document.getElementById('fareInput').value = saved.fare;
+      fareQuickBtns.forEach(function(b) {
+        b.classList.toggle('active', parseInt(b.getAttribute('data-fare'), 10) === saved.fare);
+      });
+    }
+
+    // Notes
+    if (saved.notes) document.getElementById('notesInput').value = saved.notes;
+
+  } catch(e) {}
+});
+
+showLastRideCard();
+
+
+function copyRideLink() {
+  var url = window._lastRide ? window._lastRide.shareUrl : document.getElementById('rideLinkUrl').textContent;
+  if (navigator.clipboard) { navigator.clipboard.writeText(url); }
+  else { var el=document.createElement('textarea');el.value=url;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el); }
+  var btn = document.getElementById('copyBtn');
+  btn.textContent = 'Copied!';
+  setTimeout(function(){ btn.textContent = 'Copy link'; }, 2000);
+}
+
+function shareRideWA() {
+  if (!window._lastRide) return;
+  var msg = 'I\'m sharing a ride — join here: ' + window._lastRide.shareUrl;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function openRidePage() {
+  if (!window._lastRide) return;
+  window.location.href = window._lastRide.mgmtUrl;
+}
+
+function setLoading(on) {
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+}
+
+function showError(msg) {
+  var el = document.getElementById('errorBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('errorBanner').classList.remove('show');
+}
+</script>
+
+</body>
+</html>
