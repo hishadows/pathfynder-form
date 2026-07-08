@@ -792,8 +792,8 @@ function fetchSuggestions(which, query) {
 
   fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(query) + '.json'
     + '?access_token=pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
-    + '&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532'
-    + '&types=address,place,neighborhood,locality')
+    + '&language=en&limit=6&country=CA&proximity=-79.3832,43.6532'
+    + '&types=address,poi,place,locality,neighborhood,district,postcode')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       suggestions.innerHTML = '';
