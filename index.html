@@ -789,24 +789,27 @@ function setupLocationField(which) {
 function fetchSuggestions(which, query) {
   var suggestions = document.getElementById(which + 'Suggestions');
   var input       = document.getElementById(which + 'Input');
+  // Create session once per page load — same token MUST be used for suggest + retrieve
+  if (!window._SB_SID) window._SB_SID = 'pf-' + Date.now();
+  var sid = window._SB_SID;
 
-  fetch('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(query) + '.json'
-    + '?access_token=pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
-    + '&language=en&limit=6&country=CA&proximity=-79.3832,43.6532'
-    + '&types=address,poi,place,locality,neighborhood,district,postcode')
+  fetch('https://api.mapbox.com/search/searchbox/v1/suggest'
+    + '?q='             + encodeURIComponent(query)
+    + '&access_token='  + 'pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
+    + '&session_token=' + sid
+    + '&language=en&limit=6&country=CA,US&proximity=-79.3832,43.6532')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       suggestions.innerHTML = '';
-      var items = (data && data.features) || [];
+      var items = (data && data.suggestions) || [];
       if (!items.length) {
         suggestions.innerHTML = '<div class="suggestion-item loading-item">No results — try a different name</div>';
         return;
       }
       items.forEach(function(item) {
-        var name   = item.text || '';
-        var ctx    = item.place_name || '';
+        var name = item.name || '';
+        var ctx  = item.place_formatted || item.full_address || '';
         if (ctx.toLowerCase().startsWith(name.toLowerCase() + ', ')) ctx = ctx.slice(name.length + 2);
-        var coords = item.geometry && item.geometry.coordinates;
         var el = document.createElement('div');
         el.className = 'suggestion-item';
         el.innerHTML = '<div class="sug-main">' + name + '</div>'
@@ -815,14 +818,7 @@ function fetchSuggestions(which, query) {
           input.value = name + (ctx ? ', ' + ctx : '');
           suggestions.classList.remove('show');
           suggestions.innerHTML = '';
-          if (coords) {
-            var confirmed   = document.getElementById(which + 'Confirmed');
-            var confirmedTx = document.getElementById(which + 'ConfirmedText');
-            geoCache[which] = { lat: coords[1], lng: coords[0], label: name + (ctx ? ', ' + ctx : '') };
-            input.classList.add('confirmed');
-            confirmedTx.textContent = name;
-            confirmed.classList.add('show');
-          }
+          retrieveAndSelect(which, item.mapbox_id, name, ctx, sid);
         });
         suggestions.appendChild(el);
       });
@@ -833,6 +829,26 @@ function fetchSuggestions(which, query) {
     });
 }
 
+function retrieveAndSelect(which, mapboxId, name, ctx, sid) {
+  var confirmed   = document.getElementById(which + 'Confirmed');
+  var confirmedTx = document.getElementById(which + 'ConfirmedText');
+  var input       = document.getElementById(which + 'Input');
+
+  fetch('https://api.mapbox.com/search/searchbox/v1/retrieve/' + mapboxId
+    + '?access_token=pk.eyJ1IjoicHJhbmF5MDA3MSIsImEiOiJjbXF2aXJ0YzUxNXR3MnNwc2l6dnZ5dDkzIn0.g6DyGowXYxDSFO4ZWdpcEw'
+    + '&session_token=' + (sid || window._SB_SID))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var feat   = data.features && data.features[0];
+      var coords = feat && feat.geometry && feat.geometry.coordinates;
+      if (!coords) return;
+      geoCache[which] = { lat: coords[1], lng: coords[0], label: name + (ctx ? ', ' + ctx : '') };
+      input.classList.add('confirmed');
+      confirmedTx.textContent = name;
+      confirmed.classList.add('show');
+    })
+    .catch(function() {});
+}
 
 document.getElementById('mainForm').addEventListener('submit', function(e) {
   e.preventDefault();
