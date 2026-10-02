@@ -574,6 +574,26 @@ var tg     = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp 
 if (tg) { tg.ready(); tg.expand(); }
 var tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
 var TG_ID  = tgUser ? String(tgUser.id) : null;
+var INIT_DATA = tg && tg.initData ? tg.initData : null;
+
+// Server-checked identity for the tg_* RPCs (token and/or Telegram initData)
+function tgAuth(extra) {
+  var o = { p_id: RIDE_ID, p_token: SHARE_TK || null, p_init_data: INIT_DATA, p_chat_id: TG_ID };
+  for (var k in (extra || {})) o[k] = extra[k];
+  return o;
+}
+
+// Open a WhatsApp URL returned by the server (never build wa.me links from raw numbers here)
+function openWa(url, text) {
+  if (!url) return;
+  window.open(url + (text ? '?text=' + encodeURIComponent(text) : ''), '_blank');
+}
+
+async function contactDriver() {
+  var r = await db.rpc('tg_ride_driver_contact', { p_id: RIDE_ID });
+  if (r.error || !r.data) { alert('Driver contact is not available.'); return; }
+  openWa(r.data);
+}
 
 // ════════════════════════════════════════════════════════════
 // LOCAL STORAGE
@@ -699,17 +719,11 @@ function doShare(url, text) {
 async function load() {
   if (!RIDE_ID) { showErr('No ride ID in URL.'); return; }
   try {
-    var r1 = await db.from('driver_routines').select('*').eq('id', RIDE_ID).single();
-    if (r1.error || !r1.data) { showErr('Ride not found.'); return; }
-    ride = r1.data;
-
-    isDriver = (SHARE_TK && SHARE_TK === ride.share_token) ||
-               (TG_ID && TG_ID === String(ride.telegram_chat_id || ''));
-
-    var r2 = await db.from('passenger_requests')
-      .select('*').eq('ride_id', RIDE_ID)
-      .order('created_at', {ascending: true});
-    passengers = r2.data || [];
+    var r1 = await db.rpc('tg_ride_get', tgAuth());
+    if (r1.error || !r1.data || !r1.data.ride) { showErr('Ride not found.'); return; }
+    ride = r1.data.ride;
+    isDriver = !!r1.data.is_driver;
+    passengers = r1.data.passengers || [];
 
     render();
   } catch(e) { showErr(e.message); }
@@ -776,7 +790,6 @@ function heroCardHTML(showFooter) {
   // Footer: WA + Share for passenger view; nothing for driver view
   var footerHTML = '';
   if (showFooter) {
-    var phone = (ride.driver_phone || '').replace(/\D/g, '');
     footerHTML = '<div class="card-footer">' +
       '<div class="footer-chips">' +
         '<div class="f-chip"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + fmtDate(ride.dates) + '</div>' +
@@ -836,10 +849,7 @@ function heroCardHTML(showFooter) {
 function wireHeroFooter() {
   var wa = document.getElementById('hero-wa-btn');
   if (wa) {
-    var phone = (ride.driver_phone || '').replace(/\D/g, '');
-    wa.addEventListener('click', function() {
-      window.open('https://wa.me/' + phone, '_blank');
-    });
+    wa.addEventListener('click', function() { contactDriver(); });
   }
   var sh = document.getElementById('hero-share-btn');
   if (sh) {
@@ -887,7 +897,6 @@ var alreadyJoined = saved && String(saved.joined_ride) === String(RIDE_ID);
 '</div>' : '') +
     '</div>';
   } else if (alreadyJoined && st === 'started') {
-    var driverPhone = (ride.driver_phone||'').replace(/\D/g,'');
     // Check what we know about this passenger from localStorage
     var sv = getSaved();
     var paxPu  = (sv && sv.last_pickup)  || '';
@@ -905,7 +914,7 @@ var alreadyJoined = saved && String(saved.joined_ride) === String(RIDE_ID);
   '<div class="otw-detail-row"><span class="otw-detail-label">Date</span><span class="otw-detail-val">' + fmtDate(ride.dates) + '</span></div>' +
   '<div class="otw-detail-row"><span class="otw-detail-label">Time</span><span class="otw-detail-val">' + fmtTime(ride.departure_time) + '</span></div>' +
 '</div>' +
-        (driverPhone ? '<button class="otw-wa-btn" id="otw-wa-btn" data-phone="' + driverPhone + '">Message driver on WhatsApp</button>' : '') +
+        (ride.has_driver_phone ? '<button class="otw-wa-btn" id="otw-wa-btn">Message driver on WhatsApp</button>' : '') +
       '</div>';
   } else if (full) {
     joinArea = '<button class="btn btn-full" disabled style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber)">Ride Full</button>';
@@ -923,7 +932,7 @@ var alreadyJoined = saved && String(saved.joined_ride) === String(RIDE_ID);
 
   wireHeroFooter();
   var otwWa = document.getElementById('otw-wa-btn');
-  if (otwWa) otwWa.addEventListener('click', function() { window.open('https://wa.me/' + this.dataset.phone, '_blank'); });
+  if (otwWa) otwWa.addEventListener('click', function() { contactDriver(); });
 
   var joinBtn = document.getElementById('btn-join');
   if (joinBtn) joinBtn.addEventListener('click', showJoinForm);
@@ -1017,33 +1026,18 @@ async function submitJoin(shiftOn) {
   var doGeo = geoCache['j-do'] || null;
 
   try {
-    var row = {
-      ride_id:             RIDE_ID,
-      passenger_name_web:  name,
-      passenger_phone_web: phone,
-      passenger_wa_id:     phone,
-      passenger_name:      name,
-      pickup_label:        pu,
-      dropoff_label:       dro,
-      pickup_lat:          puGeo ? puGeo.lat : null,
-      pickup_lng:          puGeo ? puGeo.lng : null,
-      dropoff_lat:         doGeo ? doGeo.lat : null,
-      dropoff_lng:         doGeo ? doGeo.lng : null,
-      is_shift_start:      shiftOn,
-      status:              'pending',    // constraint: pending/matched/cancelled/confirmed/picked_up
-      platform:            'web',
-      date:                ride.dates,
-    };
-    if (time) row.pickup_time = time;
-    if (TG_ID) row.telegram_chat_id = TG_ID;
-
-    var res = await db.from('passenger_requests').insert(row);
+    var res = await db.rpc('tg_ride_join', {
+      p_id: RIDE_ID, p_init_data: INIT_DATA, p_chat_id: TG_ID,
+      p_name: name, p_phone: phone, p_pickup_label: pu, p_dropoff_label: dro,
+      p_pickup_lat:  puGeo ? puGeo.lat : null, p_pickup_lng:  puGeo ? puGeo.lng : null,
+      p_dropoff_lat: doGeo ? doGeo.lat : null, p_dropoff_lng: doGeo ? doGeo.lng : null,
+      p_pickup_time: time || null, p_is_shift_start: !!shiftOn
+    });
     if (res.error) throw res.error;
 
     setSaved({ name: name, phone: numRaw.replace(/\D/g, ''), joined_ride: RIDE_ID, last_pickup: pu, last_dropoff: dro, last_pickup_time: fmtTime((time||'00:00')+':00') });
 
-    var r2 = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
-    passengers = r2.data || [];
+    passengers = res.data || passengers;
 
     showConfirmed(name, pu, dro, time, shiftOn);
   } catch(e) {
@@ -1184,8 +1178,8 @@ function renderPaxTab() {
   conf.forEach(function(p, i) {
     var av   = avCol(i + 1);
     var name = p.passenger_name_web || p.passenger_name || 'Passenger';
-    var ph   = p.passenger_phone_web || p.passenger_wa_id || '';
-    var phC  = ph.replace(/\D/g, '');
+    var ph   = p.phone_masked || '';
+    var phC  = p.wa_url || '';
     var pu   = p.pickup_label  || '—';
     var dro  = p.dropoff_label || '—';
     var pt   = p.pickup_time ? fmtTime(p.pickup_time) : '—';
@@ -1215,7 +1209,7 @@ function renderPaxTab() {
     var actionRow =
       '<div class="pax-actions">' +
         '<button class="pax-btn pax-btn-remove remove-pax" data-pid="' + p.id + '" title="Remove">✕</button>' +
-        (phC ? '<button class="pax-btn pax-btn-outside outside-btn" data-phone="' + phC + '">💬 I\'m outside</button>' : '') +
+        (phC ? '<button class="pax-btn pax-btn-outside outside-btn" data-url="' + phC + '">💬 I\'m outside</button>' : '') +
         (!done
           ? '<button class="pax-btn pax-btn-pickup pickup-btn" data-pid="' + p.id + '">✓ Picked up</button>'
           : '<div class="pax-btn pax-btn-onboard">✓ On board</div>') +
@@ -1254,7 +1248,7 @@ function renderPaxTab() {
   tc.querySelectorAll('.outside-btn').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
-      window.open('https://wa.me/' + this.dataset.phone + '?text=' + encodeURIComponent("I'm outside"), '_blank');
+      openWa(this.dataset.url, "I'm outside");
     });
   });
 
@@ -1263,9 +1257,9 @@ function renderPaxTab() {
     btn.addEventListener('click', async function(e) {
       e.stopPropagation();
       this.disabled = true; this.textContent = 'Saving…';
-      await db.from('passenger_requests').update({status:'picked_up'}).eq('id', this.dataset.pid);
-      var r = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
-      passengers = r.data || [];
+      var r = await db.rpc('tg_passenger_set_status', tgAuth({ p_passenger_id: this.dataset.pid, p_status: 'picked_up' }));
+      if (r.error) { alert('Could not update: ' + r.error.message); }
+      else passengers = r.data || passengers;
       renderPaxTab();
     });
   });
@@ -1275,9 +1269,9 @@ function renderPaxTab() {
     btn.addEventListener('click', async function(e) {
       e.stopPropagation();
       if (!confirm('Remove this passenger?')) return;
-      await db.from('passenger_requests').update({status:'cancelled'}).eq('id', this.dataset.pid);
-      var r = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
-      passengers = r.data || [];
+      var r = await db.rpc('tg_passenger_set_status', tgAuth({ p_passenger_id: this.dataset.pid, p_status: 'cancelled' }));
+      if (r.error) { alert('Could not update: ' + r.error.message); }
+      else passengers = r.data || passengers;
       renderPaxTab();
     });
   });
@@ -1321,16 +1315,14 @@ function showAddPaxForm() {
     this.disabled = true; this.textContent = 'Adding…';
     var puG = geoCache['ap-pu'] || null;
     var doG = geoCache['ap-do'] || null;
-    await db.from('passenger_requests').insert({
-      ride_id: RIDE_ID, passenger_name_web: name, passenger_phone_web: ph,
-      passenger_wa_id: ph, passenger_name: name,
-      pickup_label: pu, dropoff_label: dro,
-      pickup_lat:  puG ? puG.lat : null, pickup_lng:  puG ? puG.lng : null,
-      dropoff_lat: doG ? doG.lat : null, dropoff_lng: doG ? doG.lng : null,
-      pickup_time: t || null, status: 'confirmed', platform: 'web', date: ride.dates,
-    });
-    var r = await db.from('passenger_requests').select('*').eq('ride_id', RIDE_ID);
-    passengers = r.data || [];
+    var r = await db.rpc('tg_passenger_add', tgAuth({
+      p_name: name, p_phone: ph, p_pickup_label: pu, p_dropoff_label: dro,
+      p_pickup_lat:  puG ? puG.lat : null, p_pickup_lng:  puG ? puG.lng : null,
+      p_dropoff_lat: doG ? doG.lat : null, p_dropoff_lng: doG ? doG.lng : null,
+      p_pickup_time: t || null
+    }));
+    if (r.error) { err.textContent = 'Could not add: ' + r.error.message; err.classList.add('show'); this.disabled = false; this.textContent = 'Add passenger'; return; }
+    passengers = r.data || passengers;
     activeTab = 'passengers';
     renderPaxTab();
   });
@@ -1349,15 +1341,14 @@ async function renderMatchedTab() {
   }
 
   try {
-    var res = await db.rpc('find_matched_passengers', {
-      p_driver_id: RIDE_ID,
+    var res = await db.rpc('tg_matched_passengers', tgAuth({
       p_from_lat:  ride.pickup_lat,
       p_from_lng:  ride.pickup_lng,
       p_to_lat:    ride.dropoff_lat || ride.pickup_lat,
       p_to_lng:    ride.dropoff_lng || ride.pickup_lng,
       p_ride_date: ride.dates,
       p_radius_km: 25,
-    });
+    }));
     if (res.error) throw res.error;
 
     var matches = res.data || [];
@@ -1372,16 +1363,13 @@ async function renderMatchedTab() {
     matches.forEach(function(m, i) {
       var av    = avCol(i);
       var name  = m.sender_name || 'Passenger';
-      var ph    = m.sender_number ? String(m.sender_number) : '';
-      var phC   = ph.replace(/\D/g, '');
+      var phC   = m.has_phone ? String(m.row_id) : '';
       var rTime = fmtTime(m.pick_up_time);
       var rDate = fmtDate(m.pick_up_date);
       var dist  = m.dist_km != null ? fmtKm(m.dist_km) : '';
       var posted = timeAgo(m.msg_datetime || m.created_at || '');
       var origMsg = m.original_message || '';
       var imp   = (m.important_ride || '').toLowerCase();
-
-      var contactMsg = 'Hi ' + name + ', I am driving from ' + (ride.pickup_label||'') + ' to ' + (ride.dropoff_label||'') + ' on ' + fmtDate(ride.dates) + ' at ' + fmtTime(ride.departure_time) + '. Do you still need a ride? Join here: ' + shareUrl;
 
       var badges = '';
       if (imp === 'urgent')  badges += '<span class="badge b-urgent">urgent</span>';
@@ -1419,7 +1407,7 @@ async function renderMatchedTab() {
           // Original message — hidden, toggled inline by button click
           '<div class="match-footer">' +
             (origMsg ? '<button class="match-btn match-btn-msg" data-idx="' + i + '">View message</button>' : '<div></div>') +
-            (phC ? '<button class="match-btn match-btn-contact" data-num="' + phC + '" data-msg="' + encodeURIComponent(contactMsg) + '">Contact</button>' : '') +
+            (phC ? '<button class="match-btn match-btn-contact" data-id="' + phC + '">Contact</button>' : '') +
           '</div>' +
           (origMsg
             ? '<div class="msg-box" id="msgbox-' + i + '">' +
@@ -1454,7 +1442,20 @@ async function renderMatchedTab() {
     tc.querySelectorAll('.match-btn-contact').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
-        window.open('https://wa.me/' + this.dataset.num + '?text=' + this.dataset.msg, '_blank');
+        var b = this;
+        if (b.disabled) return;
+        b.disabled = true;
+        var pop = null; try { pop = window.open('', '_blank'); } catch (e2) {}
+        db.rpc('explore_contact', { p_id: 'wa:' + b.dataset.id }).then(function(res) {
+          if (res.error) throw res.error;
+          var row = Array.isArray(res.data) ? res.data[0] : res.data;
+          if (!row || !row.url) throw new Error('empty');
+          if (pop) pop.location.href = row.url; else location.href = row.url;
+        }).catch(function(err) {
+          if (pop) { try { pop.close(); } catch (e3) {} }
+          var m2 = (err && err.message) || '';
+          alert(/rate_limited/i.test(m2) ? 'Too many requests — try again in a bit' : /not_available/i.test(m2) ? 'This ride is no longer available' : 'Something went wrong — try again');
+        }).finally(function() { b.disabled = false; });
       });
     });
 
@@ -1544,21 +1545,24 @@ function openMaps() {
 async function startRide() {
   var btn = document.getElementById('d-start');
   if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
-  await db.from('driver_routines').update({ride_status:'started'}).eq('id', RIDE_ID);
+  var rs = await db.rpc('tg_ride_set_status', tgAuth({ p_status: 'started' }));
+  if (rs.error) { alert('Could not update ride: ' + rs.error.message); render(); return; }
   ride.ride_status = 'started';
   render();
 }
 
 async function endRide() {
   if (!confirm('End this ride?')) return;
-  await db.from('driver_routines').update({ride_status:'ended'}).eq('id', RIDE_ID);
+  var rs = await db.rpc('tg_ride_set_status', tgAuth({ p_status: 'ended' }));
+  if (rs.error) { alert('Could not update ride: ' + rs.error.message); render(); return; }
   ride.ride_status = 'ended';
   render();
 }
 
 async function toggleClose() {
   var newSt = ride.ride_status === 'closed' ? 'open' : 'closed';
-  await db.from('driver_routines').update({ride_status:newSt}).eq('id', RIDE_ID);
+  var rs = await db.rpc('tg_ride_set_status', tgAuth({ p_status: newSt }));
+  if (rs.error) { alert('Could not update ride: ' + rs.error.message); render(); return; }
   ride.ride_status = newSt;
   render();
 }

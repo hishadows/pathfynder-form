@@ -493,15 +493,10 @@ setupLocationField('to');
 // ── DATA LOADING ──
 async function loadData(){
   try {
-    var {count}=await db.from(TABLE).select('*',{count:'exact',head:true}).ilike('Type','passenger');
-    totalDBCount=count||0;
-    var {data,error}=await db.from(TABLE)
-      .select('id,"Type",sender_name,sender_number,pickup_label,dropoff_label,"pick up time","pick up date","additional conditions",group_name,"D&T of msg","D&T of Ride",ride_frequency,important_ride,source_geo,destination_geo,pickup_lat,pickup_lng,dropoff_lat,dropoff_lng,geo_status,pickup_place_name,dropoff_place_name,source_inferred,original_message')
-      .ilike('Type','passenger')
-      .order('"pick up date"',{ascending:false})
-      .order('"pick up time"',{ascending:true})
-      .limit(LOAD_LIMIT);
+    var {data:loaded,error}=await db.rpc('tg_search_rides_load',{p_limit:LOAD_LIMIT});
     if(error)throw error;
+    totalDBCount=(loaded&&loaded.total)||0;
+    var data=(loaded&&loaded.rows)||[];
     allData=data||[];
     updateStats(allData,false);
     applyFiltersAndRender();
@@ -512,10 +507,10 @@ async function loadData(){
 }
 
 async function geoSearch(fromLat,fromLng,toLat,toLng,radiusKm,dateVal,timeVal){
-  var params={from_lat:fromLat,from_lng:fromLng,radius_km:radiusKm,search_date:dateVal||null};
-  if(toLat){params.to_lat=toLat;params.to_lng=toLng;}
-  if(timeVal&&twOn){params.search_time=timeVal+':00';params.time_window_hrs=1;}
-  var {data,error}=await db.rpc('search_passenger_requests',params);
+  var params={p_from_lat:fromLat,p_from_lng:fromLng,p_radius_km:radiusKm,p_search_date:dateVal||null};
+  if(toLat){params.p_to_lat=toLat;params.p_to_lng=toLng;}
+  if(timeVal&&twOn){params.p_search_time=timeVal+':00';params.p_time_window_hrs=1;}
+  var {data,error}=await db.rpc('tg_search_rides',params);
   if(error)throw error;
   return data||[];
 }
@@ -632,13 +627,19 @@ function renderCards(data){
     var waBtn=card.querySelector('.wa-btn');
     if(waBtn)waBtn.addEventListener('click',function(e){
       e.stopPropagation();
-      var n=waBtn.dataset.num;
-      var nm=decodeURIComponent(waBtn.dataset.name||'');
-      var fr=decodeURIComponent(waBtn.dataset.from||'');
-      var to=decodeURIComponent(waBtn.dataset.to||'');
-      var tm=waBtn.dataset.time||'';
-      var msg='Hi '+nm+', I am driving from '+fr+' to '+to+(tm&&tm!=='—'?' around '+tm:'')+'. Do you still need a ride?';
-      window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank');
+      if(waBtn.disabled)return;
+      waBtn.disabled=true;
+      var pop=null;try{pop=window.open('','_blank');}catch(e2){}
+      db.rpc('explore_contact',{p_id:'wa:'+waBtn.dataset.id}).then(function(res){
+        if(res.error)throw res.error;
+        var row=Array.isArray(res.data)?res.data[0]:res.data;
+        if(!row||!row.url)throw new Error('empty');
+        if(pop)pop.location.href=row.url;else location.href=row.url;
+      }).catch(function(err){
+        if(pop){try{pop.close();}catch(e3){}}
+        var m=(err&&err.message)||'';
+        showDebug(/rate_limited/i.test(m)?'Too many requests — try again in a bit':/not_available/i.test(m)?'This ride is no longer available':'Something went wrong — try again');
+      }).finally(function(){waBtn.disabled=false;});
     });
     var tgBtn=card.querySelector('.tg-btn');
     if(tgBtn)tgBtn.addEventListener('click',function(e){e.stopPropagation();if(tgBtn.dataset.user)window.open('https://t.me/'+tgBtn.dataset.user,'_blank');});
@@ -651,7 +652,7 @@ function buildCard(r,i){
   var isInf=r.source_inferred===true||r.source_inferred==='true';
   var isMatch=!!(r.matched_drivers_id&&r.matched_drivers_id.length);
   var exp=expandedId===String(r.id);
-  var waNum=String(r.sender_number||'').replace(/\D/g,'');
+  var waNum=r.has_phone?String(r.id):'';
   var tgU=r.telegram_chat_id||'';
   var rTime=fmtTime(r['pick up time']),rDate=fmtDate(r['pick up date']);
   var puLabel=getDisplayLabel(r,'pickup'),doLabel=getDisplayLabel(r,'dropoff');
@@ -663,7 +664,7 @@ function buildCard(r,i){
   if(r.ride_frequency&&r.ride_frequency!=='one-time'&&r.ride_frequency!=='not_specified')badges+='<span class="badge b-recurring"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>'+r.ride_frequency+'</span>';
   else badges+='<span class="badge b-onetime">one-time</span>';
   badges+='<span class="badge '+(isMatch?'b-matched':'b-pending')+'">'+(isMatch?'matched':'pending')+'</span>';
-  var waBtnHtml=waNum?'<button class="c-btn wa-btn" data-num="'+waNum+'" data-name="'+encodeURIComponent(r.sender_name||'')+'" data-from="'+encodeURIComponent(puLabel)+'" data-to="'+encodeURIComponent(doLabel)+'" data-time="'+rTime+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>':'<button class="c-btn" style="opacity:0.3" aria-label="No WhatsApp"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
+  var waBtnHtml=waNum?'<button class="c-btn wa-btn" data-id="'+waNum+'" aria-label="WhatsApp"><svg viewBox="0 0 24 24" class="icon-wa"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>':'<button class="c-btn" style="opacity:0.3" aria-label="No WhatsApp"><svg viewBox="0 0 24 24" class="icon-dim"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>';
   var tgBtnHtml=tgU?'<button class="c-btn tg-btn" data-user="'+tgU+'" aria-label="Telegram"><svg viewBox="0 0 24 24" class="icon-tg"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>':'<button class="c-btn" style="opacity:0.3" aria-label="No Telegram"><svg viewBox="0 0 24 24" class="icon-dim"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>';
   var puSub='Pickup'+(isInf?' · inferred ⚠':'');
   var expHtml=exp?'<div class="card-detail open"><div class="det-label"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Original message</div><div class="msg-box"><p>'+(r.original_message?r.original_message.replace(/</g,'&lt;').replace(/>/g,'&gt;'):'No message available')+'</p><div class="msg-fade"></div></div></div>':'';
@@ -733,13 +734,19 @@ function renderPastRides(data){
     var waBtn=card.querySelector('.wa-btn');
     if(waBtn)waBtn.addEventListener('click',function(e){
       e.stopPropagation();
-      var n=waBtn.dataset.num;
-      var nm=decodeURIComponent(waBtn.dataset.name||'');
-      var fr=decodeURIComponent(waBtn.dataset.from||'');
-      var to=decodeURIComponent(waBtn.dataset.to||'');
-      var tm=waBtn.dataset.time||'';
-      var msg='Hi '+nm+', I am driving from '+fr+' to '+to+(tm&&tm!=='—'?' around '+tm:'')+'. Do you still need a ride?';
-      window.open('https://wa.me/'+n+'?text='+encodeURIComponent(msg),'_blank');
+      if(waBtn.disabled)return;
+      waBtn.disabled=true;
+      var pop=null;try{pop=window.open('','_blank');}catch(e2){}
+      db.rpc('explore_contact',{p_id:'wa:'+waBtn.dataset.id}).then(function(res){
+        if(res.error)throw res.error;
+        var row=Array.isArray(res.data)?res.data[0]:res.data;
+        if(!row||!row.url)throw new Error('empty');
+        if(pop)pop.location.href=row.url;else location.href=row.url;
+      }).catch(function(err){
+        if(pop){try{pop.close();}catch(e3){}}
+        var m=(err&&err.message)||'';
+        showDebug(/rate_limited/i.test(m)?'Too many requests — try again in a bit':/not_available/i.test(m)?'This ride is no longer available':'Something went wrong — try again');
+      }).finally(function(){waBtn.disabled=false;});
     });
     var tgBtn=card.querySelector('.tg-btn');
     if(tgBtn)tgBtn.addEventListener('click',function(e){e.stopPropagation();if(tgBtn.dataset.user)window.open('https://t.me/'+tgBtn.dataset.user,'_blank');});

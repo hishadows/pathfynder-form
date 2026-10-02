@@ -507,6 +507,7 @@
     // Telegram & URL param
     // ─────────────────────────────────────────
     if (window.Telegram?.WebApp) Telegram.WebApp.ready();
+    const INIT_DATA = window.Telegram?.WebApp?.initData || null;
 
     const params   = new URLSearchParams(window.location.search);
     const CHAT_ID  = params.get('chat_id');
@@ -525,43 +526,24 @@
         showError('No driver ID provided.');
         return;
       }
-      await Promise.all([loadDriverName(), loadRides()]);
-    }
-
-    async function loadDriverName() {
-      const { data } = await db
-        .from('driver_routines')
-        .select('driver_name')
-        .eq('telegram_chat_id', CHAT_ID)
-        .limit(1)
-        .single();
-
-      if (data?.driver_name) {
-        document.getElementById('driver-name').textContent = data.driver_name;
-      }
+      await loadRides();
     }
 
     async function loadRides() {
-      // Step 1: fetch driver's routines
-      const { data: rides, error } = await db
-        .from('driver_routines')
-        .select('*')
-        .eq('telegram_chat_id', CHAT_ID)
-        .order('departure_datetime', { ascending: false });
+      // One server-checked call: the driver's routines + their passengers (phones come back as wa_url / masked label only)
+      const { data: hist, error } = await db.rpc('tg_history', { p_init_data: INIT_DATA, p_chat_id: CHAT_ID });
 
       if (error) { showError('Could not load rides.'); return; }
-      if (!rides || rides.length === 0) { showEmpty(); return; }
-
-      // Step 2: fetch all passenger_requests for those ride IDs in one query
-      const rideIds = rides.map(r => r.id);
-      const { data: passengers } = await db
-        .from('passenger_requests')
-        .select('id, ride_id, passenger_name, passenger_name_web, passenger_wa_id, passenger_phone_web, status, created_at, pickup_label, dropoff_label')
-        .in('ride_id', rideIds);
+      if (hist?.driver_name) {
+        document.getElementById('driver-name').textContent = hist.driver_name;
+      }
+      const rides = hist?.rides || [];
+      const passengers = hist?.passengers || [];
+      if (rides.length === 0) { showEmpty(); return; }
 
       // Group passengers by ride_id
       const passengerMap = {};
-      (passengers || []).forEach(p => {
+      passengers.forEach(p => {
         if (!passengerMap[p.ride_id]) passengerMap[p.ride_id] = [];
         passengerMap[p.ride_id].push(p);
       });
@@ -748,7 +730,8 @@
       const heading = `<div class="drawer-heading">Passengers</div>`;
       const rows = passengers.map(p => {
         const name  = p.passenger_name_web || p.passenger_name || 'Unknown';
-        const phone = p.passenger_phone_web || p.passenger_wa_id || null;
+        const phone = p.has_phone ? (p.phone_masked || '[number hidden]') : null;
+        const waUrl = p.wa_url || null;
         const initial = name.charAt(0).toUpperCase() || '?';
 
         const statusCls = p.status || 'pending';
@@ -760,9 +743,9 @@
           rejected:   'Rejected'
         }[p.status] || p.status || 'Pending';
 
-        const contactHref = phone ? `tel:${phone}` : '#';
-        const contactClass = phone ? '' : 'no-phone';
-        const contactTitle = phone ? `Call ${phone}` : 'No phone on file';
+        const contactHref = waUrl ? escHtml(waUrl) : '#';
+        const contactClass = waUrl ? '' : 'no-phone';
+        const contactTitle = waUrl ? 'Message on WhatsApp' : 'No phone on file';
 
         return `
           <div class="passenger-row">
@@ -775,7 +758,7 @@
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
               <div class="p-status ${statusCls}">${statusLabel}</div>
-              <a href="${contactHref}" class="p-contact ${contactClass}" title="${contactTitle}">📞</a>
+              <a href="${contactHref}" target="_blank" rel="noopener" class="p-contact ${contactClass}" title="${contactTitle}">📞</a>
             </div>
           </div>`;
       }).join('');

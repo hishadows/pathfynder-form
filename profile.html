@@ -310,6 +310,16 @@ var params   = new URLSearchParams(location.search);
 var chatId   = params.get('chat_id')  || '';
 var userName = params.get('name')     || '';
 var userId   = params.get('user_id')  || '';
+var initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || null;
+
+// Server-checked RPC call (identity = Telegram initData, with chat_id as fallback until verification is enabled)
+function rpc(fn, body) {
+  return fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
+    body: JSON.stringify(body)
+  });
+}
 
 // Show user pill
 if (userName) {
@@ -348,13 +358,11 @@ function buildFinalNumber() {
 // ── Load existing profile ─────────────────────────────────────────────────
 function loadProfile() {
   if (!chatId) { showForm(); return; }
-  fetch(SUPABASE_URL + '/rest/v1/telegram_users?telegram_chat_id=eq.' + encodeURIComponent(chatId) + '&limit=1', {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-  })
+  rpc('tg_profile_get', { p_init_data: initData, p_chat_id: chatId })
   .then(function(res) { return res.json(); })
   .then(function(data) {
-    if (data && data.length > 0) {
-      var row = data[0];
+    if (data && data.telegram_username !== undefined) {
+      var row = data;
       if (row.telegram_username) {
         document.getElementById('tgUsername').value = row.telegram_username.replace(/^@/, '');
       }
@@ -381,6 +389,10 @@ function loadProfile() {
           waInput.value = stored;
         }
         updateWaPreview();
+      }
+      if (!row.whatsapp_number && row.has_whatsapp) {
+        // Number is not sent back until Telegram identity verification is on — ask the user to re-enter it
+        waInput.placeholder = 'Saved number hidden — re-enter to update';
       }
       document.getElementById('cardTitle').textContent = 'Update Your Profile';
       document.getElementById('submitBtn').querySelector('.btn-text').textContent = 'Update Profile';
@@ -533,15 +545,13 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
 
   setLoading(true);
 
-  fetch(SUPABASE_URL + '/rest/v1/telegram_users?on_conflict=telegram_chat_id', {
-    method: 'POST',
-    headers: {
-      'Content-Type':  'application/json',
-      'apikey':        SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Prefer':        'resolution=merge-duplicates,return=minimal'
-    },
-    body: JSON.stringify(payload)
+  rpc('tg_profile_save', {
+    p_init_data:        initData,
+    p_chat_id:          chatId || null,
+    p_telegram_user_id: payload.telegram_user_id,
+    p_name:             payload.name,
+    p_telegram_username: payload.telegram_username,
+    p_whatsapp_number:  payload.whatsapp_number
   })
   .then(function(res) {
     if (!res.ok) {
